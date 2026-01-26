@@ -14,29 +14,7 @@
 
     let homonymsVisible: boolean = false;
 
-    async function handleClick() {
-        try {
-            const response = await fetch('http://localhost:8088/query?word=говорить' +
-                '')
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            lexemeDescr = await response.json(); // Assign the fetched data
-
-            if (lexemeDescr.length === 0) {
-                console.log('No lexeme data');
-                return;
-            }
-        }
-        catch (err: any) {
-//            error: string = err.message;
-            console.log('Error: ' + err.message);
-            return;
-        } finally {
-//            isLoading = false;
-        }
-
+    function handleLexemeData() {
         for (let i:number = 0; i < lexemeDescr.length; i++)
         {
             let lexeme = lexemeDescr[i];
@@ -126,6 +104,32 @@
 
         }
         console.log('-----------------\n', lexemes, '\n-----------------');
+    }
+
+    async function handleClick() {
+        try {
+            const response = await fetch('http://localhost:8088/query?word=мама' +
+                '')
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            lexemeDescr = await response.json(); // Assign the fetched data
+
+            if (lexemeDescr.length === 0) {
+                console.log('No lexeme data');
+                return;
+            }
+        }
+        catch (err: any) {
+//            error: string = err.message;
+            console.log('Error: ' + err.message);
+            return;
+        } finally {
+//            isLoading = false;
+        }
+
+        handleLexemeData();
     }
 </script>
 

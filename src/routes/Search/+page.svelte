@@ -7,11 +7,8 @@
     let prompt: string = 'Введите слово';
     let btnText: string = 'Искать';
     let lexemeDescr: object[];
-
     let lexemeDivs = $state(lexemes);
-
-    let inputValue: string = '';
-
+    let inputValue: string = $state('');
     let homonymsVisible: boolean = false;
 
     function handleLexemeData() {
@@ -108,7 +105,8 @@
 
     async function handleClick() {
         try {
-            const response = await fetch('http://localhost:8088/query?word=мама' +
+            console.log('Input value: ' + inputValue);
+            const response = await fetch(`http://localhost:8088/query?word=${inputValue}` +
                 '')
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -129,6 +127,7 @@
 //            isLoading = false;
         }
 
+        lexemeDivs.length = 0;
         handleLexemeData();
     }
 </script>

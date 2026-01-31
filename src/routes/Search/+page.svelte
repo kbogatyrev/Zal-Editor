@@ -1,15 +1,15 @@
 <script lang="ts">
     // Props
-    import { lexemes } from '$lib/stores' ;
+//    import { lexemes } from '$lib/stores' ;
     import { currentLexeme } from "$lib/stores";
     import { currentInflection } from "$lib/stores";
 
     let prompt: string = 'Введите слово';
     let btnText: string = 'Искать';
     let lexemeDescr: object[];
-    let lexemeDivs = $state(lexemes);
+    let lexemes = $state([]);
     let inputValue: string = $state('');
-    let homonymsVisible: boolean = false;
+    let homonymsVisible: boolean = $state(false);
 
     function handleLexemeData() {
         for (let i:number = 0; i < lexemeDescr.length; i++)
@@ -68,12 +68,13 @@
                 currentLexeme['section'] = lexeme['section'];
             }
 
+            currentLexeme['inflections'] = [];
             if ('inflections' in lexeme) {
                 let inflections = lexeme['inflections'];
                 for (let j: number = 0; j < inflections.length; j++) {
                     let inflection = inflections[j];
 
-                    currentInflection['seqNum'] = j + 1;
+                    currentInflection['seqNum'] = i + j + 1;
 
                     if ('inflectionId' in inflection) {
                         currentInflection['inflectionId'] = inflection['inflectionId'];
@@ -92,15 +93,13 @@
                     } else {
                         console.log("accentType1 property not found");
                     }
+                    currentLexeme['inflections'].push({...currentInflection});
                 }
             }
-
-            currentLexeme['inflections'] = lexeme['inflections'];
-
-            lexemeDivs.push({ ...currentLexeme });
+            lexemes.push({ ...currentLexeme });
 
         }
-        console.log('-----------------\n', lexemes, '\n-----------------');
+        console.log(lexemes);
     }
 
     async function handleClick() {
@@ -127,7 +126,7 @@
 //            isLoading = false;
         }
 
-        lexemeDivs.length = 0;
+        lexemes.length = 0;
         handleLexemeData();
     }
 </script>
@@ -143,28 +142,78 @@
     {btnText}
     </button>
 </div>
-{#each lexemeDivs as div (div.seqNum)}
-    <div class="dynamic-div">
-        <p>Lexeme ID: {div.lexemeId}</p>
-        <p>Source form: {div.sourceForm}</p>
-        {#if homonymsVisible}
-            <p>Homonyms: {div.homonyms}</p>
-        {/if}
-        <p>Part of speech: {div.partOfSpeech}</p>
-        <p>Main symbol: {div.mainSymbol}</p>
-        {#each div.inflections as inflection (inflection.seqNum)}
-            <p>Inflection ID: {inflection.inflectionId}</p>
-            <p>Inflection type: {inflection.inflectionType}</p>
-            <p>Accent type: {inflection.accentType1}</p>
-        {/each}
+
+{#each lexemes as lexProp (lexProp.seqNum)}
+<div class="container">
+    <div class="row">
+        <div class="col">Lexeme ID:</div>
+        <div class="col">{lexProp.lexemeId}</div>
     </div>
+    <div class="row">
+        <div class="col">Source form:</div>
+        <div class="col">{lexProp.sourceForm}</div>
+    </div>
+        {#if homonymsVisible}
+        <div class="row">
+            <div class="col">Homonyms:</div>
+            <div class="col">{lexProp.homonyms}</div>
+        </div>
+        {/if}
+    <div class="row">
+        <div class="col">Part of speech:</div>
+        <div class="col">{lexProp.partOfSpeech}</div>
+    </div>
+    <div class="row">
+        <div class="col">Main symbol:</div>
+        <div class="col">{lexProp.mainSymbol}</div>
+    </div>
+        {#each lexProp.inflections as inflection (inflection.seqNum)}
+        <div class="row">
+            <div class="col">Inflection ID:</div>
+            <div class="col">{inflection.inflectionId}</div>
+        </div>
+        <div class="row">
+            <div class="col">Inflection type:</div>
+            <div class="col">{inflection.inflectionType}</div>
+        </div>
+        <div class="row">
+            <div class="col">Accent type:</div>
+            <div class="col">{inflection.accentType1}</div>
+        </div>
+        {/each}
+ </div>
 {/each}
 
 <style>
-    .dynamic-div {
-        border: 1px solid blue;
-        padding: 10px;
+    .container {
+        border: 1px solid black;
+        padding: 15px;
         margin: 5px 0;
-        background-color: #f0f0f0;
+        background-color: #FFFAF0;
+        margin-bottom: 10px;
+/*        padding: 50px;  */
+        max-width:500px;
+
+/*        border: #b3b3b3;    */
+    }
+    .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-left: 1px solid #eee;
+/*        border-right: 1px solid #eee;  */
+        max-width: 500px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .col {
+        flex: 1; /* Each column takes up equal space */
+    }
+    .col:first-child {
+        text-align: left;
+        max-width: 300px
+    }
+    .col:last-child {
+        text-align: left;
     }
 </style>

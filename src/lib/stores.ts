@@ -9,5 +9,5 @@ const initialLexeme: ILexeme | null = null;
 export const currentInflection = writable<IInflection | null>(initialInflection);
 export const currentLexeme = writable<ILexeme | null>(initialLexeme);
 //export const lexemes= writable<Lexeme[]>([]);
-export let lexemes: ILexeme[] = [];
+//export let lexemes: ILexeme[] = [];
 //export let lexemes: LexemeDict = {};

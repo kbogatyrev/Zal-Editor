@@ -1,5 +1,6 @@
 
 export interface IInflection {
+    seqNum: number;
     inflectionId: number;
     inflectionType: string;
     accentType1: string;

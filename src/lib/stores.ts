@@ -1,13 +1,20 @@
 import { writable } from 'svelte/store';
-import type { IInflection } from './types';
-import type { ILexeme } from './types';
-//import type { LexemeDict } from './types';
+import type { ILexeme, IInflection } from './types';
 
 // Create a writable store to hold the current user profile
 const initialInflection: IInflection | null = null;
 const initialLexeme: ILexeme | null = null;
 export const currentInflection = writable<IInflection | null>(initialInflection);
 export const currentLexeme = writable<ILexeme | null>(initialLexeme);
-//export const lexemes= writable<Lexeme[]>([]);
-//export let lexemes: ILexeme[] = [];
-//export let lexemes: LexemeDict = {};
+
+export const caseToHash = new Map<string, string>();
+caseToHash.set('Nominative', 'N');
+caseToHash.set('Accusative', 'A');
+caseToHash.set('Dative', 'D');
+caseToHash.set('Genitive', 'G');
+caseToHash.set('Prepositional', 'P');
+caseToHash.set('Instrumental', 'I');
+
+export const numberToHash = new Map<string, string>();
+numberToHash.set('Singular', 'Sg');
+numberToHash.set('Plural', 'Pl');

@@ -23,4 +23,10 @@ export interface ILexeme {
     inflections: object[];
 }
 
-//export type LexemeDict = Record<number, ILexeme>;
+export interface IWordFormNoun
+{
+    wordForm: string;
+    subParadigm: string;
+    case: string;
+    number: string;
+}

@@ -1,7 +1,11 @@
 <script lang="ts">
-    // Props
-//    import { lexemes } from '$lib/stores' ;
-    import { currentLexeme } from "$lib/stores";
+
+    import { SvelteMap } from 'svelte/reactivity';
+
+// Props
+    import type { IWordFormNoun } from "$lib/types";
+
+    import { currentLexeme, caseToHash, numberToHash } from "$lib/stores";
     import { currentInflection } from "$lib/stores";
 
     let prompt: string = 'Введите слово';
@@ -10,8 +14,61 @@
     let lexemes = $state([]);
     let inputValue: string = $state('');
     let homonymsVisible: boolean = $state(false);
+    let nounForms = $state(new SvelteMap<number, IWordFormNoun>());
 
-    function handleLexemeData() {
+    function handleNounForms(jsonForms: Array)
+    {
+        for (const [idx, form] of jsonForms.entries()) {
+            let formCase: string = caseToHash.get(form['case']);
+            let formNumber: string = numberToHash.get(form['number']);
+            if (formCase !== '' && formNumber !== undefined) {
+                let hash = formCase + '_' + formNumber;
+                let fwDescr: IWordFormNoun = {wordForm: form['wordForm'], subparadigm: form['subParadigm'], case: form['case'], number: form['number']};
+                nounForms.set(idx, fwDescr);
+            }
+        }
+        console.log('---------------');
+        console.log(nounForms);
+        const koko = Array.from(nounForms.entries()) as [id, word];
+        console.log(koko);
+        console.log('++++++++++++++++');
+    }
+
+    function updateNounMap(id: number, field: keyof IWordFormNoun, value: any) {
+        const item = nounForms.get(id);
+        if (item) {
+            nounForms.set(id, { ...item, [field]: value });
+        }
+    }
+
+    async function requestForms(inflectionId: number)
+    {
+        try {
+            console.log('Input value: ' + inputValue);
+            const response = await fetch(`http://localhost:8088/forms?inflection-id=${inflectionId}` +
+                '')
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            let resp = await response.json(); // Assign the fetched data
+            let forms = resp['wordForms'];
+            if (forms.length === 0) {
+                console.log('No forms');
+                return;
+            }
+            handleNounForms(forms);
+        }
+        catch (err: any) {
+//            error: string = err.message;
+            console.log('Error: ' + err.message);
+            return;
+        } finally {
+//            let isLoading: boolean = false;
+        }
+    }
+
+    async function handleLexemeData() {
         for (let i:number = 0; i < lexemeDescr.length; i++)
         {
             let lexeme = lexemeDescr[i];
@@ -56,7 +113,7 @@
                 console.log("partOfSpeech property not found");
             }
 
-            if ('Verb' === lexemeDescr['partOfSpeech']) {
+            if ('Verb' === lexeme['partOfSpeech']) {
                 if ('isTransitive' in lexeme) {
                     currentLexeme['isTransitive'] = lexeme['isTransitive'];
                 } else {
@@ -100,6 +157,16 @@
 
         }
         console.log(lexemes);
+
+        await Promise.all(lexemes.flatMap(lexeme => // Await all requests
+            lexeme.inflections.map(inflection => requestForms(inflection['inflectionId']))
+        ));
+        for(let lexeme of lexemes) {
+            for(let inflection of lexeme.inflections) {
+                requestForms(inflection['inflectionId']);
+                console.log('----------------------- requested forms');
+            }
+        }
     }
 
     async function handleClick() {
@@ -183,6 +250,29 @@
         {/each}
  </div>
 {/each}
+
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        {#each Array.from(nounForms.entries()) as [id, word] (id)}
+            <tr>
+                <td>{id}</td>
+                <td>
+                    <input type='text'
+                           value={word.wordForm}
+                           oninput={(e) => updateNounMap(id, 'wordForm', e.currentTarget.value)}
+                    />
+                </td>
+            </tr>
+        {/each}
+    </tbody>
+</table>
+<!-- <pre>{JSON.stringify(Array.from(nounForms.entries()), null, 2)}</pre> -->
 
 <style>
     .container {

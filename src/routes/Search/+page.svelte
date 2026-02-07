@@ -24,20 +24,15 @@
             if (formCase !== '' && formNumber !== undefined) {
                 let hash = formCase + '_' + formNumber;
                 let fwDescr: IWordFormNoun = {wordForm: form['wordForm'], subparadigm: form['subParadigm'], case: form['case'], number: form['number']};
-                nounForms.set(idx, fwDescr);
+                nounForms.set(hash, fwDescr);
             }
         }
-        console.log('---------------');
-        console.log(nounForms);
-        const koko = Array.from(nounForms.entries()) as [id, word];
-        console.log(koko);
-        console.log('++++++++++++++++');
     }
 
-    function updateNounMap(id: number, field: keyof IWordFormNoun, value: any) {
+    function updateNounMap(hash: string, field: keyof IWordFormNoun, value: any) {
         const item = nounForms.get(id);
         if (item) {
-            nounForms.set(id, { ...item, [field]: value });
+            nounForms.set(hash, { ...item, [field]: value });
         }
     }
 
@@ -254,8 +249,9 @@
 <table>
     <thead>
     <tr>
-        <th></th>
-        <th></th>
+        <th>Hash</th>
+        <th>Sg</th>
+        <th>Pl</th>
     </tr>
     </thead>
     <tbody>

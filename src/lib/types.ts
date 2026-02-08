@@ -30,3 +30,9 @@ export interface IWordFormNoun
     case: string;
     number: string;
 }
+
+export interface INounTableRow
+{
+    case: string;
+    form: string;
+}

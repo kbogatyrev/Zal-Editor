@@ -4,6 +4,7 @@
 
 // Props
     import type { IWordFormNoun } from "$lib/types";
+    import type { INounTableRow } from "$lib/types";
 
     import { currentLexeme, caseToHash, numberToHash } from "$lib/stores";
     import { currentInflection } from "$lib/stores";
@@ -14,25 +15,48 @@
     let lexemes = $state([]);
     let inputValue: string = $state('');
     let homonymsVisible: boolean = $state(false);
-    let nounForms = $state(new SvelteMap<number, IWordFormNoun>());
+    let nounForms = $state(new SvelteMap<string, IWordFormNoun>());
+    let nounTableRows = $state([]);
+
+    nounTableRows = [
+        { case: 'N', formSg: '', formPl: '' },
+        { case: 'A', formSg: '', formPl: '' },
+        { case: 'D', formSg: '', formPl: '' },
+        { case: 'G', formSg: '', formPl: '' },
+        { case: 'P', formSg: '', formPl: '' },
+        { case: 'I', formSg: '', formPl: '' },
+    ];
 
     function handleNounForms(jsonForms: Array)
     {
+//        nounTableRowsSg.length = 0;
+//        nounTableRowsPl.length = 0;
         for (const [idx, form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']);
             let formNumber: string = numberToHash.get(form['number']);
-            if (formCase !== '' && formNumber !== undefined) {
+            if (formCase !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
                 let hash = formCase + '_' + formNumber;
                 let fwDescr: IWordFormNoun = {wordForm: form['wordForm'], subparadigm: form['subParadigm'], case: form['case'], number: form['number']};
-                nounForms.set(hash, fwDescr);
+                const findSgCell = nounTableRows.find(item => item.case === formCase);
+                if (findSgCell) {
+                    if (formNumber === 'Sg') {
+                        findSgCell.formSg = fwDescr['wordForm'];
+                    } else if (formNumber === 'Pl') {
+                        findSgCell.formPl = fwDescr['wordForm'];
+                    }
+                } else {
+                    console.log('*** Cell not found');
+                }
             }
+
         }
+        console.log (nounTableRows);
     }
 
     function updateNounMap(hash: string, field: keyof IWordFormNoun, value: any) {
-        const item = nounForms.get(id);
-        if (item) {
-            nounForms.set(hash, { ...item, [field]: value });
+        const sgForm = nounForms.get(hash);
+        if (sgForm) {
+            nounForms.set(hash, { ...sgForm, [field]: value });
         }
     }
 
@@ -249,20 +273,22 @@
 <table>
     <thead>
     <tr>
-        <th>Hash</th>
+        <th></th>
         <th>Sg</th>
         <th>Pl</th>
     </tr>
     </thead>
     <tbody>
-        {#each Array.from(nounForms.entries()) as [id, word] (id)}
+        {#each nounTableRows as item }
             <tr>
-                <td>{id}</td>
                 <td>
-                    <input type='text'
-                           value={word.wordForm}
-                           oninput={(e) => updateNounMap(id, 'wordForm', e.currentTarget.value)}
-                    />
+                    {item.case}
+                </td>
+                <td>
+                    {item.formSg}
+                </td>
+                <td>
+                    {item.formPl}
                 </td>
             </tr>
         {/each}
@@ -278,7 +304,7 @@
         background-color: #FFFAF0;
         margin-bottom: 10px;
 /*        padding: 50px;  */
-        max-width:500px;
+        max-width:300px;
 
 /*        border: #b3b3b3;    */
     }
@@ -292,14 +318,25 @@
         padding-left: 15px;
         padding-right: 15px;
     }
-    .col {
-        flex: 1; /* Each column takes up equal space */
+
+    th {
+        font-weight: normal;
+        text-align: center;
+        padding-right: 25px;
     }
-    .col:first-child {
-        text-align: left;
-        max-width: 300px
+
+    td {
+        padding-left: 15px;
+        padding-right: 15px;
     }
-    .col:last-child {
-        text-align: left;
+
+    td:nth-child(1), th:nth-child(1) {
+        width: 15%;
+    }
+    td:nth-child(2), th:nth-child(2) {
+        width: 42%;
+    }
+    td:nth-child(3), th:nth-child(3) {
+        width: 42%;
     }
 </style>

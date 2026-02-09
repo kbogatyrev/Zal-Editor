@@ -268,9 +268,9 @@
         </div>
         {/each}
  </div>
-{/each}
+<!-- {/each} -->
 
-{#if lexemes && lexemes.length > 0}
+<!-- {#if lexemes && lexemes.length > 0}  -->
 <table>
     <thead>
     <tr>
@@ -289,7 +289,8 @@
         {/each}
     </tbody>
 </table>
-{/if}
+<!--  {/if}   -->
+    {/each}
 <!-- <pre>{JSON.stringify(Array.from(nounForms.entries()), null, 2)}</pre> -->
 
 <style>

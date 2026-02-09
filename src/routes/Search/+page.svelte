@@ -230,67 +230,68 @@
 </div>
 
 {#each lexemes as lexProp (lexProp.seqNum)}
-<div class="lexeme-container">
-    <div class="row">
-        <div class="col">Lexeme ID:</div>
-        <div class="col">{lexProp.lexemeId}</div>
-    </div>
-    <div class="row">
-        <div class="col">Source form:</div>
-        <div class="col">{lexProp.sourceForm}</div>
-    </div>
-        {#if homonymsVisible}
-        <div class="row">
-            <div class="col">Homonyms:</div>
-            <div class="col">{lexProp.homonyms}</div>
-        </div>
-        {/if}
-    <div class="row">
-        <div class="col">Part of speech:</div>
-        <div class="col">{lexProp.partOfSpeech}</div>
-    </div>
-    <div class="row">
-        <div class="col">Main symbol:</div>
-        <div class="col">{lexProp.mainSymbol}</div>
-    </div>
-        {#each lexProp.inflections as inflection (inflection.seqNum)}
-        <div class="row">
-            <div class="col">Inflection ID:</div>
-            <div class="col">{inflection.inflectionId}</div>
-        </div>
-        <div class="row">
-            <div class="col">Inflection type:</div>
-            <div class="col">{inflection.inflectionType}</div>
-        </div>
-        <div class="row">
-            <div class="col">Accent type:</div>
-            <div class="col">{inflection.accentType1}</div>
-        </div>
-        {/each}
- </div>
-<!-- {/each} -->
+    <div class="display-container">
+        <div class="lexeme-container">
+            <div class="row">
+                <div class="col">Lexeme ID:</div>
+                <div class="col">{lexProp.lexemeId}</div>
+            </div>
+            <div class="row">
+                <div class="col">Source form:</div>
+                <div class="col">{lexProp.sourceForm}</div>
+            </div>
+            {#if homonymsVisible}
+                <div class="row">
+                <div class="col">Homonyms:</div>
+                <div class="col">{lexProp.homonyms}</div>
+            </div>
+            {/if}
+            <div class="row">
+                <div class="col">Part of speech:</div>
+                <div class="col">{lexProp.partOfSpeech}</div>
+            </div>
+            <div class="row">
+                <div class="col">Main symbol:</div>
+                <div class="col">{lexProp.mainSymbol}</div>
+            </div>
+            {#each lexProp.inflections as inflection (inflection.seqNum)}
+                <div class="row">
+                    <div class="col">Inflection ID:</div>
+                    <div class="col">{inflection.inflectionId}</div>
+                </div>
+                <div class="row">
+                    <div class="col">Inflection type:</div>
+                    <div class="col">{inflection.inflectionType}</div>
+                </div>
+                <div class="row">
+                    <div class="col">Accent type:</div>
+                    <div class="col">{inflection.accentType1}</div>
+                </div>
+            {/each}
+        </div>      <!-- lexeme-container  -->
 
-<!-- {#if lexemes && lexemes.length > 0}  -->
-<table>
-    <thead>
-    <tr>
-        <th></th>
-        <th>Sg</th>
-        <th>Pl</th>
-    </tr>
-    </thead>
-    <tbody>
-        {#each nounTableRows as item }
-            <tr>
-                <td>{item.case}</td>
-                <td>{item.formSg}</td>
-                <td>{item.formPl}</td>
-            </tr>
-        {/each}
-    </tbody>
-</table>
-<!--  {/if}   -->
-    {/each}
+        <div class="right-panel">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Sg</th>
+                        <th>Pl</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each nounTableRows as item }
+                        <tr>
+                            <td>{item.case}</td>
+                            <td>{item.formSg}</td>
+                            <td>{item.formPl}</td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>      <!-- right-panel  -->
+    </div>      <!-- display-container  -->
+{/each}
 <!-- <pre>{JSON.stringify(Array.from(nounForms.entries()), null, 2)}</pre> -->
 
 <style>
@@ -305,7 +306,12 @@
 /*        border: #b3b3b3;    */
     }
 
+    .display-container {
+        display: flex;
+    }
+
     .lexeme-container {
+        flex: 1;
         display: flex;
         flex-direction: column;
         border: 1px solid black;
@@ -316,6 +322,10 @@
         padding: 20px;
         max-width:350px;
         /*        border: #b3b3b3;    */
+    }
+
+    .right-panel {
+        flex: 2;
     }
 
     form {

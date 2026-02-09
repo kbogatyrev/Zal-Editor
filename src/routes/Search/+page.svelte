@@ -29,8 +29,6 @@
 
     function handleNounForms(jsonForms: Array)
     {
-//        nounTableRowsSg.length = 0;
-//        nounTableRowsPl.length = 0;
         for (const [idx, form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']);
             let formNumber: string = numberToHash.get(form['number']);
@@ -50,7 +48,7 @@
             }
 
         }
-        console.log (nounTableRows);
+//        console.log (nounTableRows);
     }
 
     function updateNounMap(hash: string, field: keyof IWordFormNoun, value: any) {
@@ -62,8 +60,9 @@
 
     async function requestForms(inflectionId: number)
     {
+        console.log('Requesting forms for inflection ID: ' + inflectionId);
         try {
-            console.log('Input value: ' + inputValue);
+//            console.log('Input value: ' + inputValue);
             const response = await fetch(`http://localhost:8088/forms?inflection-id=${inflectionId}` +
                 '')
             if (!response.ok) {
@@ -173,24 +172,22 @@
                 }
             }
             lexemes.push({ ...currentLexeme });
-
         }
-        console.log(lexemes);
+//        console.log(lexemes);
 
-        await Promise.all(lexemes.flatMap(lexeme => // Await all requests
-            lexeme.inflections.map(inflection => requestForms(inflection['inflectionId']))
-        ));
         for(let lexeme of lexemes) {
+            console.log('Lexeme ID: ', lexeme['lexemeId']);
             for(let inflection of lexeme.inflections) {
-                requestForms(inflection['inflectionId']);
-                console.log('----------------------- requested forms');
+                await Promise.all( // Await all requests
+                    lexeme.inflections.map(inflection => requestForms(inflection['inflectionId']))
+                );
             }
         }
     }
 
     async function handleClick() {
         try {
-            console.log('Input value: ' + inputValue);
+//            console.log('Input value: ' + inputValue);
             const response = await fetch(`http://localhost:8088/query?word=${inputValue}` +
                 '')
             if (!response.ok) {
@@ -330,7 +327,7 @@
     .row {
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
+        padding: 3px 0;
         border-left: 1px solid #eee;
 /*        border-right: 1px solid #eee;  */
         max-width: 500px;

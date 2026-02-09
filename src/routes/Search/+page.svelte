@@ -9,14 +9,14 @@
     import { currentLexeme, caseToHash, numberToHash } from "$lib/stores";
     import { currentInflection } from "$lib/stores";
 
-    let prompt: string = 'Введите слово';
+    let prompt: string = 'Введите слово...';
     let btnText: string = 'Искать';
     let lexemeDescr: object[];
     let lexemes = $state([]);
-    let inputValue: string = $state('');
     let homonymsVisible: boolean = $state(false);
     let nounForms = $state(new SvelteMap<string, IWordFormNoun>());
     let nounTableRows = $state([]);
+    let inputValue: string = $state('');
 
     nounTableRows = [
         { case: 'N', formSg: '', formPl: '' },
@@ -218,19 +218,22 @@
 </script>
 
 <h1>Поиск в словаре</h1>
-<div class="container">
-    <input
-    type="text"
-    {prompt}
-    bind:value={inputValue}
-    />
-    <button onclick={handleClick}>
-    {btnText}
-    </button>
+<div class="prompt-container">
+    <form onsubmit={handleClick}>
+        <label>
+<!--            {prompt}           -->
+            <input type="text"
+                   bind:value={inputValue}
+                   placeholder="Введите слово..." />
+<!--                   class:dimmed="{isPrompt}"
+                   oninput="{handleInput}" /> -->
+        </label>
+    <button type="submit">{btnText}</button>
+    </form>
 </div>
 
 {#each lexemes as lexProp (lexProp.seqNum)}
-<div class="container">
+<div class="lexeme-container">
     <div class="row">
         <div class="col">Lexeme ID:</div>
         <div class="col">{lexProp.lexemeId}</div>
@@ -270,6 +273,7 @@
  </div>
 {/each}
 
+{#if lexemes && lexemes.length > 0}
 <table>
     <thead>
     <tr>
@@ -281,33 +285,48 @@
     <tbody>
         {#each nounTableRows as item }
             <tr>
-                <td>
-                    {item.case}
-                </td>
-                <td>
-                    {item.formSg}
-                </td>
-                <td>
-                    {item.formPl}
-                </td>
+                <td>{item.case}</td>
+                <td>{item.formSg}</td>
+                <td>{item.formPl}</td>
             </tr>
         {/each}
     </tbody>
 </table>
+{/if}
 <!-- <pre>{JSON.stringify(Array.from(nounForms.entries()), null, 2)}</pre> -->
 
 <style>
-    .container {
+    .prompt-container {
         border: 1px solid black;
         padding: 15px;
         margin: 5px 0;
         background-color: #FFFAF0;
-        margin-bottom: 10px;
-/*        padding: 50px;  */
-        max-width:300px;
-
+        margin-left: 15px;
+        padding: 20px;
+        max-width:350px;
 /*        border: #b3b3b3;    */
     }
+
+    .lexeme-container {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid black;
+        padding: 15px;
+        margin: 5px 0;
+        background-color: #FFFAF0;
+        margin-left: 15px;
+        padding: 20px;
+        max-width:350px;
+        /*        border: #b3b3b3;    */
+    }
+
+    form {
+        display: flex;
+        flex-direction: row;
+        justify-content:space-between;
+        width: 350px;
+    }
+
     .row {
         display: flex;
         justify-content: space-between;
@@ -317,6 +336,10 @@
         max-width: 500px;
         padding-left: 15px;
         padding-right: 15px;
+    }
+
+    .col {
+        flex: 1;
     }
 
     th {

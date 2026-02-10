@@ -31,8 +31,11 @@ export interface IWordFormNoun
     number: string;
 }
 
-export interface INounTableRow
+export interface INounTableEntry
 {
     case: string;
     form: string;
+}
+export interface INounTable {
+    [inflectionId: number]: INounTableEntry[];
 }

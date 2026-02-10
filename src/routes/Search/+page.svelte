@@ -3,7 +3,7 @@
     import { SvelteMap } from 'svelte/reactivity';
 
 // Props
-    import type { IWordFormNoun } from "$lib/types";
+    import type { IWordFormNoun, INounTable } from "$lib/types";
     import type { INounTableRow } from "$lib/types";
 
     import { currentLexeme, caseToHash, numberToHash } from "$lib/stores";
@@ -15,10 +15,10 @@
     let lexemes = $state([]);
     let homonymsVisible: boolean = $state(false);
     let nounForms = $state(new SvelteMap<string, IWordFormNoun>());
-    let nounTableRows = $state([]);
+    let nounTable: INounTable = $state({});
     let inputValue: string = $state('');
 
-    nounTableRows = [
+    const nounTableRows = [
         { case: 'N', formSg: '', formPl: '' },
         { case: 'A', formSg: '', formPl: '' },
         { case: 'D', formSg: '', formPl: '' },
@@ -27,26 +27,27 @@
         { case: 'I', formSg: '', formPl: '' },
     ];
 
-    function handleNounForms(jsonForms: Array)
+    function handleNounForms(inflectionId: number, jsonForms: Array)
     {
+        nounTable[inflectionId] = [ ...nounTableRows];
         for (const [idx, form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']);
             let formNumber: string = numberToHash.get(form['number']);
             if (formCase !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
                 let hash = formCase + '_' + formNumber;
                 let fwDescr: IWordFormNoun = {wordForm: form['wordForm'], subparadigm: form['subParadigm'], case: form['case'], number: form['number']};
-                const findSgCell = nounTableRows.find(item => item.case === formCase);
-                if (findSgCell) {
+//                const findCell = nounTableRows.find(item => item.case === formCase);
+                const findCell = nounTable[inflectionId].find(item => item.case === formCase);
+                if (findCell) {
                     if (formNumber === 'Sg') {
-                        findSgCell.formSg = fwDescr['wordForm'];
+                        findCell.formSg = fwDescr['wordForm'];
                     } else if (formNumber === 'Pl') {
-                        findSgCell.formPl = fwDescr['wordForm'];
+                        findCell.formPl = fwDescr['wordForm'];
                     }
                 } else {
                     console.log('*** Cell not found');
                 }
             }
-
         }
 //        console.log (nounTableRows);
     }
@@ -75,7 +76,7 @@
                 console.log('No forms');
                 return;
             }
-            handleNounForms(forms);
+            handleNounForms(inflectionId, forms);
         }
         catch (err: any) {
 //            error: string = err.message;
@@ -218,12 +219,9 @@
 <div class="prompt-container">
     <form onsubmit={handleClick}>
         <label>
-<!--            {prompt}           -->
             <input type="text"
                    bind:value={inputValue}
                    placeholder="Введите слово..." />
-<!--                   class:dimmed="{isPrompt}"
-                   oninput="{handleInput}" /> -->
         </label>
     <button type="submit">{btnText}</button>
     </form>
@@ -280,12 +278,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {#each nounTableRows as item }
-                        <tr>
-                            <td>{item.case}</td>
-                            <td>{item.formSg}</td>
-                            <td>{item.formPl}</td>
-                        </tr>
+                    {#each lexProp.inflections as inflection (inflection.seqNum)}
+                        {#each nounTable[inflection.inflectionId] as item}
+                            <tr>
+                                <td>{item.case}</td>
+                                <td>{item.formSg}</td>
+                                <td>{item.formPl}</td>
+                            </tr>
+                        {/each}
                     {/each}
                 </tbody>
             </table>
@@ -296,43 +296,48 @@
 
 <style>
     .prompt-container {
+        display: flex;
+        flex-direction: row;
         border: 1px solid black;
-        padding: 15px;
         margin: 5px 0;
         background-color: #FFFAF0;
         margin-left: 15px;
         padding: 20px;
         max-width:350px;
+        justify-content: center;
 /*        border: #b3b3b3;    */
     }
 
     .display-container {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Defines two columns: one unit width for the div, two units width for the table */
+        gap: 20px; /* Space between grid items */
+/*        padding: 20px;   */
+        max-width: 1000px;
     }
 
     .lexeme-container {
         flex: 1;
         display: flex;
-        flex-direction: column;
         border: 1px solid black;
+        flex-direction: column;
         padding: 15px;
         margin: 5px 0;
         background-color: #FFFAF0;
         margin-left: 15px;
         padding: 20px;
-        max-width:350px;
+        max-width: 350px;
         /*        border: #b3b3b3;    */
     }
 
     .right-panel {
-        flex: 2;
     }
 
     form {
         display: flex;
         flex-direction: row;
         justify-content:space-between;
-        width: 350px;
+        width: 300px;
     }
 
     .row {
@@ -341,9 +346,11 @@
         padding: 3px 0;
         border-left: 1px solid #eee;
 /*        border-right: 1px solid #eee;  */
-        max-width: 500px;
-        padding-left: 15px;
+        max-width: 350px;
+/*        padding-left: 15px;
         padding-right: 15px;
+
+ */
     }
 
     .col {

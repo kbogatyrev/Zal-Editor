@@ -230,46 +230,46 @@
 {#each lexemes as lexProp (lexProp.seqNum)}
     <div class="display-container">
         <div class="lexeme-container">
-            <div class="row">
-                <div class="col">Lexeme ID:</div>
-                <div class="col">{lexProp.lexemeId}</div>
+            <div class="lex-row">
+                <div class="lex-col">Lexeme ID:</div>
+                <div class="lex-col">{lexProp.lexemeId}</div>
             </div>
-            <div class="row">
-                <div class="col">Source form:</div>
-                <div class="col">{lexProp.sourceForm}</div>
+            <div class="lex-row">
+                <div class="lex-col">Source form:</div>
+                <div class="lex-col">{lexProp.sourceForm}</div>
             </div>
             {#if homonymsVisible}
-                <div class="row">
-                <div class="col">Homonyms:</div>
-                <div class="col">{lexProp.homonyms}</div>
+                <div class="lex-row">
+                <div class="lex-col">Homonyms:</div>
+                <div class="lex-col">{lexProp.homonyms}</div>
             </div>
             {/if}
-            <div class="row">
-                <div class="col">Part of speech:</div>
-                <div class="col">{lexProp.partOfSpeech}</div>
+            <div class="lex-row">
+                <div class="lex-col">Part of speech:</div>
+                <div class="lex-col">{lexProp.partOfSpeech}</div>
             </div>
-            <div class="row">
-                <div class="col">Main symbol:</div>
-                <div class="col">{lexProp.mainSymbol}</div>
+            <div class="lex-row">
+                <div class="lex-col">Main symbol:</div>
+                <div class="lex-col">{lexProp.mainSymbol}</div>
             </div>
             {#each lexProp.inflections as inflection (inflection.seqNum)}
-                <div class="row">
-                    <div class="col">Inflection ID:</div>
-                    <div class="col">{inflection.inflectionId}</div>
+                <div class="lex-row">
+                    <div class="lex-col">Inflection ID:</div>
+                    <div class="lex-col">{inflection.inflectionId}</div>
                 </div>
-                <div class="row">
-                    <div class="col">Inflection type:</div>
-                    <div class="col">{inflection.inflectionType}</div>
+                <div class="lex-row">
+                    <div class="lex-col">Inflection type:</div>
+                    <div class="lex-col">{inflection.inflectionType}</div>
                 </div>
-                <div class="row">
-                    <div class="col">Accent type:</div>
-                    <div class="col">{inflection.accentType1}</div>
+                <div class="lex-row">
+                    <div class="lex-col">Accent type:</div>
+                    <div class="lex-col">{inflection.accentType1}</div>
                 </div>
             {/each}
         </div>      <!-- lexeme-container  -->
 
         <div class="right-panel">
-            <table>
+            <table class="paradigm-table">
                 <thead>
                     <tr>
                         <th></th>
@@ -308,18 +308,24 @@
 /*        border: #b3b3b3;    */
     }
 
+    form {
+        display: flex;
+        flex-direction: row;
+        justify-content:space-between;
+        width: 300px;
+    }
+
     .display-container {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* Defines two columns: one unit width for the div, two units width for the table */
+        grid-template-columns: 1fr 1fr;
         gap: 20px; /* Space between grid items */
 /*        padding: 20px;   */
         max-width: 1000px;
     }
 
     .lexeme-container {
-        flex: 1;
-        display: flex;
         border: 1px solid black;
+        display: flex;
         flex-direction: column;
         padding: 15px;
         margin: 5px 0;
@@ -330,51 +336,65 @@
         /*        border: #b3b3b3;    */
     }
 
-    .right-panel {
-    }
-
-    form {
-        display: flex;
-        flex-direction: row;
-        justify-content:space-between;
-        width: 300px;
-    }
-
-    .row {
+    .lex-row {
         display: flex;
         justify-content: space-between;
         padding: 3px 0;
         border-left: 1px solid #eee;
-/*        border-right: 1px solid #eee;  */
-        max-width: 350px;
-/*        padding-left: 15px;
-        padding-right: 15px;
-
- */
+        /*        border-right: 1px solid #eee;  */
+        padding-left: 25px;
+        padding-right: 5px;
     }
 
-    .col {
+    .lex-col {
         flex: 1;
     }
 
-    th {
-        font-weight: normal;
+    .right-panel {
+        padding: 20px;
+        margin: 5px 0;
+        max-width: 350px;
+/*        border: 1px solid #e5e7eb;  */
+    }
+
+    .paradigm-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .paradigm-table row {
+/*        display: flex;      */
+        justify-content: space-between;
+        padding: 10px;
+    }
+
+    .paradigm-table col {
+        flex: 1;
+    }
+
+    .paradigm-table th {
+        font-weight: bold;
         text-align: center;
         padding-right: 25px;
+        background-color: #f3f4f6;
     }
 
-    td {
-        padding-left: 15px;
-        padding-right: 15px;
+    .paradigm-table td {
+        border: 1px solid #e5e7eb;
+        border-collapse: collapse;
     }
 
-    td:nth-child(1), th:nth-child(1) {
+    .paradigm-table td:nth-child(1), th:nth-child(1) {
+        font-weight: bold;
         width: 15%;
+        text-align: center;
     }
-    td:nth-child(2), th:nth-child(2) {
+    .paradigm-table td:nth-child(2), th:nth-child(2) {
         width: 42%;
+        padding-left: 15px;
     }
-    td:nth-child(3), th:nth-child(3) {
+    .paradigm-table td:nth-child(3), th:nth-child(3) {
         width: 42%;
+        padding-left: 15px;
     }
 </style>

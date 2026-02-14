@@ -253,42 +253,48 @@
                 <div class="lex-col">{lexProp.mainSymbol}</div>
             </div>
             {#each lexProp.inflections as inflection (inflection.seqNum)}
-                <div class="lex-row">
-                    <div class="lex-col">Inflection ID:</div>
-                    <div class="lex-col">{inflection.inflectionId}</div>
-                </div>
-                <div class="lex-row">
-                    <div class="lex-col">Inflection type:</div>
-                    <div class="lex-col">{inflection.inflectionType}</div>
-                </div>
-                <div class="lex-row">
-                    <div class="lex-col">Accent type:</div>
-                    <div class="lex-col">{inflection.accentType1}</div>
+                <div class="inflection-container">
+                    <div class="lex-row">
+                        <div class="lex-col">Inflection ID:</div>
+                        <div class="lex-col">{inflection.inflectionId}</div>
+                    </div>
+                    <div class="lex-row">
+                        <div class="lex-col">Inflection type:</div>
+                        <div class="lex-col">{inflection.inflectionType}</div>
+                    </div>
+                    <div class="lex-row">
+                        <div class="lex-col">Accent type:</div>
+                        <div class="lex-col">{inflection.accentType1}</div>
+                    </div>
                 </div>
             {/each}
         </div>      <!-- lexeme-container  -->
 
         <div class="right-panel">
+            {#each lexProp.inflections as inflection (inflection.seqNum)}
             <table class="paradigm-table">
+                <colgroup>
+                    <col class="col-case" span="1"/>
+                    <col class="col-form" span="2"/>
+                </colgroup>
                 <thead>
                     <tr>
-                        <th></th>
-                        <th>Sg</th>
-                        <th>Pl</th>
+                        <th class="col-case"></th>
+                        <th class="col-form">Sg</th>
+                        <th class="col-form">Pl</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {#each lexProp.inflections as inflection (inflection.seqNum)}
-                        {#each nounTable[inflection.inflectionId] as item}
-                            <tr>
-                                <td>{item.case}</td>
-                                <td>{item.formSg}</td>
-                                <td>{item.formPl}</td>
-                            </tr>
-                        {/each}
+                    {#each nounTable[inflection.inflectionId] as item}
+                        <tr>
+                            <td class="col-case">{item.case}</td>
+                            <td class="col-form">{item.formSg}</td>
+                            <td class="col-form">{item.formPl}</td>
+                        </tr>
                     {/each}
                 </tbody>
             </table>
+            {/each}
         </div>      <!-- right-panel  -->
     </div>      <!-- display-container  -->
 {/each}
@@ -350,33 +356,52 @@
         flex: 1;
     }
 
+    .inflection-container {
+        display: flex;
+        flex-direction: column;
+        margin: 5px 0;
+        margin-left: 50px;
+        padding: 5px;
+        max-width: 350px;
+    }
+
     .right-panel {
         padding: 20px;
         margin: 5px 0;
-        max-width: 350px;
-/*        border: 1px solid #e5e7eb;  */
+        column-gap: 50px;
     }
 
     .paradigm-table {
         border-collapse: collapse;
         width: 100%;
+        table-layout: fixed;
+        margin-bottom: 50px;
     }
 
     .paradigm-table row {
-/*        display: flex;      */
-        justify-content: space-between;
-        padding: 10px;
+        padding: 20px;
     }
 
-    .paradigm-table col {
-        flex: 1;
+    .col-case {
+        width: 25px;
+/*        background-color: #f3f4f6;    */
+        color: gray;
+        text-align: center;
+    }
+
+    .col-form {
+        width: 250px;
+        padding-left: 25px;
+        padding-right: 25px;
     }
 
     .paradigm-table th {
-        font-weight: bold;
+        border: 1px solid #e5e7eb;
         text-align: center;
         padding-right: 25px;
-        background-color: #f3f4f6;
+/*        background-color: #f3f4f6;    */
+        color: gray;
+        font-weight: normal;
     }
 
     .paradigm-table td {
@@ -384,8 +409,8 @@
         border-collapse: collapse;
     }
 
+    /*
     .paradigm-table td:nth-child(1), th:nth-child(1) {
-        font-weight: bold;
         width: 15%;
         text-align: center;
     }
@@ -397,4 +422,6 @@
         width: 42%;
         padding-left: 15px;
     }
+    */
+
 </style>

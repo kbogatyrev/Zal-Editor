@@ -18,13 +18,14 @@
     let nounTable: INounTable = $state({});
     let inputValue: string = $state('');
 
+    const triangle: string = '\u25B3';
     const nounTableRows = [
-        { case: 'N', formSg: '', formPl: '' },
-        { case: 'A', formSg: '', formPl: '' },
-        { case: 'D', formSg: '', formPl: '' },
-        { case: 'G', formSg: '', formPl: '' },
-        { case: 'P', formSg: '', formPl: '' },
-        { case: 'I', formSg: '', formPl: '' },
+        { case: 'N', formSg: '', formPl: '', isIrregular: '' },
+        { case: 'A', formSg: '', formPl: '', isIrregular: '' },
+        { case: 'D', formSg: '', formPl: '', isIrregular: '' },
+        { case: 'G', formSg: '', formPl: '', isIrregular: '' },
+        { case: 'P', formSg: '', formPl: '', isIrregular: '' },
+        { case: 'I', formSg: '', formPl: '', isIrregular: '' },
     ];
 
     function handleNounForms(inflectionId: number, jsonForms: Array)
@@ -33,16 +34,17 @@
         for (const [idx, form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']);
             let formNumber: string = numberToHash.get(form['number']);
+            let isIrregular: boolean = form['isIrregular'] !== undefined;
             if (formCase !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
-                let hash = formCase + '_' + formNumber;
-                let fwDescr: IWordFormNoun = {wordForm: form['wordForm'], subparadigm: form['subParadigm'], case: form['case'], number: form['number']};
-//                const findCell = nounTableRows.find(item => item.case === formCase);
                 const findCell = nounTable[inflectionId].find(item => item.case === formCase);
                 if (findCell) {
                     if (formNumber === 'Sg') {
-                        findCell.formSg = fwDescr['wordForm'];
+                        findCell.formSg = form['wordForm'];
                     } else if (formNumber === 'Pl') {
-                        findCell.formPl = fwDescr['wordForm'];
+                        findCell.formPl = form['wordForm'];
+                    }
+                    if (isIrregular) {
+                        findCell.isIrregular = triangle;
                     }
                 } else {
                     console.log('*** Cell not found');
@@ -276,12 +278,14 @@
                 <colgroup>
                     <col class="col-case" span="1"/>
                     <col class="col-form" span="2"/>
+                    <col class="col-irreg" span="1"/>
                 </colgroup>
                 <thead>
                     <tr>
                         <th class="col-case"></th>
                         <th class="col-form">Sg</th>
                         <th class="col-form">Pl</th>
+                        <th class="col-irreg"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -290,6 +294,7 @@
                             <td class="col-case">{item.case}</td>
                             <td class="col-form">{item.formSg}</td>
                             <td class="col-form">{item.formPl}</td>
+                            <td class="col-irreg">{item.isIrregular}</td>
                         </tr>
                     {/each}
                 </tbody>
@@ -324,7 +329,6 @@
     .display-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 20px; /* Space between grid items */
 /*        padding: 20px;   */
         max-width: 1000px;
     }
@@ -382,6 +386,10 @@
         padding: 20px;
     }
 
+    .col-case, .col-form, .col-irreg {
+        border: 1px solid #e5e7eb;
+    }
+
     .col-case {
         width: 25px;
 /*        background-color: #f3f4f6;    */
@@ -395,8 +403,18 @@
         padding-right: 25px;
     }
 
+    .col-irreg {
+        width: 25px;
+        /*        background-color: #f3f4f6;    */
+        text-align: center;
+        border-collapse: collapse ;
+        border-right: none;
+        border-top: none;
+        border-bottom: none;
+    }
+
     .paradigm-table th {
-        border: 1px solid #e5e7eb;
+/*        border: 1px solid #e5e7eb;   */
         text-align: center;
         padding-right: 25px;
 /*        background-color: #f3f4f6;    */
@@ -404,10 +422,12 @@
         font-weight: normal;
     }
 
+    /*
     .paradigm-table td {
         border: 1px solid #e5e7eb;
         border-collapse: collapse;
     }
+     */
 
     /*
     .paradigm-table td:nth-child(1), th:nth-child(1) {

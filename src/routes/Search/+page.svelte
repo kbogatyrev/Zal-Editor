@@ -3,7 +3,7 @@
     import { SvelteMap } from 'svelte/reactivity';
 
 // Props
-    import type { IWordFormNoun, INounTable } from "$lib/types";
+    import type {IWordFormNoun, INounTable, INounTableEntry} from "$lib/types";
     import type { INounTableRow } from "$lib/types";
 
     import { currentLexeme, caseToHash, numberToHash } from "$lib/stores";
@@ -19,13 +19,25 @@
     let inputValue: string = $state('');
 
     const triangle: string = '\u25B3';
+
+    /*
     const nounTableRows = [
-        { case: 'N', formSg: '', formPl: '', isIrregular: '' },
-        { case: 'A', formSg: '', formPl: '', isIrregular: '' },
-        { case: 'D', formSg: '', formPl: '', isIrregular: '' },
-        { case: 'G', formSg: '', formPl: '', isIrregular: '' },
-        { case: 'P', formSg: '', formPl: '', isIrregular: '' },
-        { case: 'I', formSg: '', formPl: '', isIrregular: '' },
+        { case: 'N', formSg: '', isIrregularSg: '', isDifficult: true, formPl: '', isIrregularPl: '', isDifficult: false },
+        { case: 'A', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
+        { case: 'D', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
+        { case: 'G', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
+        { case: 'P', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
+        { case: 'I', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
+    ];
+*/
+
+    const nounTableRows = [
+        [{ number: 'Sg', case: 'N', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'N', form: '', isIrregular: '', isDifficult: false }],
+        [{ number: 'Sg', case: 'A', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'A', form: '', isIrregular: '', isDifficult: false }],
+        [{ number: 'Sg', case: 'D', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'D', form: '', isIrregular: '', isDifficult: false }],
+        [{ number: 'Sg', case: 'G', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'G', form: '', isIrregular: '', isDifficult: false }],
+        [{ number: 'Sg', case: 'P', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'P', form: '', isIrregular: '', isDifficult: false }],
+        [{ number: 'Sg', case: 'I', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'I', form: '', isIrregular: '', isDifficult: false }]
     ];
 
     function handleNounForms(inflectionId: number, jsonForms: Array)
@@ -35,24 +47,33 @@
             let formCase: string = caseToHash.get(form['case']);
             let formNumber: string = numberToHash.get(form['number']);
             let isIrregular: boolean = form['isIrregular'] !== undefined;
+            let isDifficult: boolean = form['isDifficult'] !== undefined;
             if (formCase !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
-                const findCell = nounTable[inflectionId].find(item => item.case === formCase);
+                const findCell = nounTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
                 if (findCell) {
                     if (formNumber === 'Sg') {
-                        findCell.formSg = form['wordForm'];
+                        findCell.form = form['wordForm'];
                     } else if (formNumber === 'Pl') {
-                        findCell.formPl = form['wordForm'];
+                        findCell.form = form['wordForm'];
                     }
                     if (isIrregular) {
-                        findCell.isIrregular = triangle;
+                        (formNumber === 'Sg') ? findCell.isIrregular = triangle : findCell.isIrregular = triangle;
+                    }
+                    if (isDifficult) {
+                        findCell.isDifficult = true;
                     }
                 } else {
                     console.log('*** Cell not found');
                 }
             }
         }
-//        console.log (nounTableRows);
+        console.log (nounTable);
     }
+
+    const getFormClass = (item: INounTableEntry) => {
+        if (item.isDifficult) return "col-difficult-form";
+        return "col-form";
+    };
 
     function updateNounMap(hash: string, field: keyof IWordFormNoun, value: any) {
         const sgForm = nounForms.get(hash);
@@ -278,23 +299,20 @@
                 <colgroup>
                     <col class="col-case" span="1"/>
                     <col class="col-form" span="2"/>
-                    <col class="col-irreg" span="1"/>
                 </colgroup>
                 <thead>
                     <tr>
                         <th class="col-case"></th>
                         <th class="col-form">Sg</th>
                         <th class="col-form">Pl</th>
-                        <th class="col-irreg"></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {#each nounTable[inflection.inflectionId] as item}
+                    {#each nounTable[inflection.inflectionId] as itemPair}
                         <tr>
-                            <td class="col-case">{item.case}</td>
-                            <td class="col-form">{item.formSg}</td>
-                            <td class="col-form">{item.formPl}</td>
-                            <td class="col-irreg">{item.isIrregular}</td>
+                            <td class="col-case">{itemPair[0].case}</td>
+                            <td class={getFormClass(itemPair[0])}>{itemPair[0].form}  {itemPair[0].isIrregular}</td>
+                            <td class={getFormClass(itemPair[1])}>{itemPair[1].form}  {itemPair[1].isIrregular}</td>
                         </tr>
                     {/each}
                 </tbody>
@@ -318,14 +336,14 @@
         justify-content: center;
 /*        border: #b3b3b3;    */
     }
-
+/*
     form {
         display: flex;
         flex-direction: row;
         justify-content:space-between;
         width: 300px;
     }
-
+*/
     .display-container {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -386,10 +404,6 @@
         padding: 20px;
     }
 
-    .col-case, .col-form, .col-irreg {
-        border: 1px solid #e5e7eb;
-    }
-
     .col-case {
         width: 25px;
 /*        background-color: #f3f4f6;    */
@@ -401,16 +415,22 @@
         width: 250px;
         padding-left: 25px;
         padding-right: 25px;
+/*        padding-top: 2px;
+        padding-bottom: 1px;
+ */
+        border: 1px solid #e5e7eb;
     }
 
-    .col-irreg {
-        width: 25px;
-        /*        background-color: #f3f4f6;    */
-        text-align: center;
-        border-collapse: collapse ;
-        border-right: none;
-        border-top: none;
-        border-bottom: none;
+    .col-difficult-form {
+        width: 250px;
+        padding-left: 25px;
+        padding-right: 25px;
+        /*        padding-top: 2px;
+                padding-bottom: 1px;
+         */
+        font-style: italic;
+        color:gray;
+        border: 1px solid #e5e7eb;
     }
 
     .paradigm-table th {
@@ -421,27 +441,4 @@
         color: gray;
         font-weight: normal;
     }
-
-    /*
-    .paradigm-table td {
-        border: 1px solid #e5e7eb;
-        border-collapse: collapse;
-    }
-     */
-
-    /*
-    .paradigm-table td:nth-child(1), th:nth-child(1) {
-        width: 15%;
-        text-align: center;
-    }
-    .paradigm-table td:nth-child(2), th:nth-child(2) {
-        width: 42%;
-        padding-left: 15px;
-    }
-    .paradigm-table td:nth-child(3), th:nth-child(3) {
-        width: 42%;
-        padding-left: 15px;
-    }
-    */
-
 </style>

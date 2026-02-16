@@ -29,12 +29,17 @@ export interface IWordFormNoun
     subParadigm: string;
     case: string;
     number: string;
+    isIrregular: boolean;
 }
 
 export interface INounTableEntry
 {
+    number: string;
     case: string;
     form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
 }
 export interface INounTable {
     [inflectionId: number]: INounTableEntry[];

@@ -239,7 +239,8 @@
 
 <h1>Поиск в словаре</h1>
 <div class="prompt-container">
-    <form onsubmit={handleClick}>
+<!--    <form onsubmit={handleClick}>    -->
+    <form on:submit|preventDefault={handleClick}>
         <label>
             <input type="text"
                    bind:value={inputValue}
@@ -316,7 +317,7 @@
                                 {itemPair[0].isIrregular}
                             </td>
                             <td class={getFormClass(itemPair[1])}>
-                                {#if itemPair[1].isAssumed}<sup>?</sup>{/if}
+                                {#if itemPair[1].isAssumed}<sup>*</sup>{/if}
                                 {itemPair[1].form}
                                 {itemPair[1].isIrregular}</td>
                         </tr>

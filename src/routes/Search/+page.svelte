@@ -19,25 +19,21 @@
     let inputValue: string = $state('');
 
     const triangle: string = '\u25B3';
-
-    /*
-    const nounTableRows = [
-        { case: 'N', formSg: '', isIrregularSg: '', isDifficult: true, formPl: '', isIrregularPl: '', isDifficult: false },
-        { case: 'A', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
-        { case: 'D', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
-        { case: 'G', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
-        { case: 'P', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
-        { case: 'I', formSg: '', isIrregularSg: '', isDifficult: false, formPl: '', isIrregularPl: '', isDifficult: false },
-    ];
-*/
+//    const supQuestionMark: string = '<sup>?</sup>';
 
     const nounTableRows = [
-        [{ number: 'Sg', case: 'N', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'N', form: '', isIrregular: '', isDifficult: false }],
-        [{ number: 'Sg', case: 'A', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'A', form: '', isIrregular: '', isDifficult: false }],
-        [{ number: 'Sg', case: 'D', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'D', form: '', isIrregular: '', isDifficult: false }],
-        [{ number: 'Sg', case: 'G', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'G', form: '', isIrregular: '', isDifficult: false }],
-        [{ number: 'Sg', case: 'P', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'P', form: '', isIrregular: '', isDifficult: false }],
-        [{ number: 'Sg', case: 'I', form: '', isIrregular: '', isDifficult: false }, { number: 'Pl', case: 'I', form: '', isIrregular: '', isDifficult: false }]
+        [{ number: 'Sg', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', case: 'P', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'P', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false }]
     ];
 
     function handleNounForms(inflectionId: number, jsonForms: Array)
@@ -48,19 +44,22 @@
             let formNumber: string = numberToHash.get(form['number']);
             let isIrregular: boolean = form['isIrregular'] !== undefined;
             let isDifficult: boolean = form['isDifficult'] !== undefined;
+            let isAssumed: boolean = form['status'] === 'Assumed';
             if (formCase !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
                 const findCell = nounTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
                 if (findCell) {
-                    if (formNumber === 'Sg') {
-                        findCell.form = form['wordForm'];
-                    } else if (formNumber === 'Pl') {
-                        findCell.form = form['wordForm'];
-                    }
+                    findCell.form = form['wordForm'];
                     if (isIrregular) {
                         (formNumber === 'Sg') ? findCell.isIrregular = triangle : findCell.isIrregular = triangle;
                     }
                     if (isDifficult) {
                         findCell.isDifficult = true;
+                    }
+                    if (isAssumed) {
+                        findCell.isAssumed = true;
+//                        findCell.form = supQuestionMark + form['wordForm'];
+//                        console.log('*** Assumed form', findCell.form);
+
                     }
                 } else {
                     console.log('*** Cell not found');
@@ -311,8 +310,15 @@
                     {#each nounTable[inflection.inflectionId] as itemPair}
                         <tr>
                             <td class="col-case">{itemPair[0].case}</td>
-                            <td class={getFormClass(itemPair[0])}>{itemPair[0].form}  {itemPair[0].isIrregular}</td>
-                            <td class={getFormClass(itemPair[1])}>{itemPair[1].form}  {itemPair[1].isIrregular}</td>
+                            <td class={getFormClass(itemPair[0])}>
+                                {#if itemPair[0].isAssumed}<sup>*</sup>{/if}
+                                {itemPair[0].form}
+                                {itemPair[0].isIrregular}
+                            </td>
+                            <td class={getFormClass(itemPair[1])}>
+                                {#if itemPair[1].isAssumed}<sup>?</sup>{/if}
+                                {itemPair[1].form}
+                                {itemPair[1].isIrregular}</td>
                         </tr>
                     {/each}
                 </tbody>

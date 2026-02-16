@@ -19,7 +19,6 @@
     let inputValue: string = $state('');
 
     const triangle: string = '\u25B3';
-//    const supQuestionMark: string = '<sup>?</sup>';
 
     const nounTableRows = [
         [{ number: 'Sg', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
@@ -36,14 +35,14 @@
             { number: 'Pl', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false }]
     ];
 
-    function handleNounForms(inflectionId: number, jsonForms: Array)
+    function handleNounForms(inflectionId: number, jsonForms: Array<any>)
     {
         nounTable[inflectionId] = [ ...nounTableRows];
-        for (const [idx, form] of jsonForms.entries()) {
+        for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']);
             let formNumber: string = numberToHash.get(form['number']);
-            let isIrregular: boolean = form['isIrregular'] !== undefined;
-            let isDifficult: boolean = form['isDifficult'] !== undefined;
+            let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
+            let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             if (formCase !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
                 const findCell = nounTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
@@ -86,8 +85,7 @@
         console.log('Requesting forms for inflection ID: ' + inflectionId);
         try {
 //            console.log('Input value: ' + inputValue);
-            const response = await fetch(`http://localhost:8088/forms?inflection-id=${inflectionId}` +
-                '')
+            const response = await fetch(`http://localhost:8088/forms?inflection-id=${inflectionId}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -211,8 +209,7 @@
     async function handleClick() {
         try {
 //            console.log('Input value: ' + inputValue);
-            const response = await fetch(`http://localhost:8088/query?word=${inputValue}` +
-                '')
+            const response = await fetch(`http://localhost:8088/query?word=${inputValue}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }

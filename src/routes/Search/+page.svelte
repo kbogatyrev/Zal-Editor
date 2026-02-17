@@ -3,11 +3,17 @@
     import { SvelteMap } from 'svelte/reactivity';
 
 // Props
-    import type {IWordFormNoun, INounTable, INounTableEntry} from "$lib/types";
+    import type {IWordFormNoun, INounTable, INounTableEntry, ILexeme, IInflection} from "$lib/types";
     import type { INounTableRow } from "$lib/types";
 
-    import { currentLexeme, caseToHash, numberToHash } from "$lib/stores";
-    import { currentInflection } from "$lib/stores";
+    import { caseToHash, numberToHash } from "$lib/stores";
+
+    function preventDefault(fn: Function) {
+        return (e: Event) => {
+            e.preventDefault();
+            fn();
+        };
+    }
 
     let prompt: string = 'Введите слово...';
     let btnText: string = 'Искать';
@@ -37,10 +43,10 @@
 
     function handleNounForms(inflectionId: number, jsonForms: Array<any>)
     {
-        nounTable[inflectionId] = [ ...nounTableRows];
+        nounTable[inflectionId] = nounTableRows.map(row => row.map(cell => ({ ...cell })));
         for (const [,form] of jsonForms.entries()) {
-            let formCase: string = caseToHash.get(form['case']);
-            let formNumber: string = numberToHash.get(form['number']);
+            let formCase: string = caseToHash.get(form['case']) || '';
+            let formNumber: string = numberToHash.get(form['number']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
@@ -110,99 +116,50 @@
     async function handleLexemeData() {
         for (let i:number = 0; i < lexemeDescr.length; i++)
         {
-            let lexeme = lexemeDescr[i];
+            let lexemeData = lexemeDescr[i];
+            let lexeme: ILexeme = {
+                seqNum: i + 1,
+                lexemeId: lexemeData['lexemeId'],
+                sourceForm: lexemeData['sourceForm'],
+                homonyms: [],
+                mainSymbol: lexemeData['mainSymbol'],
+                partOfSpeech: lexemeData['partOfSpeech'],
+                isTransitive: lexemeData['isTransitive'],
+                section: lexemeData['section'],
+                inflections: []
+            };
 
-            currentLexeme['seqNum'] = i + 1;
-
-            if ('lexemeId' in lexeme) {
-                currentLexeme['lexemeId'] = lexeme['lexemeId'];
-            } else {
-                console.log('lexemeId property not found');
-            }
-
-            if ('sourceForm' in lexeme) {
-                currentLexeme['sourceForm'] = lexeme['sourceForm'];
-            } else {
-                console.log("sourceForm property not found");
-            }
-
-            if ('homonyms' in lexeme) {
-                let homonyms: string = '';
-                for ( const[key, value] of Object.entries(lexeme['homonyms'])) {
-                    if (homonyms.length > 0) {
-                        homonyms += ', ';
-                    }
-                    homonyms += value;
-                }
-                currentLexeme['homonyms'] = homonyms;
+            if ('homonyms' in lexemeData) {
+                lexeme.homonyms = Object.values(lexemeData['homonyms']);
                 homonymsVisible = true;
             } else {
                 homonymsVisible = false;
             }
 
-            if ('mainSymbol' in lexeme) {
-                currentLexeme['mainSymbol'] = lexeme['mainSymbol'];
-            } else {
-                console.log("mainSymbol property not found");
-            }
-
-            if ('partOfSpeech' in lexeme) {
-                currentLexeme['partOfSpeech'] = lexeme['partOfSpeech'];
-            } else {
-                console.log("partOfSpeech property not found");
-            }
-
-            if ('Verb' === lexeme['partOfSpeech']) {
-                if ('isTransitive' in lexeme) {
-                    currentLexeme['isTransitive'] = lexeme['isTransitive'];
-                } else {
-                    console.log("isTransitive property not found");
+            if ('inflections' in lexemeData) {
+                let inflectionsData = lexemeData['inflections'];
+                for (let j: number = 0; j < inflectionsData.length; j++) {
+                    let inflectionData = inflectionsData[j];
+                    let inflection: IInflection = {
+                        seqNum: i + j + 1,
+                        inflectionId: inflectionData['inflectionId'],
+                        inflectionType: inflectionData['inflectionType'],
+                        accentType1: inflectionData['accentType1'],
+                        accentType2: inflectionData['accentType2'],
+                        aspectPair: inflectionData['aspectPair'],
+                        altAspectPair: inflectionData['altAspectPair']
+                    };
+                    lexeme.inflections.push(inflection);
                 }
             }
-
-            if ('section' in lexeme) {
-                currentLexeme['section'] = lexeme['section'];
-            }
-
-            currentLexeme['inflections'] = [];
-            if ('inflections' in lexeme) {
-                let inflections = lexeme['inflections'];
-                for (let j: number = 0; j < inflections.length; j++) {
-                    let inflection = inflections[j];
-
-                    currentInflection['seqNum'] = i + j + 1;
-
-                    if ('inflectionId' in inflection) {
-                        currentInflection['inflectionId'] = inflection['inflectionId'];
-                    } else {
-                        console.log("inflectionId property not found");
-                    }
-
-                    if ('inflectionType' in inflection) {
-                        currentInflection['inflectionType'] = inflection['inflectionType'];
-                    } else {
-                        console.log("inflectionType property not found");
-                    }
-
-                    if ('accentType1' in inflection) {
-                        currentInflection['accentType1'] = inflection['accentType1'];
-                    } else {
-                        console.log("accentType1 property not found");
-                    }
-                    currentLexeme['inflections'].push({...currentInflection});
-                }
-            }
-            lexemes.push({ ...currentLexeme });
+            lexemes.push(lexeme);
         }
-//        console.log(lexemes);
 
         for(let lexeme of lexemes) {
-            console.log('Lexeme ID: ', lexeme['lexemeId']);
-            for(let inflection of lexeme.inflections) {
-                await Promise.all( // Await all requests
-                    lexeme.inflections.map(inflection => requestForms(inflection['inflectionId']))
-                );
-            }
+            console.log('Lexeme ID: ', lexeme.lexemeId);
+            await Promise.all(
+                lexeme.inflections.map(inflection => requestForms(inflection.inflectionId))
+            );
         }
     }
 
@@ -237,7 +194,7 @@
 <h1>Поиск в словаре</h1>
 <div class="prompt-container">
 <!--    <form onsubmit={handleClick}>    -->
-    <form on:submit|preventDefault={handleClick}>
+    <form class="word-entry" onsubmit={preventDefault(handleClick)}>
         <label>
             <input type="text"
                    bind:value={inputValue}
@@ -261,7 +218,7 @@
             {#if homonymsVisible}
                 <div class="lex-row">
                 <div class="lex-col">Homonyms:</div>
-                <div class="lex-col">{lexProp.homonyms}</div>
+                <div class="lex-col">{lexProp.homonyms.join(', ')}</div>
             </div>
             {/if}
             <div class="lex-row">
@@ -340,14 +297,14 @@
         justify-content: center;
 /*        border: #b3b3b3;    */
     }
-/*
-    form {
+
+    .word-entry {
         display: flex;
         flex-direction: row;
         justify-content:space-between;
         width: 300px;
     }
-*/
+
     .display-container {
         display: grid;
         grid-template-columns: 1fr 1fr;

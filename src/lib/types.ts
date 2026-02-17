@@ -30,6 +30,8 @@ export interface IWordFormNoun
     case: string;
     number: string;
     isIrregular: boolean;
+    isDifficult: boolean;
+    status: string;
 }
 
 export interface INounTableEntry

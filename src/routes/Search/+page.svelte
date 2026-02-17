@@ -25,6 +25,7 @@
     let inputValue: string = $state('');
 
     const triangle: string = '\u25B3';
+    const largeAsterisk = '\uFF0A';
 
     const nounTableRows = [
         [{ number: 'Sg', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
@@ -271,9 +272,7 @@
                                 {itemPair[0].isIrregular}
                             </td>
                             <td class={getFormClass(itemPair[1])}>
-                                {#if itemPair[1].isAssumed}<sup>*</sup>{/if}
-                                {itemPair[1].form}
-                                {itemPair[1].isIrregular}</td>
+                                {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}{itemPair[1].form}  {itemPair[1].isIrregular}</td>
                         </tr>
                     {/each}
                 </tbody>
@@ -376,9 +375,6 @@
         width: 250px;
         padding-left: 25px;
         padding-right: 25px;
-/*        padding-top: 2px;
-        padding-bottom: 1px;
- */
         border: 1px solid #e5e7eb;
     }
 

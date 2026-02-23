@@ -4,7 +4,6 @@
 
 // Props
     import type {IWordFormNoun, INounTable, INounTableEntry, ILexeme, IInflection} from "$lib/types";
-    import type { INounTableRow } from "$lib/types";
 
     import { caseToHash, numberToHash } from "$lib/stores";
 
@@ -27,12 +26,28 @@
     const triangle: string = '\u25B3';
     const largeAsterisk = '\uFF0A';
 
+/*
     const nounTableRows = [
         [{ number: 'Sg', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
             { number: 'Pl', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
         [{ number: 'Sg', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
             { number: 'Pl', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
         [{ number: 'Sg', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', case: 'P', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'P', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false }]
+    ];
+
+    const longAdjTableRows = [
+        [{ number: 'Sg', gender: 'm', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', gender: 'm', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', gender: 'm', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
+            { number: 'Pl', gender: 'm', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
+        [{ number: 'Sg', gender: 'm', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
             { number: 'Pl', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
         [{ number: 'Sg', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
             { number: 'Pl', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
@@ -41,10 +56,25 @@
         [{ number: 'Sg', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
             { number: 'Pl', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false }]
     ];
+*/
+    const declRowTemplate = { number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+
+    function getNounTable()
+    {
+        let table = [];
+        for (let caseName of ['N', 'A', 'G', 'D', 'P', 'I']) {
+            let row = [];
+            for (let number of ['Sg', 'Pl']) {
+                row.push({...declRowTemplate, number: number, case: caseName});
+            }
+            table.push(row);
+        }
+        return table;
+    }
 
     function handleNounForms(inflectionId: number, jsonForms: Array<any>)
     {
-        nounTable[inflectionId] = nounTableRows.map(row => row.map(cell => ({ ...cell })));
+        nounTable[inflectionId] = getNounTable();
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -56,7 +86,7 @@
                 if (findCell) {
                     findCell.form = form['wordForm'];
                     if (isIrregular) {
-                        (formNumber === 'Sg') ? findCell.isIrregular = triangle : findCell.isIrregular = triangle;
+                        findCell.isIrregular = triangle;
                     }
                     if (isDifficult) {
                         findCell.isDifficult = true;
@@ -364,6 +394,15 @@
         padding: 20px;
     }
 
+    .paradigm-table th {
+        /*        border: 1px solid #e5e7eb;   */
+        text-align: center;
+        padding-right: 25px;
+        /*        background-color: #f3f4f6;    */
+        color: gray;
+        font-weight: normal;
+    }
+
     .col-case {
         width: 25px;
 /*        background-color: #f3f4f6;    */
@@ -390,12 +429,4 @@
         border: 1px solid #e5e7eb;
     }
 
-    .paradigm-table th {
-/*        border: 1px solid #e5e7eb;   */
-        text-align: center;
-        padding-right: 25px;
-/*        background-color: #f3f4f6;    */
-        color: gray;
-        font-weight: normal;
-    }
 </style>

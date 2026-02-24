@@ -26,37 +26,6 @@
     const triangle: string = '\u25B3';
     const largeAsterisk = '\uFF0A';
 
-/*
-    const nounTableRows = [
-        [{ number: 'Sg', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', case: 'P', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'P', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false }]
-    ];
-
-    const longAdjTableRows = [
-        [{ number: 'Sg', gender: 'm', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', gender: 'm', case: 'N', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', gender: 'm', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', gender: 'm', case: 'A', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', gender: 'm', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'D', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'G', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', case: 'P', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'P', form: '', isIrregular: '', isDifficult: false, isAssumed: false }],
-        [{ number: 'Sg', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false },
-            { number: 'Pl', case: 'I', form: '', isIrregular: '', isDifficult: false, isAssumed: false }]
-    ];
-*/
     const declRowTemplate = { number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
     function getNounTable()

@@ -26,15 +26,30 @@
     const triangle: string = '\u25B3';
     const largeAsterisk = '\uFF0A';
 
-    const declRowTemplate = { number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
-
     function getNounTable()
     {
+        const declRowTemplate = { number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+
         let table = [];
         for (let caseName of ['N', 'A', 'G', 'D', 'P', 'I']) {
             let row = [];
             for (let number of ['Sg', 'Pl']) {
                 row.push({...declRowTemplate, number: number, case: caseName});
+            }
+            table.push(row);
+        }
+        return table;
+    }
+
+    function getAdjTable()
+    {
+        const declRowTemplateSg = { gender: '', number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+
+        let table = [];
+        for (let caseName of ['N', 'A', 'A (anim)', 'G', 'D', 'P', 'I']) {
+            let row = [];
+            for (let gender of ['m', 'f', 'n']) {
+                row.push({...declRowTemplate, gender: gender, number: number, case: caseName});
             }
             table.push(row);
         }

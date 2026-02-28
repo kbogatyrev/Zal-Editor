@@ -43,6 +43,7 @@ export interface INounTableEntry
     isDifficult: boolean;
     isAssumed: boolean;
 }
+
 export interface INounTable {
-    [inflectionId: number]: INounTableEntry[];
+    [inflectionId: number]: INounTableEntry[][];
 }

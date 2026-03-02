@@ -47,3 +47,18 @@ export interface INounTableEntry
 export interface INounTable {
     [inflectionId: number]: INounTableEntry[][];
 }
+
+export interface IAdjTableEntry
+{
+    gender: string;
+    number: string;
+    case: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface IAdjTable {
+    [inflectionId: number]: IAdjTableEntry[][];
+}

@@ -3,9 +3,9 @@
     import { SvelteMap } from 'svelte/reactivity';
 
 // Props
-    import type {IWordFormNoun, INounTable, INounTableEntry, ILexeme, IInflection} from "$lib/types";
+    import type {INounTable, INounTableEntry, IAdjTable, IAdjTableEntry, ILexeme, IInflection} from "$lib/types";
 
-    import { caseToHash, numberToHash } from "$lib/stores";
+    import { caseToHash, numberToHash, genderToHash } from "$lib/stores";
 
     function preventDefault(fn: Function) {
         return (e: Event) => {
@@ -19,9 +19,10 @@
     let lexemeDescr: object[];
     let lexemes = $state([]);
     let homonymsVisible: boolean = $state(false);
-    let nounForms = $state(new SvelteMap<string, IWordFormNoun>());
     let nounTable: INounTable = $state({});
+    let adjTable: IAdjTable = $state({});
     let inputValue: string = $state('');
+    let mapInflectionToLexeme = new Map<number, ILexeme>();
 
     const triangle: string = '\u25B3';
     const largeAsterisk = '\uFF0A';
@@ -43,13 +44,18 @@
 
     function getAdjTable()
     {
-        const declRowTemplateSg = { gender: '', number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        const declRowTemplate = { gender: '', number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
         for (let caseName of ['N', 'A', 'A (anim)', 'G', 'D', 'P', 'I']) {
             let row = [];
-            for (let gender of ['m', 'f', 'n']) {
-                row.push({...declRowTemplate, gender: gender, number: number, case: caseName});
+            for (let col of ['m', 'f', 'n', 'Pl']) {
+                if (col === 'Pl') {
+                    row.push({...declRowTemplate, number: 'Pl', case: caseName});
+                }
+                else{
+                    row.push({...declRowTemplate, gender: col, number: 'Sg', case: caseName});
+                }
             }
             table.push(row);
         }
@@ -89,17 +95,55 @@
         console.log (nounTable);
     }
 
-    const getFormClass = (item: INounTableEntry) => {
+    const getNounFormClass = (item: INounTableEntry) => {
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
 
-    function updateNounMap(hash: string, field: keyof IWordFormNoun, value: any) {
-        const sgForm = nounForms.get(hash);
-        if (sgForm) {
-            nounForms.set(hash, { ...sgForm, [field]: value });
+    function handleAdjForms(inflectionId: number, jsonForms: Array<any>)
+    {
+        adjTable[inflectionId] = getAdjTable();
+        console.log(adjTable[inflectionId])
+        for (const [,form] of jsonForms.entries()) {
+            let formCase: string = caseToHash.get(form['case']) || '';
+            let formNumber: string = numberToHash.get(form['number']) || '';
+            let formGender: string = genderToHash.get(form['gender']) || '';
+            let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
+            let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
+            let isAssumed: boolean = form['status'] === 'Assumed';
+            let findCell = undefined;
+            if (formCase !== '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f' || formGender === 'n')) {
+                findCell = adjTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
+                console.log('---------', findCell);
+            }
+            else if (formCase !== '' && formNumber == 'Pl' ) {
+                console.log('***********', formCase, formNumber, formGender);
+                findCell = adjTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
+//                console.log('***********', findCell);
+            }
+            if (findCell) {
+                findCell.form = form['wordForm'];
+                if (isIrregular) {
+                    findCell.isIrregular = triangle;
+                }
+                if (isDifficult) {
+                    findCell.isDifficult = true;
+                }
+                if (isAssumed) {
+                    findCell.isAssumed = true;
+                }
+            } else {
+                console.log('*** Cell not found');
+            }
         }
+        console.log (adjTable);
     }
+
+    const getAdjFormClass = (item: IAdjTableEntry) => {
+        if (item.isDifficult) return "col-difficult-form";
+        return "col-form";
+    };
+
 
     async function requestForms(inflectionId: number)
     {
@@ -117,7 +161,23 @@
                 console.log('No forms');
                 return;
             }
-            handleNounForms(inflectionId, forms);
+
+            let lexeme = mapInflectionToLexeme.get(inflectionId);
+            if (lexeme === undefined) {
+                console.log('Lexeme not found for inflection ID: ' + inflectionId);
+                return;
+            }
+
+            if(lexeme['partOfSpeech'] === 'Noun') {
+                handleNounForms(inflectionId, forms);
+            }
+            else if (lexeme['partOfSpeech'] === 'Adj') {
+                handleAdjForms(inflectionId, forms);
+            }
+            else {
+                console.log('*** ', lexeme['partOfSpeech'], 'is not supported yet');
+            }
+
         }
         catch (err: any) {
 //            error: string = err.message;
@@ -165,13 +225,14 @@
                         altAspectPair: inflectionData['altAspectPair']
                     };
                     lexeme.inflections.push(inflection);
+                    mapInflectionToLexeme.set(inflection.inflectionId, lexeme);
                 }
             }
             lexemes.push(lexeme);
         }
 
         for(let lexeme of lexemes) {
-            console.log('Lexeme ID: ', lexeme.lexemeId);
+//            console.log('Lexeme ID: ', lexeme.lexemeId);
             await Promise.all(
                 lexeme.inflections.map(inflection => requestForms(inflection.inflectionId))
             );
@@ -264,38 +325,85 @@
 
         <div class="right-panel">
             {#each lexProp.inflections as inflection (inflection.seqNum)}
-            <table class="paradigm-table">
-                <colgroup>
-                    <col class="col-case" span="1"/>
-                    <col class="col-form" span="2"/>
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th class="col-case"></th>
-                        <th class="col-form">Sg</th>
-                        <th class="col-form">Pl</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each nounTable[inflection.inflectionId] as itemPair}
+                {#if lexProp['partOfSpeech'] == 'Noun'}
+                    <!--  NOUN               -->
+                    <table class="noun-paradigm-table">
+                    <colgroup>
+                        <col class="col-case" span="1"/>
+                        <col class="col-form" span="2"/>
+                    </colgroup>
+                    <thead>
                         <tr>
-                            <td class="col-case">{itemPair[0].case}</td>
-                            <td class={getFormClass(itemPair[0])}>
-                                {#if itemPair[0].isAssumed}<sup>*</sup>{/if}
-                                {itemPair[0].form}
-                                {itemPair[0].isIrregular}
-                            </td>
-                            <td class={getFormClass(itemPair[1])}>
-                                {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}{itemPair[1].form}  {itemPair[1].isIrregular}</td>
+                            <th class="col-case"></th>
+                            <th class="col-form">Sg</th>
+                            <th class="col-form">Pl</th>
                         </tr>
-                    {/each}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {#each nounTable[inflection.inflectionId] as itemPair}
+                            <tr>
+                                <td class="col-case">{itemPair[0].case}</td>
+                                <td class={getNounFormClass(itemPair[0])}>
+                                    {#if itemPair[0].isAssumed}<sup>*</sup>{/if}
+                                    {itemPair[0].form}
+                                    {itemPair[0].isIrregular}
+                                </td>
+                                <td class={getNounFormClass(itemPair[1])}>
+                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}{itemPair[1].form}  {itemPair[1].isIrregular}</td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                    </table>
+                    {/if}
+                {#if lexProp['partOfSpeech'] == 'Adj'}
+                    <!--  ADJ               -->
+                    <table class="noun-paradigm-table">
+                        <colgroup>
+                            <col class="col-case" span="1"/>
+                            <col class="col-form" span="4"/>
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th class="col-case"></th>
+                            <th class="col-form">m</th>
+                            <th class="col-form">f</th>
+                            <th class="col-form">n</th>
+                            <th class="col-form">pl</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {#each adjTable[inflection.inflectionId] as itemPair}
+                            <tr>
+                                <td class="col-case">{itemPair[0].case}</td>
+                                <td class={getAdjFormClass(itemPair[0])}>
+                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair[0].form}
+                                    {itemPair[0].isIrregular}
+                                </td>
+                                <td class={getAdjFormClass(itemPair[1])}>
+                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair[1].form}
+                                    {itemPair[1].isIrregular}
+                                </td>
+                                <td class={getAdjFormClass(itemPair[2])}>
+                                    {#if itemPair[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair[2].form}
+                                    {itemPair[2].isIrregular}
+                                </td>
+                                <td class={getAdjFormClass(itemPair[3])}>
+                                    {#if itemPair[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair[3].form}
+                                    {itemPair[3].isIrregular}
+                                </td>
+                            </tr>
+                        {/each}
+                        </tbody>
+                    </table>
+                {/if}
             {/each}
         </div>      <!-- right-panel  -->
     </div>      <!-- display-container  -->
 {/each}
-<!-- <pre>{JSON.stringify(Array.from(nounForms.entries()), null, 2)}</pre> -->
 
 <style>
     .prompt-container {
@@ -365,9 +473,17 @@
         padding: 20px;
         margin: 5px 0;
         column-gap: 50px;
+        min-width: 300px;
     }
 
-    .paradigm-table {
+    .noun-paradigm-table {
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+        margin-bottom: 50px;
+    }
+
+    .adj-paradigm-table {
         border-collapse: collapse;
         width: 100%;
         table-layout: fixed;
@@ -395,7 +511,7 @@
     }
 
     .col-form {
-        width: 250px;
+        width: 175px;
         padding-left: 25px;
         padding-right: 25px;
         border: 1px solid #e5e7eb;

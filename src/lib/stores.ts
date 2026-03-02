@@ -18,3 +18,8 @@ caseToHash.set('Instrumental', 'I');
 export const numberToHash = new Map<string, string>();
 numberToHash.set('Singular', 'Sg');
 numberToHash.set('Plural', 'Pl');
+
+export const genderToHash = new Map<string, string>();
+genderToHash.set('Masculine', 'm');
+genderToHash.set('Feminine', 'f');
+genderToHash.set('Neuter', 'n');

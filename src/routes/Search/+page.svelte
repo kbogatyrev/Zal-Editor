@@ -335,8 +335,8 @@
                     <thead>
                         <tr>
                             <th class="col-case"></th>
-                            <th class="col-form">Sg</th>
-                            <th class="col-form">Pl</th>
+                            <th class="col-head">Sg</th>
+                            <th class="col-head">Pl</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -357,7 +357,7 @@
                     {/if}
                 {#if lexProp['partOfSpeech'] == 'Adj'}
                     <!--  ADJ               -->
-                    <table class="noun-paradigm-table">
+                    <table class="adj-paradigm-table">
                         <colgroup>
                             <col class="col-case" span="1"/>
                             <col class="col-form" span="4"/>
@@ -365,10 +365,10 @@
                         <thead>
                         <tr>
                             <th class="col-case"></th>
-                            <th class="col-form">m</th>
-                            <th class="col-form">f</th>
-                            <th class="col-form">n</th>
-                            <th class="col-form">pl</th>
+                            <th class="col-head">m</th>
+                            <th class="col-head">f</th>
+                            <th class="col-head">n</th>
+                            <th class="col-head">Pl</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -494,20 +494,40 @@
         padding: 20px;
     }
 
-    .paradigm-table th {
-        /*        border: 1px solid #e5e7eb;   */
+    /*
+    .noun-paradigm-table th {
+                border: 1px solid #e5e7eb;
         text-align: center;
         padding-right: 25px;
-        /*        background-color: #f3f4f6;    */
+                background-color: #f3f4f6;
         color: gray;
         font-weight: normal;
     }
 
+    .adj-paradigm-table th {
+                border: 1px solid #e5e7eb;
+        text-align: center;
+        padding-right: 25px;
+                background-color: #f3f4f6;
+        color: gray;
+                font-weight: normal;
+    }
+    */
+
     .col-case {
-        width: 25px;
+        width: 100px;
 /*        background-color: #f3f4f6;    */
         color: gray;
         text-align: center;
+    }
+
+    .col-head {
+        width: 175px;
+        padding-left: 25px;
+        padding-right: 25px;
+        color: gray;
+        text-align: center;
+        font-weight: lighter;
     }
 
     .col-form {

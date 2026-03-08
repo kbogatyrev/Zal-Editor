@@ -3,7 +3,9 @@
     import { SvelteMap } from 'svelte/reactivity';
 
 // Props
-    import type {INounTable, INounTableEntry, IAdjTable, IAdjTableEntry, ILexeme, IInflection} from "$lib/types";
+    import type {INounTable, INounTableEntry, IAdjLongTable, IAdjLongTableEntry,
+                 IAdjShortTable, IAdjShortTableEntry, ILexeme, IInflection}
+        from "$lib/types";
 
     import { caseToHash, numberToHash, genderToHash } from "$lib/stores";
 
@@ -20,7 +22,8 @@
     let lexemes = $state([]);
     let homonymsVisible: boolean = $state(false);
     let nounTable: INounTable = $state({});
-    let adjTable: IAdjTable = $state({});
+    let adjLongTable: IAdjLongTable = $state({});
+    let adjShortTable: IAdjShortTable = $state({});
     let inputValue: string = $state('');
     let mapInflectionToLexeme = new Map<number, ILexeme>();
 
@@ -42,7 +45,7 @@
         return table;
     }
 
-    function getAdjTable()
+    function getAdjLongTable()
     {
         const declRowTemplate = { gender: '', number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
@@ -59,6 +62,25 @@
             }
             table.push(row);
         }
+        return table;
+    }
+
+    function getAdjShortTable()
+    {
+        const rowTemplate = { gender: '', number: '', isIrregular: '', isDifficult: false, isAssumed: false };
+
+        let table = [];
+        let row = [];
+        for (let col of ['m', 'f', 'n', 'Pl']) {
+            if (col === 'Pl') {
+                row.push({...rowTemplate, subParadigm: 'ShortAdj', number: 'Pl'});
+            }
+            else{
+                row.push({...rowTemplate, subParadigm: 'ShortAdj', gender: col, number: 'Sg'});
+            }
+        }
+        table.push(row);
+
         return table;
     }
 
@@ -85,7 +107,6 @@
                         findCell.isAssumed = true;
 //                        findCell.form = supQuestionMark + form['wordForm'];
 //                        console.log('*** Assumed form', findCell.form);
-
                     }
                 } else {
                     console.log('*** Cell not found');
@@ -100,11 +121,13 @@
         return "col-form";
     };
 
-    function handleAdjForms(inflectionId: number, jsonForms: Array<any>)
+    function handleAdjLongForms(inflectionId: number, jsonForms: Array<any>)
     {
-        adjTable[inflectionId] = getAdjTable();
-        console.log(adjTable[inflectionId])
+        adjLongTable[inflectionId] = getAdjLongTable();
+//        console.log(adjLongTable[inflectionId]);
         for (const [,form] of jsonForms.entries()) {
+            console.log(form);
+            let formSubParadigm: string = form['subParadigm'] || '';
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
@@ -113,13 +136,10 @@
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
             if (formCase !== '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f' || formGender === 'n')) {
-                findCell = adjTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
-                console.log('---------', findCell);
+                findCell = adjLongTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
             }
-            else if (formCase !== '' && formNumber == 'Pl' ) {
-                console.log('***********', formCase, formNumber, formGender);
-                findCell = adjTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
-//                console.log('***********', findCell);
+            else if (formCase !== '' && formNumber === 'Pl' ) {
+                findCell = adjLongTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
             }
             if (findCell) {
                 findCell.form = form['wordForm'];
@@ -135,15 +155,61 @@
             } else {
                 console.log('*** Cell not found');
             }
+
+//            findCell = adjTableShort[inflectionId].flat().find(item => item.gender === formGender && item.number === formNumber);
+//            console.log ('******* ', findCell);
         }
-        console.log (adjTable);
+        console.log (adjLongTable);
     }
 
-    const getAdjFormClass = (item: IAdjTableEntry) => {
+    function handleAdjShortForms(inflectionId: number, jsonForms: Array<any>)
+    {
+        adjShortTable[inflectionId] = getAdjShortTable();
+        for (const [,form] of jsonForms.entries()) {
+            let formSubParadigm: string = form['subParadigm'] || '';
+            let formNumber: string = numberToHash.get(form['number']) || '';
+            let formGender: string = genderToHash.get(form['gender']) || '';
+            let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
+            let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
+            let isAssumed: boolean = form['status'] === 'Assumed';
+            let findCell = undefined;
+            if (formNumber != '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f' || formGender === 'n')) {
+                findCell = adjShortTable[inflectionId].flat().find(item => item.gender === formGender && item.number==='Sg');
+            }
+            else if (formNumber === 'Pl' ) {
+                findCell = adjShortTable[inflectionId].flat().find(item => item.number === formNumber);
+            }
+            if (findCell) {
+                findCell.form = form['wordForm'];
+                if (isIrregular) {
+                    findCell.isIrregular = triangle;
+                }
+                if (isDifficult) {
+                    findCell.isDifficult = true;
+                }
+                if (isAssumed) {
+                    findCell.isAssumed = true;
+                }
+            } else {
+                console.log('*** Cell not found');
+            }
+            console.log(form);
+
+//            findCell = adjTableShort[inflectionId].flat().find(item => item.gender === formGender && item.number === formNumber);
+//            console.log ('******* ', findCell);
+        }
+        console.log ('==============================', adjShortTable);
+    }
+
+    const getAdjLongFormClass = (item: IAdjLongTableEntry) => {
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
 
+    const getAdjShortFormClass = (item: IAdjShortTableEntry) => {
+        if (item.isDifficult) return "col-difficult-form";
+        return "col-form";
+    };
 
     async function requestForms(inflectionId: number)
     {
@@ -172,12 +238,12 @@
                 handleNounForms(inflectionId, forms);
             }
             else if (lexeme['partOfSpeech'] === 'Adj') {
-                handleAdjForms(inflectionId, forms);
-            }
+                handleAdjLongForms(inflectionId, forms);
+                handleAdjShortForms(inflectionId, forms);
+           }
             else {
                 console.log('*** ', lexeme['partOfSpeech'], 'is not supported yet');
             }
-
         }
         catch (err: any) {
 //            error: string = err.message;
@@ -329,12 +395,12 @@
                     <!--  NOUN               -->
                     <table class="noun-paradigm-table">
                     <colgroup>
-                        <col class="col-case" span="1"/>
+                        <col class="col-noun-case" span="1"/>
                         <col class="col-form" span="2"/>
                     </colgroup>
-                    <thead>
+                    <thead class="paradigm-header">
                         <tr>
-                            <th class="col-case"></th>
+                            <th class="col-noun-case"></th>
                             <th class="col-head">Sg</th>
                             <th class="col-head">Pl</th>
                         </tr>
@@ -342,7 +408,7 @@
                     <tbody>
                         {#each nounTable[inflection.inflectionId] as itemPair}
                             <tr>
-                                <td class="col-case">{itemPair[0].case}</td>
+                                <td class="col-noun-case">{itemPair[0].case}</td>
                                 <td class={getNounFormClass(itemPair[0])}>
                                     {#if itemPair[0].isAssumed}<sup>*</sup>{/if}
                                     {itemPair[0].form}
@@ -359,12 +425,12 @@
                     <!--  ADJ               -->
                     <table class="adj-paradigm-table">
                         <colgroup>
-                            <col class="col-case" span="1"/>
+                            <col class="col-adj-case" span="1"/>
                             <col class="col-form" span="4"/>
                         </colgroup>
-                        <thead>
+                        <thead class="paradigm-header">
                         <tr>
-                            <th class="col-case"></th>
+                            <th class="col-adj-case"></th>
                             <th class="col-head">m</th>
                             <th class="col-head">f</th>
                             <th class="col-head">n</th>
@@ -372,28 +438,70 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {#each adjTable[inflection.inflectionId] as itemPair}
+                        {#each adjLongTable[inflection.inflectionId] as itemPair}
                             <tr>
-                                <td class="col-case">{itemPair[0].case}</td>
-                                <td class={getAdjFormClass(itemPair[0])}>
+                                <td class="col-adj-case">{itemPair[0].case}</td>
+                                <td class={getAdjLongFormClass(itemPair[0])}>
                                     {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {itemPair[0].form}
                                     {itemPair[0].isIrregular}
                                 </td>
-                                <td class={getAdjFormClass(itemPair[1])}>
+                                <td class={getAdjLongFormClass(itemPair[1])}>
                                     {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {itemPair[1].form}
                                     {itemPair[1].isIrregular}
                                 </td>
-                                <td class={getAdjFormClass(itemPair[2])}>
+                                <td class={getAdjLongFormClass(itemPair[2])}>
                                     {#if itemPair[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {itemPair[2].form}
                                     {itemPair[2].isIrregular}
                                 </td>
-                                <td class={getAdjFormClass(itemPair[3])}>
+                                <td class={getAdjLongFormClass(itemPair[3])}>
                                     {#if itemPair[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {itemPair[3].form}
                                     {itemPair[3].isIrregular}
+                                </td>
+                            </tr>
+                        {/each}
+                        </tbody>
+                        </table>
+                        <table class="adj-paradigm-table">
+                            <colgroup>
+                                <col class="col-adj-case" span="1"/>
+                                <col class="col-form" span="4"/>
+                            </colgroup>
+                            <thead class="paradigm-header">
+                            <tr>
+                                <th class="col-adj-case"></th>
+                                <th class="col-head">m</th>
+                                <th class="col-head">f</th>
+                                <th class="col-head">n</th>
+                                <th class="col-head">Pl</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                        {#each adjShortTable[inflection.inflectionId] as itemPair1}
+                            <tr>
+                                <td class="col-adj-case">Short</td>
+                                <td class={getAdjShortFormClass(itemPair1[0])}>
+                                    {#if itemPair1[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair1[0].form}
+                                    {itemPair1[0].isIrregular}
+                                </td>
+                                <td class={getAdjShortFormClass(itemPair1[1])}>
+                                    {#if itemPair1[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair1[1].form}
+                                    {itemPair1[1].isIrregular}
+                                </td>
+                                <td class={getAdjShortFormClass(itemPair1[2])}>
+                                    {#if itemPair1[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair1[2].form}
+                                    {itemPair1[2].isIrregular}
+                                </td>
+                                <td class={getAdjShortFormClass(itemPair1[3])}>
+                                    {#if itemPair1[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair1[3].form}
+                                    {itemPair1[3].isIrregular}
                                 </td>
                             </tr>
                         {/each}
@@ -481,6 +589,7 @@
         width: 100%;
         table-layout: fixed;
         margin-bottom: 50px;
+        margin-left: 30px;
     }
 
     .adj-paradigm-table {
@@ -514,9 +623,16 @@
     }
     */
 
-    .col-case {
-        width: 100px;
+    .col-noun-case {
+        width: 30px;
 /*        background-color: #f3f4f6;    */
+        color: gray;
+        text-align: center;
+    }
+
+    .col-adj-case {
+        width: 70px;
+        /*        background-color: #f3f4f6;    */
         color: gray;
         text-align: center;
     }
@@ -527,7 +643,19 @@
         padding-right: 25px;
         color: gray;
         text-align: center;
-        font-weight: lighter;
+        font-weight: normal;
+        border: none;
+    }
+
+    .paradigm-header {
+        border-collapse: collapse;
+        width: 175px;
+        padding-left: 25px;
+        padding-right: 25px;
+        color: gray;
+        text-align: center;
+        font-weight: normal;
+        border: none;
     }
 
     .col-form {
@@ -537,16 +665,18 @@
         border: 1px solid #e5e7eb;
     }
 
+    /*
     .col-difficult-form {
         width: 250px;
         padding-left: 25px;
         padding-right: 25px;
-        /*        padding-top: 2px;
+                padding-top: 2px;
                 padding-bottom: 1px;
-         */
+
         font-style: italic;
         color:gray;
         border: 1px solid #e5e7eb;
     }
+    */
 
 </style>

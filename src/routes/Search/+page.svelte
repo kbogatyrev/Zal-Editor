@@ -113,7 +113,7 @@
                 }
             }
         }
-        console.log (nounTable);
+//        console.log (nounTable);
     }
 
     const getNounFormClass = (item: INounTableEntry) => {
@@ -126,7 +126,7 @@
         adjLongTable[inflectionId] = getAdjLongTable();
 //        console.log(adjLongTable[inflectionId]);
         for (const [,form] of jsonForms.entries()) {
-            console.log(form);
+//            console.log(form);
             let formSubParadigm: string = form['subParadigm'] || '';
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -155,11 +155,17 @@
             } else {
                 console.log('*** Cell not found');
             }
-
-//            findCell = adjTableShort[inflectionId].flat().find(item => item.gender === formGender && item.number === formNumber);
 //            console.log ('******* ', findCell);
         }
-        console.log (adjLongTable);
+
+        let gSgM = adjLongTable[inflectionId].flat().find(item => item.case === 'G' && item.gender === 'm' && item.number==='Sg');
+        let aAnimSgM = adjLongTable[inflectionId].flat().find(item => item.case === 'A (anim)' && item.gender === 'm' && item.number==='Sg');
+        aAnimSgM.form = gSgM.form;
+
+        let gPl = adjLongTable[inflectionId].flat().find(item => item.case === 'G' && item.number==='Pl');
+        let aAnimPl = adjLongTable[inflectionId].flat().find(item => item.case === 'A (anim)' && item.number==='Pl');
+        aAnimPl.form = gPl.form;
+
     }
 
     function handleAdjShortForms(inflectionId: number, jsonForms: Array<any>)
@@ -193,12 +199,12 @@
             } else {
                 console.log('*** Cell not found');
             }
-            console.log(form);
+//            console.log(form);
 
 //            findCell = adjTableShort[inflectionId].flat().find(item => item.gender === formGender && item.number === formNumber);
 //            console.log ('******* ', findCell);
         }
-        console.log ('==============================', adjShortTable);
+//        console.log ('==============================', adjShortTable);
     }
 
     const getAdjLongFormClass = (item: IAdjLongTableEntry) => {

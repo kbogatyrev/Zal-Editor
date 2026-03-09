@@ -166,6 +166,7 @@
         let aAnimPl = adjLongTable[inflectionId].flat().find(item => item.case === 'A (anim)' && item.number==='Pl');
         aAnimPl.form = gPl.form;
 
+//        console.log ('==============================', adjLongTable);
     }
 
     function handleAdjShortForms(inflectionId: number, jsonForms: Array<any>)
@@ -444,28 +445,44 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {#each adjLongTable[inflection.inflectionId] as itemPair}
+                        {#each adjLongTable[inflection.inflectionId] as item}
                             <tr>
-                                <td class="col-adj-case">{itemPair[0].case}</td>
-                                <td class={getAdjLongFormClass(itemPair[0])}>
-                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[0].form}
-                                    {itemPair[0].isIrregular}
+                                <td class="col-adj-case">{item[0].case}</td>
+                                <td class={getAdjLongFormClass(item[0])}>
+                                    {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {item[0].form}
+                                    {item[0].isIrregular}
                                 </td>
-                                <td class={getAdjLongFormClass(itemPair[1])}>
-                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[1].form}
-                                    {itemPair[1].isIrregular}
-                                </td>
-                                <td class={getAdjLongFormClass(itemPair[2])}>
-                                    {#if itemPair[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[2].form}
-                                    {itemPair[2].isIrregular}
-                                </td>
-                                <td class={getAdjLongFormClass(itemPair[3])}>
-                                    {#if itemPair[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[3].form}
-                                    {itemPair[3].isIrregular}
+                                {#if item[1].case === 'A' && item[1].number === 'Sg'}
+                                    <td class={getAdjLongFormClass(item[1])} rowspan="2">
+                                        {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {item[1].form}
+                                        {item[1].isIrregular}
+                                    </td>
+                                {:else if item[1].case !== 'A (anim)'}
+                                    <td class={getAdjLongFormClass(item[1])}>
+                                        {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {item[1].form}
+                                        {item[1].isIrregular}
+                                    </td>
+                                {/if}
+                                {#if item[2].case === 'A' && item[2].number === 'Sg'}
+                                    <td class={getAdjLongFormClass(item[2])} rowspan="2">
+                                        {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {item[2].form}
+                                        {item[2].isIrregular}
+                                    </td>
+                                {:else if item[2].case !== 'A (anim)'}
+                                    <td class={getAdjLongFormClass(item[2])}>
+                                        {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {item[2].form}
+                                        {item[2].isIrregular}
+                                    </td>
+                                {/if}
+                                <td class={getAdjLongFormClass(item[3])}>
+                                    {#if item[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {item[3].form}
+                                    {item[3].isIrregular}
                                 </td>
                             </tr>
                         {/each}
@@ -486,28 +503,28 @@
                             </tr>
                             </thead>
                             <tbody>
-                        {#each adjShortTable[inflection.inflectionId] as itemPair1}
+                        {#each adjShortTable[inflection.inflectionId] as item}
                             <tr>
                                 <td class="col-adj-case">Short</td>
-                                <td class={getAdjShortFormClass(itemPair1[0])}>
-                                    {#if itemPair1[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair1[0].form}
-                                    {itemPair1[0].isIrregular}
+                                <td class={getAdjShortFormClass(item[0])}>
+                                    {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {item[0].form}
+                                    {item[0].isIrregular}
                                 </td>
-                                <td class={getAdjShortFormClass(itemPair1[1])}>
-                                    {#if itemPair1[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair1[1].form}
-                                    {itemPair1[1].isIrregular}
+                                <td class={getAdjShortFormClass(item[1])}>
+                                    {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {item[1].form}
+                                    {item[1].isIrregular}
                                 </td>
-                                <td class={getAdjShortFormClass(itemPair1[2])}>
-                                    {#if itemPair1[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair1[2].form}
-                                    {itemPair1[2].isIrregular}
+                                <td class={getAdjShortFormClass(item[2])}>
+                                    {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {item[2].form}
+                                    {item[2].isIrregular}
                                 </td>
-                                <td class={getAdjShortFormClass(itemPair1[3])}>
-                                    {#if itemPair1[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair1[3].form}
-                                    {itemPair1[3].isIrregular}
+                                <td class={getAdjShortFormClass(item[3])}>
+                                    {#if item[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {item[3].form}
+                                    {item[3].isIrregular}
                                 </td>
                             </tr>
                         {/each}

@@ -5,7 +5,7 @@
 // Props
     import type { INounTable, INounTableEntry, IAdjLongTable, IAdjLongTableEntry,
                   IAdjShortTable, IAdjShortTableEntry,
-                  IComparativesTableEntry, IComparativesTable,
+                  IComparativesEntry, IComparatives,
                   ILexeme, IInflection}
         from "$lib/types";
 
@@ -26,7 +26,7 @@
     let nounTable: INounTable = $state({});
     let adjLongTable: IAdjLongTable = $state({});
     let adjShortTable: IAdjShortTable = $state({});
-    let comparativesTable: IComparativesTable = $state({});
+    let comparatives: IComparatives = $state({});
     let inputValue: string = $state('');
     let mapInflectionToLexeme = new Map<number, ILexeme>();
 
@@ -70,7 +70,7 @@
 
     function getAdjShortTable()
     {
-        const rowTemplate = { gender: '', number: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        const rowTemplate = { gender: '', number: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
         let row = [];
@@ -89,18 +89,10 @@
         return table;
     }
 
-    function getComparativesTable()
+    function getComparatives()
     {
-        const rowTemplate = { isIrregular: '', isDifficult: false, isAssumed: false };
-
-        let table = [];
-        let row = [];
-        row.push({...rowTemplate, subParadigm: 'Comparative'});
-        table.push(row);
-
-        console.log ('Comparatives template', table);
-
-        return table;
+        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        return rowTemplate;
     }
 
     function handleNounForms(inflectionId: number, jsonForms: Array<any>)
@@ -143,9 +135,7 @@
     function handleAdjLongForms(inflectionId: number, jsonForms: Array<any>)
     {
         adjLongTable[inflectionId] = getAdjLongTable();
-//        console.log(adjLongTable[inflectionId]);
         for (const [,form] of jsonForms.entries()) {
-//            console.log(form);
             let formSubParadigm: string = form['subParadigm'] || '';
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -227,34 +217,23 @@
 //        console.log ('==============================', adjShortTable);
     }
 
-    function handleComapratives(inflectionId: number, jsonForms: Array<any>)
+    function handleComparatives(inflectionId: number, jsonForms: Array<any>)
     {
-        comparativesTable[inflectionId] = getComparativesTable();
+        comparatives[inflectionId] = getComparatives();
         for (const [,form] of jsonForms.entries()) {
             let formSubParadigm: string = form['subParadigm'] || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
-            let findCell = undefined;
+            let entry = undefined;
             if (formSubParadigm === 'Comparative') {
-                findCell = comparativesTable[inflectionId].flat().find(item => item.subParadigm === formSubParadigm);
-            }
-            if (findCell) {
-                findCell.form = form['wordForm'];
-                if (isIrregular) {
-                    findCell.isIrregular = triangle;
-                }
-                if (isDifficult) {
-                    findCell.isDifficult = true;
-                }
-                if (isAssumed) {
-                    findCell.isAssumed = true;
-                }
-            } else {
-                console.log('*** Comparative cell not found');
+                entry = comparatives[inflectionId];
+                entry.form = form['wordForm'];
+                entry.isIrregular = isIrregular ? triangle : '';
+                entry.isDifficult = isDifficult;
+                entry.isAssumed = isAssumed;
             }
         }
-        console.log ('==============================', comparativesTable);
     }
 
     const getAdjLongFormClass = (item: IAdjLongTableEntry) => {
@@ -267,8 +246,8 @@
         return "col-form";
     };
 
-    const getComparativeClass = (item: IComparativesTableEntry) => {
-        if (item.isDifficult) return "comparative-difficult-form";
+    const getComparativeClass = (item: IComparativesEntry | undefined) => {
+        if (!item || item.isDifficult) return "comparative-difficult-form";
         return "comparative-form";
     };
 
@@ -276,7 +255,6 @@
     {
         console.log('Requesting forms for inflection ID: ' + inflectionId);
         try {
-//            console.log('Input value: ' + inputValue);
             const response = await fetch(`http://localhost:8088/forms?inflection-id=${inflectionId}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -301,7 +279,7 @@
             else if (lexeme['partOfSpeech'] === 'Adj') {
                 handleAdjLongForms(inflectionId, forms);
                 handleAdjShortForms(inflectionId, forms);
-                handleComapratives(inflectionId, forms);
+                handleComparatives(inflectionId, forms);
            }
             else {
                 console.log('*** ', lexeme['partOfSpeech'], 'is not supported yet');
@@ -472,7 +450,7 @@
                             <tr>
                                 <td class="col-noun-case">{itemPair[0].case}</td>
                                 <td class={getNounFormClass(itemPair[0])}>
-                                    {#if itemPair[0].isAssumed}<sup>*</sup>{/if}
+                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {itemPair[0].form}
                                     {itemPair[0].isIrregular}
                                 </td>
@@ -585,16 +563,24 @@
                         {/each}
                         </tbody>
                     </table>
-                    {#each comparativesTable[inflection.inflectionId] as item}
+                    {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
+                    <table class="comparative-table">
+                        <colgroup>
+                            <col class="col-comparative-name" span="1"/>
+                            <col class="col-comparative" span="4"/>
+                        </colgroup>
+                        <tbody>
                     <tr>
                         <td class="col-comparative-name">Comparative</td>
-                        <td class={getComparativeClass(item[0])}>
-                            {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                            {item[0].form}
-                            {item[0].isIrregular}
+                        <td class={getComparativeClass(comparatives[inflection.inflectionId])} colspan="4">
+                            {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                            {comparatives[inflection.inflectionId].form}
+                            {comparatives[inflection.inflectionId].isIrregular}
                         </td>
                     </tr>
-                    {/each}
+                    </tbody>
+                    </table>
+                    {/if}
                 {/if}
             {/each}
         </div>      <!-- right-panel  -->
@@ -719,14 +705,15 @@
     }
 
     .col-adj-case {
-        width: 70px;
+        width: 100px;
         /*        background-color: #f3f4f6;    */
         color: gray;
         text-align: center;
+        border: 1px solid #e5e7eb;
     }
 
     .col-comparative-name {
-        width: 200px;
+        width: 100px;
         /*        background-color: #f3f4f6;    */
         color: gray;
         text-align: right;
@@ -739,7 +726,7 @@
         color: gray;
         text-align: center;
         font-weight: normal;
-        border: none;
+/*        border: none;   */
     }
 
     .paradigm-header {
@@ -750,7 +737,7 @@
         color: gray;
         text-align: center;
         font-weight: normal;
-        border: none;
+/*        border: none;    */
     }
 
     .col-form {
@@ -761,10 +748,11 @@
     }
 
     .comparative-form {
-        width: 250px;
         padding-left: 25px;
         padding-right: 25px;
-        border: 1px solid #e5e7eb;
+/*        border: 1px solid #e5e7eb;    */
+        border-collapse: collapse;
+        text-align: left;
     }
 
     comparative-difficult-form {
@@ -776,7 +764,8 @@
 
         font-style: italic;
         color:gray;
-        border: 1px solid #e5e7eb;
+/*        border: 1px solid #e5e7eb;  */
+        border-collapse: collapse;
     }
 
     .col-difficult-form {
@@ -790,5 +779,4 @@
         color:gray;
         border: 1px solid #e5e7eb;
     }
-
 </style>

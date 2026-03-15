@@ -6,10 +6,12 @@
     import type { INounTable, INounTableEntry, IAdjLongTable, IAdjLongTableEntry,
                   IAdjShortTable, IAdjShortTableEntry,
                   IComparativesEntry, IComparatives,
+                  IPresentTenseTableEntry, IPresentTenseTable,
                   ILexeme, IInflection}
         from "$lib/types";
 
-    import { caseToHash, numberToHash, genderToHash } from "$lib/stores";
+    import {caseToHash, numberToHash, genderToHash} from "$lib/stores";
+    import {presentTenseToPerson} from "$lib/stores.ts";
 
     function preventDefault(fn: Function) {
         return (e: Event) => {
@@ -28,6 +30,7 @@
     let adjShortTable: IAdjShortTable = $state({});
     let comparatives: IComparatives = $state({});
     let inputValue: string = $state('');
+    let presentTenseTable: IPresentTenseTable = $state({});
     let mapInflectionToLexeme = new Map<number, ILexeme>();
 
     const triangle: string = '\u25B3';
@@ -84,7 +87,7 @@
         }
         table.push(row);
 
-        console.log ('ShortAdj template', table);
+//        console.log ('ShortAdj template', table);
 
         return table;
     }
@@ -93,6 +96,22 @@
     {
         const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         return rowTemplate;
+    }
+
+    function getPresentTenseTable()
+    {
+        const rowTemplate = { number: '', person: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+
+        let table = [];
+        for (let personName of ['P1', 'P2', 'P3']) {
+            let row = [];
+            for (let numberName of ['Sg', 'Pl']) {
+                row.push({...rowTemplate, number: numberName, person: personName});
+            }
+            table.push(row);
+        }
+        console.log ('Present tense template', table);
+        return table;
     }
 
     function handleNounForms(inflectionId: number, jsonForms: Array<any>)
@@ -136,7 +155,6 @@
     {
         adjLongTable[inflectionId] = getAdjLongTable();
         for (const [,form] of jsonForms.entries()) {
-            let formSubParadigm: string = form['subParadigm'] || '';
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
@@ -182,7 +200,6 @@
     {
         adjShortTable[inflectionId] = getAdjShortTable();
         for (const [,form] of jsonForms.entries()) {
-            let formSubParadigm: string = form['subParadigm'] || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
@@ -236,6 +253,40 @@
         }
     }
 
+    function handlePresentTenseForms(inflectionId: number, jsonForms: Array<any>)
+    {
+        presentTenseTable[inflectionId] = getPresentTenseTable();
+        for (const [,form] of jsonForms.entries()) {
+            let formSubParadigm: string = form['subParadigm'] || '';
+            if (formSubParadigm !== 'PresentTense') continue;
+
+            let formPerson: string = presentTenseToPerson.get(form['person']) || '';
+            let formNumber: string = numberToHash.get(form['number']) || '';
+            let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
+            let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
+            let isAssumed: boolean = form['status'] !== undefined && form['status'] === 'Assumed';
+            if (formPerson !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
+                const findCell = presentTenseTable[inflectionId].flat().find(item => item.person === formPerson && item.number === formNumber);
+                if (findCell) {
+                    findCell.form = form['wordForm'];
+                    if (isIrregular) {
+                        findCell.isIrregular = triangle;
+                    }
+                    if (isDifficult) {
+                        findCell.isDifficult = true;
+                    }
+                    if (isAssumed) {
+                        findCell.isAssumed = true;
+//                        findCell.form = supQuestionMark + form['wordForm'];
+//                        console.log('*** Assumed form', findCell.form);
+                    }
+                } else {
+                    console.log('*** Cell not found');
+                }
+            }
+        }
+    }
+
     const getAdjLongFormClass = (item: IAdjLongTableEntry) => {
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
@@ -247,8 +298,13 @@
     };
 
     const getComparativeClass = (item: IComparativesEntry | undefined) => {
-        if (!item || item.isDifficult) return "comparative-difficult-form";
+        if (!item || item.isDifficult) return "col-difficult-form";
         return "comparative-form";
+    };
+
+    const getPresentTenseClass = (item: IPresentTenseTableEntry | undefined) => {
+        if (!item || item.isDifficult) return "col-difficult-form";
+        return "col-form";
     };
 
     async function requestForms(inflectionId: number)
@@ -281,9 +337,12 @@
                 handleAdjShortForms(inflectionId, forms);
                 handleComparatives(inflectionId, forms);
            }
-            else {
+           else if (lexeme['partOfSpeech'] === 'Verb') {
+               handlePresentTenseForms(inflectionId, forms);
+           }
+           else {
                 console.log('*** ', lexeme['partOfSpeech'], 'is not supported yet');
-            }
+           }
         }
         catch (err: any) {
 //            error: string = err.message;
@@ -455,7 +514,10 @@
                                     {itemPair[0].isIrregular}
                                 </td>
                                 <td class={getNounFormClass(itemPair[1])}>
-                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}{itemPair[1].form}  {itemPair[1].isIrregular}</td>
+                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair[1].form}
+                                    {itemPair[1].isIrregular}
+                                </td>
                             </tr>
                         {/each}
                     </tbody>
@@ -463,6 +525,7 @@
                     {/if}
                 {#if lexProp['partOfSpeech'] == 'Adj'}
                     <!--  ADJ               -->
+                    <div class="section-heading">Long Forms</div>
                     <table class="adj-paradigm-table">
                         <colgroup>
                             <col class="col-adj-case" span="1"/>
@@ -521,6 +584,7 @@
                         {/each}
                         </tbody>
                         </table>
+                        <div class="section-heading">Short Forms</div>
                         <table class="adj-paradigm-table">
                             <colgroup>
                                 <col class="col-adj-case" span="1"/>
@@ -563,6 +627,7 @@
                         {/each}
                         </tbody>
                     </table>
+                    <div class="section-heading">Comparative</div>
                     {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
                     <table class="comparative-table">
                         <colgroup>
@@ -581,6 +646,37 @@
                     </tbody>
                     </table>
                     {/if}
+                {/if}         <!-- ADJ -->
+                {#if lexProp['partOfSpeech'] == 'Verb'}
+                    <!--  VERB -->
+                    <div class="section-heading">Present Tense</div>
+                    <table class="present-tense-paradigm">
+                        <colgroup>
+                            <col class="col-present-tense-name" span="1"/>
+                            <col class="col-form" span="2"/>
+                        </colgroup>
+                        <thead class="paradigm-header">
+                        <tr>
+                            <th class="col-present-tense-person"></th>
+                            <th class="col-head">Sg</th>
+                            <th class="col-head">Pl</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {#each presentTenseTable[inflection.inflectionId] as itemPair}
+                            <tr>
+                                <td class="col-present-tense-name">{itemPair[0].case}</td>
+                                <td class={getPresentTenseClass(itemPair[0])}>
+                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair[0].form}
+                                    {itemPair[0].isIrregular}
+                                </td>
+                                <td class={getPresentTenseClass(itemPair[1])}>
+                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}{itemPair[1].form}  {itemPair[1].isIrregular}</td>
+                            </tr>
+                        {/each}
+                        </tbody>
+                    </table>
                 {/if}
             {/each}
         </div>      <!-- right-panel  -->
@@ -656,6 +752,14 @@
         margin: 5px 0;
         column-gap: 50px;
         min-width: 300px;
+    }
+
+    .section-heading {
+        font-weight: normal;
+        font-size: large;
+        text-align: center;
+        color: gray;
+        margin-bottom: 20px;
     }
 
     .noun-paradigm-table {

@@ -23,3 +23,9 @@ export const genderToHash = new Map<string, string>();
 genderToHash.set('Masculine', 'm');
 genderToHash.set('Feminine', 'f');
 genderToHash.set('Neuter', 'n');
+
+export const presentTenseToPerson = new Map<string, string>();
+presentTenseToPerson.set('1stPerson', 'P1');
+presentTenseToPerson.set('2ndPerson', 'P2');
+presentTenseToPerson.set('3rdPerson', 'P3');
+

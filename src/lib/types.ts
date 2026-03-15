@@ -48,7 +48,7 @@ export interface INounTable {
     [inflectionId: number]: INounTableEntry[][];
 }
 
-export interface IAdjTableEntry
+export interface IAdjLongTableEntry
 {
     gender: string;
     number: string;
@@ -59,6 +59,46 @@ export interface IAdjTableEntry
     isAssumed: boolean;
 }
 
-export interface IAdjTable {
-    [inflectionId: number]: IAdjTableEntry[][];
+export interface IAdjLongTable {
+    [inflectionId: number]: IAdjLongTableEntry[][];
+}
+
+export interface IAdjShortTableEntry
+{
+    gender: string;
+    number: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface IAdjShortTable {
+    [inflectionId: number]: IAdjShortTableEntry[][];
+}
+
+export interface IComparativesEntry
+{
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface IComparatives {
+    [inflectionId: number]: IComparativesEntry;
+}
+
+export interface IPresentTenseTableEntry
+{
+    number: string;
+    person: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface IPresentTenseTable {
+    [inflectionId: number]: IPresentTenseTable[][];
 }

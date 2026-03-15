@@ -587,12 +587,12 @@
                         <div class="section-heading">Short Forms</div>
                         <table class="adj-paradigm-table">
                             <colgroup>
-                                <col class="col-adj-case" span="1"/>
+<!--                                <col class="col-head-invisible" span="1"/>       -->
                                 <col class="col-form" span="4"/>
                             </colgroup>
                             <thead class="paradigm-header">
                             <tr>
-                                <th class="col-adj-case"></th>
+<!--                                <th class="col-invisible"></th>     -->
                                 <th class="col-head">m</th>
                                 <th class="col-head">f</th>
                                 <th class="col-head">n</th>
@@ -602,7 +602,7 @@
                             <tbody>
                         {#each adjShortTable[inflection.inflectionId] as item}
                             <tr>
-                                <td class="col-adj-case">Short</td>
+<!--                                <td class="col-invisible"></td>         -->
                                 <td class={getAdjShortFormClass(item[0])}>
                                     {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {item[0].form}
@@ -631,12 +631,12 @@
                     {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
                     <table class="comparative-table">
                         <colgroup>
-                            <col class="col-comparative-name" span="1"/>
+                            <col class="col-invisible" span="1"/>
                             <col class="col-comparative" span="4"/>
                         </colgroup>
                         <tbody>
                     <tr>
-                        <td class="col-comparative-name">Comparative</td>
+                        <td class="col-invisible"></td>
                         <td class={getComparativeClass(comparatives[inflection.inflectionId])} colspan="4">
                             {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                             {comparatives[inflection.inflectionId].form}
@@ -759,7 +759,7 @@
         font-size: large;
         text-align: center;
         color: gray;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     }
 
     .noun-paradigm-table {
@@ -816,11 +816,10 @@
         border: 1px solid #e5e7eb;
     }
 
-    .col-comparative-name {
+    .col-invisible {
         width: 100px;
-        /*        background-color: #f3f4f6;    */
-        color: gray;
-        text-align: right;
+        border-collapse: collapse;
+        border: none;
     }
 
     .col-head {
@@ -831,6 +830,17 @@
         text-align: center;
         font-weight: normal;
 /*        border: none;   */
+    }
+
+    .col-head-invisible {
+        width: 175px;
+        padding-left: 25px;
+        padding-right: 25px;
+        color: gray;
+        text-align: center;
+        font-weight: normal;
+        border: none;
+        border-collapse: collapse;
     }
 
     .paradigm-header {

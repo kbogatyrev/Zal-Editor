@@ -102,3 +102,30 @@ export interface IPresentTenseTableEntry
 export interface IPresentTenseTable {
     [inflectionId: number]: IPresentTenseTable[][];
 }
+
+export interface IPastTenseTableEntry
+{
+    number: string;
+    person: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface IPastTenseTable {
+    [inflectionId: number]: IPastTenseTable[][];
+}
+
+export interface IImperativeTableEntry
+{
+    number: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface IImperativeTable {
+    [inflectionId: number]: IImperativeTable[][];
+}

@@ -129,3 +129,30 @@ export interface IImperativeTableEntry
 export interface IImperativeTable {
     [inflectionId: number]: IImperativeTable[][];
 }
+
+export interface IBaseParticiplesTableEntry
+{
+    subParadigm: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface IBaseParticiplesTable {
+    [inflectionId: number]: IBaseParticiplesTableEntry[][];
+}
+
+export interface IParticipleTableEntry {
+    gender: string;
+    number: string;
+    case: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface IParticipleTable {
+    [inflectionId: number]: IParticipleTableEntry[][];
+}

@@ -25,7 +25,7 @@ genderToHash.set('Feminine', 'f');
 genderToHash.set('Neuter', 'n');
 
 export const presentTenseToPerson = new Map<string, string>();
-presentTenseToPerson.set('1stPerson', 'P1');
-presentTenseToPerson.set('2ndPerson', 'P2');
-presentTenseToPerson.set('3rdPerson', 'P3');
+presentTenseToPerson.set('1stPerson', '1');
+presentTenseToPerson.set('2ndPerson', '2');
+presentTenseToPerson.set('3rdPerson', '3');
 

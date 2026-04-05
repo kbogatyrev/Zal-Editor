@@ -43,7 +43,7 @@
     const triangle: string = '\u25B3';
     const largeAsterisk = '\uFF0A';
 
-    function getNounTable()
+    function getNounTableTemplate()
     {
         const declRowTemplate = { number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
@@ -58,7 +58,7 @@
         return table;
     }
 
-    function getAdjLongTable()
+    function getAdjLongTableTemplate()
     {
         const declRowTemplate = { gender: '', number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
@@ -78,7 +78,7 @@
         return table;
     }
 
-    function getAdjShortTable()
+    function getAdjShortTableTemplate()
     {
         const rowTemplate = { gender: '', number: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
@@ -99,13 +99,13 @@
         return table;
     }
 
-    function getComparatives()
+    function getComparativesTableTemplate()
     {
         const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         return rowTemplate;
     }
 
-    function getPresentTenseTable()
+    function getPresentTenseTableTemplate()
     {
         const rowTemplate = { number: '', person: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
@@ -120,7 +120,7 @@
         return table;
     }
 
-    function getPastTenseTable()
+    function getPastTenseTableTemplate()
     {
         const rowTemplate = { gender: '', number: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
@@ -141,7 +141,7 @@
         return table;
     }
 
-    function getImperativeTable()
+    function getImperativeTableTemplate()
     {
         const rowTemplate = { number: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
@@ -154,7 +154,7 @@
         return table;
     }
 
-    function getBaseParticiplesTable()
+    function getBaseParticiplesTableTemplate()
     {
         const rowTemplate = { subParadigm: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
@@ -172,7 +172,7 @@
 
     function handleNounForms(inflectionId: number, jsonForms: Array<any>)
     {
-        nounTable[inflectionId] = getNounTable();
+        nounTable[inflectionId] = getNounTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -209,7 +209,7 @@
 
     function handleAdjLongForms(inflectionId: number, jsonForms: Array<any>)
     {
-        adjLongTable[inflectionId] = getAdjLongTable();
+        adjLongTable[inflectionId] = getAdjLongTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -254,7 +254,7 @@
 
     function handleAdjShortForms(inflectionId: number, jsonForms: Array<any>)
     {
-        adjShortTable[inflectionId] = getAdjShortTable();
+        adjShortTable[inflectionId] = getAdjShortTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
@@ -292,7 +292,7 @@
 
     function handleComparatives(inflectionId: number, jsonForms: Array<any>)
     {
-        comparatives[inflectionId] = getComparatives();
+        comparatives[inflectionId] = getComparativesTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             let formSubParadigm: string = form['subParadigm'] || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
@@ -311,7 +311,7 @@
 
     function handlePresentTenseForms(inflectionId: number, jsonForms: Array<any>)
     {
-        presentTenseTable[inflectionId] = getPresentTenseTable();
+        presentTenseTable[inflectionId] = getPresentTenseTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             let formSubParadigm: string = form['subParadigm'] || '';
             if (formSubParadigm !== 'PresentTense') continue;
@@ -345,7 +345,7 @@
 
     function handlePastTenseForms(inflectionId: number, jsonForms: Array<any>)
     {
-        pastTenseTable[inflectionId] = getPastTenseTable();
+        pastTenseTable[inflectionId] = getPastTenseTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             if (form['subParadigm'] !== 'PastTense') continue;
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -381,7 +381,7 @@
 
     function handleImperativeForms(inflectionId: number, jsonForms: Array<any>)
     {
-        imperativeTable[inflectionId] = getImperativeTable();
+        imperativeTable[inflectionId] = getImperativeTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             if (form['subParadigm'] !== 'Imperative') continue;
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -412,8 +412,7 @@
     function handleBaseParticiples(inflectionId: number, jsonForms: Array<any>)
     {
         console.log(jsonForms);
-        baseParticiplesTable[inflectionId] = getBaseParticiplesTable();
-        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!', baseParticiplesTable[inflectionId]);
+        baseParticiplesTable[inflectionId] = getBaseParticiplesTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -722,6 +721,7 @@
                 <!--  ADJECTIVES          -->
                 {#if lexProp['partOfSpeech'] == 'Adj'}
                     <!--  ADJ               -->
+                    {#snippet longForms()}
                     <div class="section-heading">Long Forms</div>
                     <table class="paradigm-table">
                         <colgroup>
@@ -781,6 +781,9 @@
                         {/each}
                         </tbody>
                         </table>
+                        {/snippet}
+
+                        {#snippet shortForms()}
                         <div class="section-heading">Short Forms</div>
                         <table class="paradigm-table">
                             <colgroup>
@@ -821,6 +824,9 @@
                         {/each}
                         </tbody>
                     </table>
+                    {/snippet}
+
+                    {#snippet comparative()}
                     <div class="section-heading">Comparative</div>
                     {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
                         <div class={getComparativeClass(comparatives[inflection.inflectionId])} />
@@ -828,6 +834,10 @@
                             {comparatives[inflection.inflectionId].form}
                             {comparatives[inflection.inflectionId].isIrregular}
                     {/if}
+                    {/snippet}
+                    {@render longForms()}
+                    {@render shortForms()}
+                    {@render comparative()}
                 {/if}
                 <!-- END ADJ -->
 

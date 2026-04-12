@@ -37,7 +37,9 @@
     let presentTenseTable: IPresentTenseTable = $state({});
     let pastTenseTable: IPastTenseTable = $state({});
     let imperativeTable: IImperativeTable = $state({});
-    let baseParticiplesTable: IBaseParticiplesTable = $state({});
+    let partPresActBaseTable:  IBaseParticiplesTable = $state({});
+    let partPresActTable: IAdjLongTable = $state({});
+
     let mapInflectionToLexeme = new Map<number, ILexeme>();
 
     const triangle: string = '\u25B3';
@@ -154,20 +156,10 @@
         return table;
     }
 
-    function getBaseParticiplesTableTemplate()
+    function getBaseParticiplesTableTemplate(subParadigm: string)
     {
-        const rowTemplate = { subParadigm: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
-        let table = [];
-        for (const sp of ['PartPresAct',
-                          'PartPresPassLong',
-                          'AdverbialPresent',
-                          'PartPastAct',
-                          'AdverbialPast',
-                          'PartPastPassLong']) {
-            const row = rowTemplate;
-            table.push({...rowTemplate, subParadigm: sp});
-        }
-        return table;
+        const rowTemplate = { subParadigm: subParadigm, form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        return {...rowTemplate};
     }
 
     function handleNounForms(inflectionId: number, jsonForms: Array<any>)
@@ -207,10 +199,11 @@
         return "col-form";
     };
 
-    function handleAdjLongForms(inflectionId: number, jsonForms: Array<any>)
+    function handleLongForms(inflectionId: number, subParadigm: string, jsonForms: Array<any>)
     {
         adjLongTable[inflectionId] = getAdjLongTableTemplate();
         for (const [,form] of jsonForms.entries()) {
+            if (subParadigm !== form['subParadigm']) continue;
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
@@ -409,10 +402,11 @@
         }
     }
 
-    function handleBaseParticiples(inflectionId: number, jsonForms: Array<any>)
+    function handlePartPresAct(inflectionId: number, jsonForms: Array<any>)
     {
         console.log(jsonForms);
-        baseParticiplesTable[inflectionId] = getBaseParticiplesTableTemplate();
+        partPresActBaseTable[inflectionId] = getBaseParticiplesTableTemplate('PartPresAct');
+        console.log('---------------------- ', partPresActBaseTable[inflectionId]);
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -420,20 +414,18 @@
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
-            if (['PartPresAct', 'PartPresPassLong', 'PartPastAct', 'PartPastPassLong'].includes(form['subParadigm'])
+            if ('PartPresAct' === form['subParadigm']
                 && formGender === 'm' &&  formNumber === 'Sg' && formCase === 'N') {
-                const findCell =
-                    baseParticiplesTable[inflectionId].flat().find(item => item.subParadigm === form['subParadigm']);
-                if (findCell) {
-                    findCell.form = form['wordForm'];
-                    if (isIrregular) {
-                        findCell.isIrregular = triangle;
+                let cell = partPresActBaseTable[inflectionId];
+                if (cell) {
+                    cell.form = form['wordForm'];
+                    isIrregular ? triangle : '';
                     }
                     if (isDifficult) {
-                        findCell.isDifficult = true;
+                        cell.isDifficult = true;
                     }
                     if (isAssumed) {
-                        findCell.isAssumed = true;
+                        cell.isAssumed = true;
 //                        findCell.form = supQuestionMark + form['wordForm'];
 //                        console.log('*** Assumed form', findCell.form);
                     }
@@ -441,30 +433,8 @@
                 {
                     console.log('*** Cell not found');
                 }
-            }
-            else if (['AdverbialPresent', 'AdverbialPast'].includes(form['subParadigm']))
-            {
-                const findCell =
-                    baseParticiplesTable[inflectionId].flat().find(item => item.subParadigm === form['subParadigm']);
-                if (findCell) {
-                    findCell.form = form['wordForm'];
-                    if (isIrregular) {
-                        findCell.isIrregular = triangle;
-                    }
-                    if (isDifficult) {
-                        findCell.isDifficult = true;
-                    }
-                    if (isAssumed) {
-                        findCell.isAssumed = true;
-//                        findCell.form = supQuestionMark + form['wordForm'];
-//                        console.log('*** Assumed form', findCell.form);
-                    }
-                } else {
-                    console.log('*** Cell not found');
-                }
-            }
         }
-        console.log ('============================================== Base participles', baseParticiplesTable);
+        console.log ('============================================== Pres act participles', partPresActBaseTable);
     }
 
     const getAdjLongFormClass = (item: IAdjLongTableEntry) => {
@@ -528,7 +498,7 @@
                 handleNounForms(inflectionId, forms);
             }
             else if (lexeme['partOfSpeech'] === 'Adj') {
-                handleAdjLongForms(inflectionId, forms);
+                handleLongForms(inflectionId, 'LongAdj', forms);
                 handleAdjShortForms(inflectionId, forms);
                 handleComparatives(inflectionId, forms);
            }
@@ -536,7 +506,9 @@
                handlePresentTenseForms(inflectionId, forms);
                handlePastTenseForms(inflectionId, forms);
                handleImperativeForms(inflectionId, forms);
-               handleBaseParticiples(inflectionId, forms);
+//               handleBaseParticiples(inflectionId, forms);
+               handlePartPresAct(inflectionId, forms);
+               handleLongForms(inflectionId, 'PartPresAct', forms);
            }
            else {
                 console.log('*** ', lexeme['partOfSpeech'], 'is not supported yet');
@@ -630,6 +602,121 @@
     }
 </script>
 
+{#snippet longForms(inflection)}
+    <div class="section-heading">Long Forms</div>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-adj-case" span="1"/>
+            <col class="col-form" span="4"/>
+        </colgroup>
+        <thead class="paradigm-header">
+        <tr>
+            <th class="col-adj-case"></th>
+            <th class="col-head">m</th>
+            <th class="col-head">f</th>
+            <th class="col-head">n</th>
+            <th class="col-head">Pl</th>
+        </tr>
+        </thead>
+        <tbody>
+        {#each adjLongTable[inflection.inflectionId] as item}
+            <tr>
+                <td class="col-adj-case">{item[0].case}</td>
+                <td class={getAdjLongFormClass(item[0])}>
+                    {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                    {item[0].form}
+                    {item[0].isIrregular}
+                </td>
+                {#if item[1].case === 'A' && item[1].number === 'Sg'}
+                    <td class={getAdjLongFormClass(item[1])} rowspan="2">
+                        {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {item[1].form}
+                        {item[1].isIrregular}
+                    </td>
+                {:else if item[1].case !== 'A (anim)'}
+                    <td class={getAdjLongFormClass(item[1])}>
+                        {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {item[1].form}
+                        {item[1].isIrregular}
+                    </td>
+                {/if}
+                {#if item[2].case === 'A' && item[2].number === 'Sg'}
+                    <td class={getAdjLongFormClass(item[2])} rowspan="2">
+                        {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {item[2].form}
+                        {item[2].isIrregular}
+                    </td>
+                {:else if item[2].case !== 'A (anim)'}
+                    <td class={getAdjLongFormClass(item[2])}>
+                        {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {item[2].form}
+                        {item[2].isIrregular}
+                    </td>
+                {/if}
+                <td class={getAdjLongFormClass(item[3])}>
+                    {#if item[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                    {item[3].form}
+                    {item[3].isIrregular}
+                </td>
+            </tr>
+        {/each}
+        </tbody>
+    </table>
+{/snippet}
+
+{#snippet shortForms(inflection)}
+    <div class="section-heading">Short Forms</div>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-form" span="4"/>
+        </colgroup>
+        <thead class="paradigm-header">
+        <tr>
+            <th class="col-head">m</th>
+            <th class="col-head">f</th>
+            <th class="col-head">n</th>
+            <th class="col-head">Pl</th>
+        </tr>
+        </thead>
+        <tbody>
+        {#each adjShortTable[inflection.inflectionId] as item}
+            <tr>
+                <td class={getAdjShortFormClass(item[0])}>
+                    {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                    {item[0].form}
+                    {item[0].isIrregular}
+                </td>
+                <td class={getAdjShortFormClass(item[1])}>
+                    {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                    {item[1].form}
+                    {item[1].isIrregular}
+                </td>
+                <td class={getAdjShortFormClass(item[2])}>
+                    {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                    {item[2].form}
+                    {item[2].isIrregular}
+                </td>
+                <td class={getAdjShortFormClass(item[3])}>
+                    {#if item[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                    {item[3].form}
+                    {item[3].isIrregular}
+                </td>
+            </tr>
+        {/each}
+        </tbody>
+    </table>
+{/snippet}
+
+{#snippet comparative(inflection)}
+    <div class="section-heading">Comparative</div>
+    {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
+        <div class={getComparativeClass(comparatives[inflection.inflectionId])} />
+        {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+        {comparatives[inflection.inflectionId].form}
+        {comparatives[inflection.inflectionId].isIrregular}
+    {/if}
+{/snippet}
+
 <h1>Поиск в словаре</h1>
 <div class="prompt-container">
 <!--    <form onsubmit={handleClick}>    -->
@@ -716,129 +803,15 @@
                         {/each}
                     </tbody>
                     </table>
-                    {/if}
+                {/if}
 
                 <!--  ADJECTIVES          -->
                 {#if lexProp['partOfSpeech'] == 'Adj'}
                     <!--  ADJ               -->
-                    {#snippet longForms()}
-                    <div class="section-heading">Long Forms</div>
-                    <table class="paradigm-table">
-                        <colgroup>
-                            <col class="col-adj-case" span="1"/>
-                            <col class="col-form" span="4"/>
-                        </colgroup>
-                        <thead class="paradigm-header">
-                        <tr>
-                            <th class="col-adj-case"></th>
-                            <th class="col-head">m</th>
-                            <th class="col-head">f</th>
-                            <th class="col-head">n</th>
-                            <th class="col-head">Pl</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {#each adjLongTable[inflection.inflectionId] as item}
-                            <tr>
-                                <td class="col-adj-case">{item[0].case}</td>
-                                <td class={getAdjLongFormClass(item[0])}>
-                                    {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {item[0].form}
-                                    {item[0].isIrregular}
-                                </td>
-                                {#if item[1].case === 'A' && item[1].number === 'Sg'}
-                                    <td class={getAdjLongFormClass(item[1])} rowspan="2">
-                                        {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                        {item[1].form}
-                                        {item[1].isIrregular}
-                                    </td>
-                                {:else if item[1].case !== 'A (anim)'}
-                                    <td class={getAdjLongFormClass(item[1])}>
-                                        {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                        {item[1].form}
-                                        {item[1].isIrregular}
-                                    </td>
-                                {/if}
-                                {#if item[2].case === 'A' && item[2].number === 'Sg'}
-                                    <td class={getAdjLongFormClass(item[2])} rowspan="2">
-                                        {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                        {item[2].form}
-                                        {item[2].isIrregular}
-                                    </td>
-                                {:else if item[2].case !== 'A (anim)'}
-                                    <td class={getAdjLongFormClass(item[2])}>
-                                        {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                        {item[2].form}
-                                        {item[2].isIrregular}
-                                    </td>
-                                {/if}
-                                <td class={getAdjLongFormClass(item[3])}>
-                                    {#if item[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {item[3].form}
-                                    {item[3].isIrregular}
-                                </td>
-                            </tr>
-                        {/each}
-                        </tbody>
-                        </table>
-                        {/snippet}
-
-                        {#snippet shortForms()}
-                        <div class="section-heading">Short Forms</div>
-                        <table class="paradigm-table">
-                            <colgroup>
-                                <col class="col-form" span="4"/>
-                            </colgroup>
-                            <thead class="paradigm-header">
-                            <tr>
-                                <th class="col-head">m</th>
-                                <th class="col-head">f</th>
-                                <th class="col-head">n</th>
-                                <th class="col-head">Pl</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                        {#each adjShortTable[inflection.inflectionId] as item}
-                            <tr>
-                                <td class={getAdjShortFormClass(item[0])}>
-                                    {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {item[0].form}
-                                    {item[0].isIrregular}
-                                </td>
-                                <td class={getAdjShortFormClass(item[1])}>
-                                    {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {item[1].form}
-                                    {item[1].isIrregular}
-                                </td>
-                                <td class={getAdjShortFormClass(item[2])}>
-                                    {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {item[2].form}
-                                    {item[2].isIrregular}
-                                </td>
-                                <td class={getAdjShortFormClass(item[3])}>
-                                    {#if item[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {item[3].form}
-                                    {item[3].isIrregular}
-                                </td>
-                            </tr>
-                        {/each}
-                        </tbody>
-                    </table>
-                    {/snippet}
-
-                    {#snippet comparative()}
-                    <div class="section-heading">Comparative</div>
-                    {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
-                        <div class={getComparativeClass(comparatives[inflection.inflectionId])} />
-                            {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                            {comparatives[inflection.inflectionId].form}
-                            {comparatives[inflection.inflectionId].isIrregular}
-                    {/if}
-                    {/snippet}
-                    {@render longForms()}
-                    {@render shortForms()}
-                    {@render comparative()}
-                {/if}
+                    {@render longForms(inflection)}
+                    {@render shortForms(inflection)}
+                    {@render comparative(inflection)}
+                {/if}                           <!-- if adj -->
                 <!-- END ADJ -->
 
                 <!--  VERB -->
@@ -938,15 +911,12 @@
                     </table>        <!-- imperative -->
 
                     <div class="section-heading">Participles & Adverbials</div>
-                    {#each baseParticiplesTable[inflection.inflectionId] as item}
-                        <tr>
-                            <td class={getParticipleListClass(item)}>
-                                {#if item.isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {item.form}
-                                {item.isIrregular}
-                            </td>
-                        </tr>
-                    {/each}
+                    {#if partPresActBaseTable[inflection.inflectionId]}
+                        {#if partPresActBaseTable[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {partPresActBaseTable[inflection.inflectionId].form}
+                        {partPresActBaseTable[inflection.inflectionId].isIrregular}
+                    {/if}
+                    {@render longForms(inflection)}
                 {/if}           <!-- verb  -->
             {/each}
         </div>      <!-- right-panel  -->

@@ -140,7 +140,7 @@ export interface IBaseParticiplesTableEntry
 }
 
 export interface IBaseParticiplesTable {
-    [inflectionId: number]: IBaseParticiplesTableEntry[];
+    [inflectionId: number]: IBaseParticiplesTableEntry;
 }
 
 export interface IParticipleTableEntry {
@@ -154,5 +154,5 @@ export interface IParticipleTableEntry {
 }
 
 export interface IParticipleTable {
-    [inflectionId: number]: IParticipleTableEntry[][];
+    [inflectionId: number]: IParticipleTableEntry[];
 }

@@ -1,6 +1,7 @@
 <script lang="ts">
 
-    import { SvelteMap } from 'svelte/reactivity';
+   // import { Collapse } from "bootstrap";
+   // import bootstrapjs from "svelte-bootstrapjs-action";
 
 // Props
     import type {
@@ -37,7 +38,7 @@
     let presentTenseTable: IPresentTenseTable = $state({});
     let pastTenseTable: IPastTenseTable = $state({});
     let imperativeTable: IImperativeTable = $state({});
-    let partPresActBaseTable:  IBaseParticiplesTable = $state({});
+    let partPresActBase:  IBaseParticiplesTable = $state({});
     let partPresActTable: IAdjLongTable = $state({});
 
     let mapInflectionToLexeme = new Map<number, ILexeme>();
@@ -187,7 +188,7 @@
 //                        console.log('*** Assumed form', findCell.form);
                     }
                 } else {
-                    console.log('*** Cell not found');
+                    console.log('*** Noun entry not found');
                 }
             }
         }
@@ -229,7 +230,7 @@
                     findCell.isAssumed = true;
                 }
             } else {
-                console.log('*** Cell not found');
+                console.log('*** Long form not found');
             }
 //            console.log ('******* ', findCell);
         }
@@ -273,7 +274,7 @@
                     findCell.isAssumed = true;
                 }
             } else {
-                console.log('*** Cell not found');
+                console.log('*** Short form not found');
             }
 //            console.log(form);
 
@@ -330,7 +331,7 @@
 //                        console.log('*** Assumed form', findCell.form);
                     }
                 } else {
-                    console.log('*** Cell not found');
+                    console.log('*** Present tense form not found');
                 }
             }
         }
@@ -367,7 +368,7 @@
                     findCell.isAssumed = true;
                 }
             } else {
-                console.log('*** Cell not found');
+                console.log('*** Past tense form not found');
             }
         }
     }
@@ -397,16 +398,16 @@
                     findCell.isAssumed = true;
                 }
             } else {
-                console.log('*** Cell not found');
+                console.log('*** Imperative form not found');
             }
         }
     }
 
-    function handlePartPresAct(inflectionId: number, jsonForms: Array<any>)
+    function handlePartBaseForm(inflectionId: number, subParadigm:string, jsonForms: Array<any>)
     {
         console.log(jsonForms);
-        partPresActBaseTable[inflectionId] = getBaseParticiplesTableTemplate('PartPresAct');
-        console.log('---------------------- ', partPresActBaseTable[inflectionId]);
+        let partBase = getBaseParticiplesTableTemplate(subParadigm);
+        console.log('---------------------- ', partBase);
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -414,27 +415,36 @@
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
-            if ('PartPresAct' === form['subParadigm']
+            if (subParadigm === form['subParadigm']
                 && formGender === 'm' &&  formNumber === 'Sg' && formCase === 'N') {
-                let cell = partPresActBaseTable[inflectionId];
-                if (cell) {
-                    cell.form = form['wordForm'];
+                if (partBase) {
+                    partBase.form = form['wordForm'];
                     isIrregular ? triangle : '';
                     }
                     if (isDifficult) {
-                        cell.isDifficult = true;
+                        partBase.isDifficult = true;
                     }
                     if (isAssumed) {
-                        cell.isAssumed = true;
+                        partBase.isAssumed = true;
 //                        findCell.form = supQuestionMark + form['wordForm'];
 //                        console.log('*** Assumed form', findCell.form);
                     }
-                } else
-                {
-                    console.log('*** Cell not found');
-                }
+            }
         }
-        console.log ('============================================== Pres act participles', partPresActBaseTable);
+
+        if (!partBase.form) {
+            console.log('*** %s base form not found');
+            return;
+        }
+
+        switch (subParadigm) {
+            case 'PartPresAct':
+                partPresActBase[inflectionId] = partBase;
+                break;
+            default:
+                console.log('*** Unknown subParadigm: ', subParadigm);
+        }
+        console.log ('============================================== Base form: ', partBase);
     }
 
     const getAdjLongFormClass = (item: IAdjLongTableEntry) => {
@@ -506,8 +516,7 @@
                handlePresentTenseForms(inflectionId, forms);
                handlePastTenseForms(inflectionId, forms);
                handleImperativeForms(inflectionId, forms);
-//               handleBaseParticiples(inflectionId, forms);
-               handlePartPresAct(inflectionId, forms);
+               handlePartBaseForm(inflectionId, 'PartPresAct', forms);
                handleLongForms(inflectionId, 'PartPresAct', forms);
            }
            else {
@@ -911,10 +920,10 @@
                     </table>        <!-- imperative -->
 
                     <div class="section-heading">Participles & Adverbials</div>
-                    {#if partPresActBaseTable[inflection.inflectionId]}
-                        {#if partPresActBaseTable[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                        {partPresActBaseTable[inflection.inflectionId].form}
-                        {partPresActBaseTable[inflection.inflectionId].isIrregular}
+                    {#if partPresActBase[inflection.inflectionId]}
+                        {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {partPresActBase[inflection.inflectionId].form}
+                        {partPresActBase[inflection.inflectionId].isIrregular}
                     {/if}
                     {@render longForms(inflection)}
                 {/if}           <!-- verb  -->

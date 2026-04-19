@@ -1,7 +1,6 @@
 <script lang="ts">
 
-   // import { Collapse } from "bootstrap";
-   // import bootstrapjs from "svelte-bootstrapjs-action";
+    import { slide } from 'svelte/transition';
 
 // Props
     import type {
@@ -12,8 +11,7 @@
         IPastTenseTableEntry, IPastTenseTable,
         IImperativeTableEntry, IImperativeTable,
         ILexeme, IInflection, IBaseParticiplesTable, IBaseParticiplesTableEntry
-    }
-        from "$lib/types";
+    } from "$lib/types";
 
     import {caseToHash, numberToHash, genderToHash} from "$lib/stores";
     import {presentTenseToPerson} from "$lib/stores.ts";
@@ -39,7 +37,21 @@
     let pastTenseTable: IPastTenseTable = $state({});
     let imperativeTable: IImperativeTable = $state({});
     let partPresActBase:  IBaseParticiplesTable = $state({});
-    let partPresActTable: IAdjLongTable = $state({});
+    let presActLongTable: IAdjLongTable = $state({});
+    let adverbialPresent: IBaseParticiplesTable = $state({});
+    let partPresPassBase: IBaseParticiplesTable = $state({});
+    let presPassLongTable: IAdjLongTable = $state({});
+    let presPassShortTable: IAdjShortTable = $state({});
+    let partPastActBase: IBaseParticiplesTable = $state({});
+    let pastActLongTable: IAdjLongTable = $state({});
+    let adverbialPast: IBaseParticiplesTable = $state({});
+    let partPastPass: IBaseParticiplesTable = $state({});
+    let pastPassLongTable: IAdjLongTable = $state({});
+    let pastPassShortTable: IAdjShortTable = $state({});
+
+    let showLongPresAct: boolean = $state(false);
+    let showLongPresPass: boolean = $state(false);
+    let showLongPastAct: boolean = $state(false);
 
     let mapInflectionToLexeme = new Map<number, ILexeme>();
 
@@ -202,7 +214,31 @@
 
     function handleLongForms(inflectionId: number, subParadigm: string, jsonForms: Array<any>)
     {
-        adjLongTable[inflectionId] = getAdjLongTableTemplate();
+        let targetContainer: IAdjLongTable;
+        switch (subParadigm) {
+            case 'LongAdj':
+                targetContainer = adjLongTable;
+                break;
+            case 'PartPresAct':
+                targetContainer = presActLongTable;
+                break;
+            case 'PartPresPassLong':
+                targetContainer = presPassLongTable;
+                break;
+            case 'PartPastActLong':
+                targetContainer = pastActLongTable;
+                break;
+            case 'PartPastPassLong':
+                targetContainer = pastPassLongTable;
+                break;
+            default:
+                console.log('*** Unknown subParadigm: ', subParadigm);
+                alert("Internal error.");
+                return;
+        }
+
+        targetContainer[inflectionId] = getAdjLongTableTemplate();
+        let table = targetContainer[inflectionId];
         for (const [,form] of jsonForms.entries()) {
             if (subParadigm !== form['subParadigm']) continue;
             let formCase: string = caseToHash.get(form['case']) || '';
@@ -213,10 +249,10 @@
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
             if (formCase !== '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f' || formGender === 'n')) {
-                findCell = adjLongTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
+                findCell = table.flat().find(item => item.case === formCase && item.gender === formGender);
             }
             else if (formCase !== '' && formNumber === 'Pl' ) {
-                findCell = adjLongTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
+                findCell = table.flat().find(item => item.case === formCase && item.number === formNumber);
             }
             if (findCell) {
                 findCell.form = form['wordForm'];
@@ -235,15 +271,19 @@
 //            console.log ('******* ', findCell);
         }
 
-        let gSgM = adjLongTable[inflectionId].flat().find(item => item.case === 'G' && item.gender === 'm' && item.number==='Sg');
-        let aAnimSgM = adjLongTable[inflectionId].flat().find(item => item.case === 'A (anim)' && item.gender === 'm' && item.number==='Sg');
-        aAnimSgM.form = gSgM.form;
+        let gSgM = table.flat().find(item => item.case === 'G' && item.gender === 'm' && item.number==='Sg');
+        let aAnimSgM = table.flat().find(item => item.case === 'A (anim)' && item.gender === 'm' && item.number==='Sg');
+        if (gSgM && aAnimSgM) {
+            aAnimSgM.form = gSgM.form;
+        }
 
-        let gPl = adjLongTable[inflectionId].flat().find(item => item.case === 'G' && item.number==='Pl');
-        let aAnimPl = adjLongTable[inflectionId].flat().find(item => item.case === 'A (anim)' && item.number==='Pl');
-        aAnimPl.form = gPl.form;
+        let gPl = table.flat().find(item => item.case === 'G' && item.number==='Pl');
+        let aAnimPl = table.flat().find(item => item.case === 'A (anim)' && item.number==='Pl');
+        if (gPl && aAnimPl) {
+            aAnimPl.form = gPl.form;
+        }
 
-//        console.log ('==============================', adjLongTable);
+        console.log ('==============================', table);
     }
 
     function handleAdjShortForms(inflectionId: number, jsonForms: Array<any>)
@@ -441,6 +481,21 @@
             case 'PartPresAct':
                 partPresActBase[inflectionId] = partBase;
                 break;
+            case 'AdverbialPresent':
+                adverbialPresent[inflectionId] = partBase;
+                break;
+            case 'PartPresPassLong':
+                partPresPassBase[inflectionId] = partBase;
+                break;
+            case 'PartPastActLong':
+                partPastActBase[inflectionId] = partBase;
+                break;
+            case 'AdverbialPast':
+                adverbialPast[inflectionId] = partBase;
+                break;
+            case 'PartPastPassLong':
+                partPastPass[inflectionId] = partBase;
+                break;
             default:
                 console.log('*** Unknown subParadigm: ', subParadigm);
         }
@@ -518,6 +573,13 @@
                handleImperativeForms(inflectionId, forms);
                handlePartBaseForm(inflectionId, 'PartPresAct', forms);
                handleLongForms(inflectionId, 'PartPresAct', forms);
+               handlePartBaseForm(inflectionId, 'AdverbialPresent', forms);
+               handlePartBaseForm(inflectionId, 'PartPresPassLong', forms);
+               handleLongForms(inflectionId, 'PartPresPassLong', forms);
+               handlePartBaseForm(inflectionId, 'PartPastActLong', forms);
+               handleLongForms(inflectionId, 'PartPastActLong', forms);
+               handlePartBaseForm(inflectionId, 'PartPastPassLong', forms);
+               handleLongForms(inflectionId, 'PartPastPassLong', forms);
            }
            else {
                 console.log('*** ', lexeme['partOfSpeech'], 'is not supported yet');
@@ -609,9 +671,19 @@
         lexemes.length = 0;
         handleLexemeData();
     }
+
+    const presActToggleExpand = () => {
+        showLongPresAct = !showLongPresAct;
+    }
+    const presPassToggleExpand = () => {
+        showLongPresPass = !showLongPresPass;
+    }
+    const pastActToggleExpand = () => {
+        showLongPastAct = !showLongPastAct;
+    }
 </script>
 
-{#snippet longForms(inflection)}
+{#snippet longForms(inflection, table)}
     <div class="section-heading">Long Forms</div>
     <table class="paradigm-table">
         <colgroup>
@@ -628,7 +700,7 @@
         </tr>
         </thead>
         <tbody>
-        {#each adjLongTable[inflection.inflectionId] as item}
+        {#each table[inflection.inflectionId] as item}
             <tr>
                 <td class="col-adj-case">{item[0].case}</td>
                 <td class={getAdjLongFormClass(item[0])}>
@@ -817,7 +889,7 @@
                 <!--  ADJECTIVES          -->
                 {#if lexProp['partOfSpeech'] == 'Adj'}
                     <!--  ADJ               -->
-                    {@render longForms(inflection)}
+                    {@render longForms(inflection, adjLongTable)}
                     {@render shortForms(inflection)}
                     {@render comparative(inflection)}
                 {/if}                           <!-- if adj -->
@@ -920,12 +992,51 @@
                     </table>        <!-- imperative -->
 
                     <div class="section-heading">Participles & Adverbials</div>
-                    {#if partPresActBase[inflection.inflectionId]}
-                        {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                        {partPresActBase[inflection.inflectionId].form}
-                        {partPresActBase[inflection.inflectionId].isIrregular}
-                    {/if}
-                    {@render longForms(inflection)}
+
+                    <div class="accordion">
+                        {#if partPresActBase[inflection.inflectionId]}
+                            {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                            {partPresActBase[inflection.inflectionId].form}
+                            {partPresActBase[inflection.inflectionId].isIrregular}
+                            <button class="expand-btn"  onclick={() => presActToggleExpand()}>
+                                <span class="icon" class:rotated={showLongPresAct}>▼</span>
+                            </button>
+                            <div class="slider" transition:slide>
+                                {#if showLongPresAct }
+                                    <div transition:slide={{duration: 300}} />
+                                    {@render longForms(inflection, presActLongTable)}
+                                {/if}
+                            </div>
+                        {/if}
+                        {#if partPresPassBase[inflection.inflectionId]}
+                            <br/>
+                            {#if partPresPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                            {partPresPassBase[inflection.inflectionId].form}
+                            {partPresPassBase[inflection.inflectionId].isIrregular}
+                            <button class="expand-btn" onclick={() => presPassToggleExpand() }>
+                                <span class="icon" class:rotated={showLongPresPass}>▼</span>
+                            </button>
+                            <div class="slider" transition:slide>
+                                {#if showLongPresPass }
+                                    {@render longForms(inflection, presPassLongTable)}
+                                {/if}
+                            </div>
+                        {/if}
+                        {#if partPastActBase[inflection.inflectionId]}
+                            <br/>
+                            {#if partPastActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                            {partPastActBase[inflection.inflectionId].form}
+                            {partPastActBase[inflection.inflectionId].isIrregular}
+                            <button class="expand-btn" onclick={() => pastActToggleExpand() }>
+                                <span class="icon" class:rotated={showLongPastAct}>▼</span>
+                            </button>
+                            <div class="slider" transition:slide>
+                                {#if showLongPastAct }
+                                    {@render longForms(inflection, pastActLongTable)}
+                                {/if}
+                            </div>
+                        {/if}
+                    </div>
                 {/if}           <!-- verb  -->
             {/each}
         </div>      <!-- right-panel  -->
@@ -1137,4 +1248,32 @@
         color:gray;
     }
 
+    .expand-btn {
+        background: none;
+/*        text-align: left;  */
+/*        background: none;  */
+/*        border: none;  */
+/*        padding: 1rem;   */
+        cursor: pointer;
+/*        justify-content: space-between;   */
+    }
+    .icon {
+        display: inline-block;
+        color: black;
+        transition: transform 0.2s ease;
+    }
+    .rotated {
+        transform: rotate(180deg);
+    }
+/* ----------------------------------------------------------------------*/
+     .accordion {
+         margin-bottom: 1px;
+     }
+    .slider {
+/*        border: 1px solid #eee;    */
+/*        padding: 4px 20px;     */
+    }
+/* ----------------------------------------------------------------------*/
+
 </style>
+

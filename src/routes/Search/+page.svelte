@@ -36,22 +36,23 @@
     let presentTenseTable: IPresentTenseTable = $state({});
     let pastTenseTable: IPastTenseTable = $state({});
     let imperativeTable: IImperativeTable = $state({});
-    let partPresActBase:  IBaseParticiplesTable = $state({});
     let presActLongTable: IAdjLongTable = $state({});
     let adverbialPresent: IBaseParticiplesTable = $state({});
+    let partPresActBase: IBaseParticiplesTable = $state({});
     let partPresPassBase: IBaseParticiplesTable = $state({});
-    let presPassLongTable: IAdjLongTable = $state({});
-    let presPassShortTable: IAdjShortTable = $state({});
     let partPastActBase: IBaseParticiplesTable = $state({});
+    let partPastPassBase: IBaseParticiplesTable = $state({});
+    let presPassLongTable: IAdjLongTable = $state({});
     let pastActLongTable: IAdjLongTable = $state({});
-    let adverbialPast: IBaseParticiplesTable = $state({});
-    let partPastPass: IBaseParticiplesTable = $state({});
     let pastPassLongTable: IAdjLongTable = $state({});
+    let presPassShortTable: IAdjShortTable = $state({});
+    let adverbialPast: IBaseParticiplesTable = $state({});
     let pastPassShortTable: IAdjShortTable = $state({});
 
     let showLongPresAct: boolean = $state(false);
     let showLongPresPass: boolean = $state(false);
     let showLongPastAct: boolean = $state(false);
+    let showLongPastPass: boolean = $state(false);
 
     let mapInflectionToLexeme = new Map<number, ILexeme>();
 
@@ -225,7 +226,7 @@
             case 'PartPresPassLong':
                 targetContainer = presPassLongTable;
                 break;
-            case 'PartPastActLong':
+            case 'PartPastAct':
                 targetContainer = pastActLongTable;
                 break;
             case 'PartPastPassLong':
@@ -487,14 +488,14 @@
             case 'PartPresPassLong':
                 partPresPassBase[inflectionId] = partBase;
                 break;
-            case 'PartPastActLong':
+            case 'PartPastAct':
                 partPastActBase[inflectionId] = partBase;
                 break;
             case 'AdverbialPast':
                 adverbialPast[inflectionId] = partBase;
                 break;
             case 'PartPastPassLong':
-                partPastPass[inflectionId] = partBase;
+                partPastPassBase[inflectionId] = partBase;
                 break;
             default:
                 console.log('*** Unknown subParadigm: ', subParadigm);
@@ -576,8 +577,8 @@
                handlePartBaseForm(inflectionId, 'AdverbialPresent', forms);
                handlePartBaseForm(inflectionId, 'PartPresPassLong', forms);
                handleLongForms(inflectionId, 'PartPresPassLong', forms);
-               handlePartBaseForm(inflectionId, 'PartPastActLong', forms);
-               handleLongForms(inflectionId, 'PartPastActLong', forms);
+               handlePartBaseForm(inflectionId, 'PartPastAct', forms);
+               handleLongForms(inflectionId, 'PartPastAct', forms);
                handlePartBaseForm(inflectionId, 'PartPastPassLong', forms);
                handleLongForms(inflectionId, 'PartPastPassLong', forms);
            }
@@ -680,6 +681,9 @@
     }
     const pastActToggleExpand = () => {
         showLongPastAct = !showLongPastAct;
+    }
+    const pastPassToggleExpand = () => {
+        showLongPastPass = !showLongPastPass;
     }
 </script>
 
@@ -1036,6 +1040,20 @@
                                 {/if}
                             </div>
                         {/if}
+                        {#if partPastPassBase[inflection.inflectionId]}
+                            <br/>
+                            {#if partPastPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                            {partPastPassBase[inflection.inflectionId].form}
+                            {partPastPassBase[inflection.inflectionId].isIrregular}
+                            <button class="expand-btn" onclick={() => pastPassToggleExpand() }>
+                                <span class="icon" class:rotated={showLongPastPass}>▼</span>
+                            </button>
+                            <div class="slider" transition:slide>
+                                {#if showLongPastPass }
+                                    {@render longForms(inflection, pastPassLongTable)}
+                                {/if}
+                            </div>
+                        {/if}
                     </div>
                 {/if}           <!-- verb  -->
             {/each}
@@ -1260,7 +1278,7 @@
     .icon {
         display: inline-block;
         color: black;
-        transition: transform 0.2s ease;
+        transition: transform 0.2s;
     }
     .rotated {
         transform: rotate(180deg);

@@ -43,14 +43,14 @@
     let partPastActBase: IBaseParticiplesTable = $state({});
     let partPastPassBase: IBaseParticiplesTable = $state({});
     let presPassLongTable: IAdjLongTable = $state({});
+    let presPassShortTable: IAdjShortTable = $state({});
     let pastActLongTable: IAdjLongTable = $state({});
     let pastPassLongTable: IAdjLongTable = $state({});
-    let presPassShortTable: IAdjShortTable = $state({});
-    let adverbialPast: IBaseParticiplesTable = $state({});
     let pastPassShortTable: IAdjShortTable = $state({});
+    let adverbialPast: IBaseParticiplesTable = $state({});
 
     let showLongPresAct: boolean = $state(false);
-    let showLongPresPass: boolean = $state(false);
+    let expandPresPass: boolean = $state(false);
     let showLongPastAct: boolean = $state(false);
     let showLongPastPass: boolean = $state(false);
 
@@ -285,12 +285,32 @@
         }
 
         console.log ('==============================', table);
-    }
+    }       //  handleLongForms
 
-    function handleAdjShortForms(inflectionId: number, jsonForms: Array<any>)
+    function handleShortForms(inflectionId: number, subParadigm: string, jsonForms: Array<any>)
     {
-        adjShortTable[inflectionId] = getAdjShortTableTemplate();
+        let targetContainer: IAdjShortTable;
+
+        switch (subParadigm) {
+            case 'ShortAdj':
+                targetContainer = adjShortTable;
+                break;
+            case 'PartPresPassShort':
+                targetContainer = presPassShortTable;
+                break;
+            case 'PartPastPassShort':
+                targetContainer = pastPassShortTable;
+                break;
+            default:
+                console.log('*** Unknown subParadigm: ', subParadigm);
+                alert("Internal error.");
+                return;
+        }
+
+        targetContainer[inflectionId] = getAdjShortTableTemplate();
+        let table = targetContainer[inflectionId];
         for (const [,form] of jsonForms.entries()) {
+            if (subParadigm !== form['subParadigm']) continue;
             let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
@@ -298,10 +318,10 @@
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
             if (formNumber != '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f' || formGender === 'n')) {
-                findCell = adjShortTable[inflectionId].flat().find(item => item.gender === formGender && item.number==='Sg');
+                findCell = table.flat().find(item => item.gender === formGender && item.number==='Sg');
             }
             else if (formNumber === 'Pl' ) {
-                findCell = adjShortTable[inflectionId].flat().find(item => item.number === formNumber);
+                findCell = table.flat().find(item => item.number === formNumber);
             }
             if (findCell) {
                 findCell.form = form['wordForm'];
@@ -322,8 +342,9 @@
 //            findCell = adjTableShort[inflectionId].flat().find(item => item.gender === formGender && item.number === formNumber);
 //            console.log ('******* ', findCell);
         }
-//        console.log ('==============================', adjShortTable);
-    }
+        console.log ('!!!!!!!=======================', adjShortTable);
+
+    }       //  handleShortForms
 
     function handleComparatives(inflectionId: number, jsonForms: Array<any>)
     {
@@ -565,7 +586,7 @@
             }
             else if (lexeme['partOfSpeech'] === 'Adj') {
                 handleLongForms(inflectionId, 'LongAdj', forms);
-                handleAdjShortForms(inflectionId, forms);
+                handleShortForms(inflectionId, 'ShortAdj', forms);
                 handleComparatives(inflectionId, forms);
            }
            else if (lexeme['partOfSpeech'] === 'Verb') {
@@ -577,6 +598,7 @@
                handlePartBaseForm(inflectionId, 'AdverbialPresent', forms);
                handlePartBaseForm(inflectionId, 'PartPresPassLong', forms);
                handleLongForms(inflectionId, 'PartPresPassLong', forms);
+               handleShortForms(inflectionId, 'PartPresPassShort', forms);
                handlePartBaseForm(inflectionId, 'PartPastAct', forms);
                handleLongForms(inflectionId, 'PartPastAct', forms);
                handlePartBaseForm(inflectionId, 'PartPastPassLong', forms);
@@ -677,7 +699,7 @@
         showLongPresAct = !showLongPresAct;
     }
     const presPassToggleExpand = () => {
-        showLongPresPass = !showLongPresPass;
+        expandPresPass = !expandPresPass;
     }
     const pastActToggleExpand = () => {
         showLongPastAct = !showLongPastAct;
@@ -749,7 +771,7 @@
     </table>
 {/snippet}
 
-{#snippet shortForms(inflection)}
+{#snippet shortForms(inflection, table)}
     <div class="section-heading">Short Forms</div>
     <table class="paradigm-table">
         <colgroup>
@@ -764,7 +786,8 @@
         </tr>
         </thead>
         <tbody>
-        {#each adjShortTable[inflection.inflectionId] as item}
+        {#each table[inflection.inflectionId] as item}
+            {@debug item}
             <tr>
                 <td class={getAdjShortFormClass(item[0])}>
                     {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
@@ -894,7 +917,7 @@
                 {#if lexProp['partOfSpeech'] == 'Adj'}
                     <!--  ADJ               -->
                     {@render longForms(inflection, adjLongTable)}
-                    {@render shortForms(inflection)}
+                    {@render shortForms(inflection, adjShortTable)}
                     {@render comparative(inflection)}
                 {/if}                           <!-- if adj -->
                 <!-- END ADJ -->
@@ -1018,11 +1041,12 @@
                             {partPresPassBase[inflection.inflectionId].form}
                             {partPresPassBase[inflection.inflectionId].isIrregular}
                             <button class="expand-btn" onclick={() => presPassToggleExpand() }>
-                                <span class="icon" class:rotated={showLongPresPass}>▼</span>
+                                <span class="icon" class:rotated={expandPresPass}>▼</span>
                             </button>
                             <div class="slider" transition:slide>
-                                {#if showLongPresPass }
+                                {#if expandPresPass }
                                     {@render longForms(inflection, presPassLongTable)}
+                                    {@render shortForms(inflection, presPassShortTable)}
                                 {/if}
                             </div>
                         {/if}

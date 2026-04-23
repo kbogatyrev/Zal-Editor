@@ -342,7 +342,7 @@
 //            findCell = adjTableShort[inflectionId].flat().find(item => item.gender === formGender && item.number === formNumber);
 //            console.log ('******* ', findCell);
         }
-        console.log ('!!!!!!!=======================', adjShortTable);
+        console.log ('=======================', adjShortTable);
 
     }       //  handleShortForms
 
@@ -469,7 +469,6 @@
     {
         console.log(jsonForms);
         let partBase = getBaseParticiplesTableTemplate(subParadigm);
-        console.log('---------------------- ', partBase);
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -603,6 +602,7 @@
                handleLongForms(inflectionId, 'PartPastAct', forms);
                handlePartBaseForm(inflectionId, 'PartPastPassLong', forms);
                handleLongForms(inflectionId, 'PartPastPassLong', forms);
+               handleShortForms(inflectionId, 'PartPastPassShort', forms);
            }
            else {
                 console.log('*** ', lexeme['partOfSpeech'], 'is not supported yet');
@@ -1075,6 +1075,7 @@
                             <div class="slider" transition:slide>
                                 {#if showLongPastPass }
                                     {@render longForms(inflection, pastPassLongTable)}
+                                    {@render shortForms(inflection, pastPassShortTable)}
                                 {/if}
                             </div>
                         {/if}

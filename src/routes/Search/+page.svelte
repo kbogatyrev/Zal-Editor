@@ -502,17 +502,11 @@
             case 'PartPresAct':
                 partPresActBase[inflectionId] = partBase;
                 break;
-            case 'AdverbialPresent':
-                adverbialPresent[inflectionId] = partBase;
-                break;
             case 'PartPresPassLong':
                 partPresPassBase[inflectionId] = partBase;
                 break;
             case 'PartPastAct':
                 partPastActBase[inflectionId] = partBase;
-                break;
-            case 'AdverbialPast':
-                adverbialPast[inflectionId] = partBase;
                 break;
             case 'PartPastPassLong':
                 partPastPassBase[inflectionId] = partBase;
@@ -522,6 +516,46 @@
         }
         console.log ('============================================== Base form: ', partBase);
     }
+
+    function handleAdverbials(inflectionId: number, subParadigm:string, jsonForms: Array<any>)
+    {
+        console.log(jsonForms);
+        let adverbial = getBaseParticiplesTableTemplate(subParadigm);
+        for (const [,form] of jsonForms.entries()) {
+            let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
+            let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
+            let isAssumed: boolean = form['status'] === 'Assumed';
+            if (subParadigm === form['subParadigm']) {
+                adverbial.form = form['wordForm'];
+                isIrregular ? triangle : '';
+                if (isDifficult) {
+                    adverbial.isDifficult = true;
+                }
+                if (isAssumed) {
+                    adverbial.isAssumed = true;
+//                        findCell.form = supQuestionMark + form['wordForm'];
+//                        console.log('*** Assumed form', findCell.form);
+                }
+            }
+        }
+
+        if (!adverbial.form) {
+            console.log('*** %s not found');
+            return;
+        }
+
+        if (subParadigm === 'AdverbialPresent') {
+            adverbialPresent[inflectionId] = adverbial;
+        }
+        else if (subParadigm === 'AdverbialPast') {
+            adverbialPast[inflectionId] = adverbial;
+        }
+        else {
+            console.log('*** Unknown subParadigm: ', subParadigm);
+        }
+        console.log ('============================================== Adverbial: ', adverbial);
+
+    }       //  handleAdverbials()
 
     const getAdjLongFormClass = (item: IAdjLongTableEntry) => {
         if (item.isDifficult) return "col-difficult-form";
@@ -594,7 +628,7 @@
                handleImperativeForms(inflectionId, forms);
                handlePartBaseForm(inflectionId, 'PartPresAct', forms);
                handleLongForms(inflectionId, 'PartPresAct', forms);
-               handlePartBaseForm(inflectionId, 'AdverbialPresent', forms);
+               handleAdverbials(inflectionId, 'AdverbialPresent', forms);
                handlePartBaseForm(inflectionId, 'PartPresPassLong', forms);
                handleLongForms(inflectionId, 'PartPresPassLong', forms);
                handleShortForms(inflectionId, 'PartPresPassShort', forms);
@@ -603,6 +637,7 @@
                handlePartBaseForm(inflectionId, 'PartPastPassLong', forms);
                handleLongForms(inflectionId, 'PartPastPassLong', forms);
                handleShortForms(inflectionId, 'PartPastPassShort', forms);
+               handleAdverbials(inflectionId, 'AdverbialPast', forms);
            }
            else {
                 console.log('*** ', lexeme['partOfSpeech'], 'is not supported yet');
@@ -787,7 +822,6 @@
         </thead>
         <tbody>
         {#each table[inflection.inflectionId] as item}
-            {@debug item}
             <tr>
                 <td class={getAdjShortFormClass(item[0])}>
                     {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
@@ -1019,24 +1053,31 @@
                     </table>        <!-- imperative -->
 
                     <div class="section-heading">Participles & Adverbials</div>
-
-                    <div class="accordion">
-                        {#if partPresActBase[inflection.inflectionId]}
-                            {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                            {partPresActBase[inflection.inflectionId].form}
-                            {partPresActBase[inflection.inflectionId].isIrregular}
-                            <button class="expand-btn"  onclick={() => presActToggleExpand()}>
-                                <span class="icon" class:rotated={showLongPresAct}>▼</span>
-                            </button>
-                            <div class="slider" transition:slide>
-                                {#if showLongPresAct }
-                                    <div transition:slide={{duration: 300}} />
-                                    {@render longForms(inflection, presActLongTable)}
-                                {/if}
-                            </div>
-                        {/if}
-                        {#if partPresPassBase[inflection.inflectionId]}
-                            <br/>
+                    {#if partPresActBase[inflection.inflectionId]}
+                        <div>
+                        {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {partPresActBase[inflection.inflectionId].form}
+                        {partPresActBase[inflection.inflectionId].isIrregular}
+                        <button class="expand-btn"  onclick={() => presActToggleExpand()}>
+                            <span class="icon" class:rotated={showLongPresAct}>▼</span>
+                        </button>
+                        <div class="slider" transition:slide>
+                            {#if showLongPresAct }
+                                <div transition:slide={{duration: 300}} />
+                                {@render longForms(inflection, presActLongTable)}
+                            {/if}
+                        </div>
+                        </div>
+                    {/if}
+                    <div>
+                    {#if adverbialPresent[inflection.inflectionId]}
+                        {#if adverbialPresent[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {adverbialPresent[inflection.inflectionId].form}
+                        {adverbialPresent[inflection.inflectionId].isIrregular}
+                    {/if}
+                    </div>
+                    {#if partPresPassBase[inflection.inflectionId]}
+                        <div>
                             {#if partPresPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                             {partPresPassBase[inflection.inflectionId].form}
                             {partPresPassBase[inflection.inflectionId].isIrregular}
@@ -1049,9 +1090,10 @@
                                     {@render shortForms(inflection, presPassShortTable)}
                                 {/if}
                             </div>
-                        {/if}
-                        {#if partPastActBase[inflection.inflectionId]}
-                            <br/>
+                        </div>
+                    {/if}
+                    {#if partPastActBase[inflection.inflectionId]}
+                        <div>
                             {#if partPastActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                             {partPastActBase[inflection.inflectionId].form}
                             {partPastActBase[inflection.inflectionId].isIrregular}
@@ -1063,9 +1105,15 @@
                                     {@render longForms(inflection, pastActLongTable)}
                                 {/if}
                             </div>
-                        {/if}
-                        {#if partPastPassBase[inflection.inflectionId]}
-                            <br/>
+                        </div>
+                    {/if}
+                    {#if adverbialPast[inflection.inflectionId]}
+                        {#if adverbialPast[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                        {adverbialPast[inflection.inflectionId].form}
+                        {adverbialPast[inflection.inflectionId].isIrregular}
+                    {/if}
+                    {#if partPastPassBase[inflection.inflectionId]}
+                            <div>
                             {#if partPastPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                             {partPastPassBase[inflection.inflectionId].form}
                             {partPastPassBase[inflection.inflectionId].isIrregular}
@@ -1078,8 +1126,8 @@
                                     {@render shortForms(inflection, pastPassShortTable)}
                                 {/if}
                             </div>
-                        {/if}
-                    </div>
+                        </div>
+                    {/if}
                 {/if}           <!-- verb  -->
             {/each}
         </div>      <!-- right-panel  -->
@@ -1309,13 +1357,15 @@
         transform: rotate(180deg);
     }
 /* ----------------------------------------------------------------------*/
-     .accordion {
-         margin-bottom: 1px;
+
+/*     .accordion {
+         margin-bottom: 0;
      }
     .slider {
-/*        border: 1px solid #eee;    */
-/*        padding: 4px 20px;     */
+        border: 1px solid #eee;
+        padding: 4px 20px;
     }
+    */
 /* ----------------------------------------------------------------------*/
 
 </style>

@@ -745,7 +745,7 @@
 </script>
 
 {#snippet longForms(inflection, table)}
-    <div class="section-heading">Long Forms</div>
+    <div class="section-subheading">Long Forms</div>
     <table class="paradigm-table">
         <colgroup>
             <col class="col-adj-case" span="1"/>
@@ -807,7 +807,7 @@
 {/snippet}
 
 {#snippet shortForms(inflection, table)}
-    <div class="section-heading">Short Forms</div>
+    <div class="section-subheading">Short Forms</div>
     <table class="paradigm-table">
         <colgroup>
             <col class="col-form" span="4"/>
@@ -850,7 +850,7 @@
 {/snippet}
 
 {#snippet comparative(inflection)}
-    <div class="section-heading">Comparative</div>
+    <div class="section-subheading">Comparative</div>
     {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
         <div class={getComparativeClass(comparatives[inflection.inflectionId])} />
         {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
@@ -1055,37 +1055,46 @@
                     <div class="section-heading">Participles & Adverbials</div>
                     {#if partPresActBase[inflection.inflectionId]}
                         <div>
-                        {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                        {partPresActBase[inflection.inflectionId].form}
-                        {partPresActBase[inflection.inflectionId].isIrregular}
-                        <button class="expand-btn"  onclick={() => presActToggleExpand()}>
-                            <span class="icon" class:rotated={showLongPresAct}>▼</span>
-                        </button>
-                        <div class="slider" transition:slide>
-                            {#if showLongPresAct }
-                                <div transition:slide={{duration: 300}} />
-                                {@render longForms(inflection, presActLongTable)}
-                            {/if}
-                        </div>
+                            <span class="section-subheading">Part. Pres. Active:</span>
+                            <span class="base-form">
+                                {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                {partPresActBase[inflection.inflectionId].form}
+                                {partPresActBase[inflection.inflectionId].isIrregular}
+                            </span>
+                            <button class="expand-btn"  onclick={() => presActToggleExpand()}>
+                                    <span class="icon" class:rotated={showLongPresAct}>&gt;</span>
+                                </button>
+                                <div class="slider" transition:slide>
+                                    {#if showLongPresAct }
+                                        <div transition:slide={{duration: 300}} />
+                                        {@render longForms(inflection, presActLongTable)}
+                                    {/if}
+                                </div>
                         </div>
                     {/if}
                     <div>
                     {#if adverbialPresent[inflection.inflectionId]}
-                        {#if adverbialPresent[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                        {adverbialPresent[inflection.inflectionId].form}
-                        {adverbialPresent[inflection.inflectionId].isIrregular}
+                        <span class="section-subheading">Pres. Adverbial:</span>
+                        <span class="base-form">
+                            {#if adverbialPresent[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                            {adverbialPresent[inflection.inflectionId].form}
+                            {adverbialPresent[inflection.inflectionId].isIrregular}
+                        </span>
                     {/if}
                     </div>
                     {#if partPresPassBase[inflection.inflectionId]}
                         <div>
-                            {#if partPresPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                            {partPresPassBase[inflection.inflectionId].form}
-                            {partPresPassBase[inflection.inflectionId].isIrregular}
-                            <button class="expand-btn" onclick={() => presPassToggleExpand() }>
-                                <span class="icon" class:rotated={expandPresPass}>▼</span>
+                            <span class="section-subheading">Part. Pres. Passive:</span>
+                            <span class="base-form">
+                                {#if partPresPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                {partPresPassBase[inflection.inflectionId].form}
+                                {partPresPassBase[inflection.inflectionId].isIrregular}
+                            </span>
+                            <button class="expand-btn" onclick={() => presPassToggleExpand()}>
+                                <span class="icon" class:rotated={expandPresPass}>&gt;</span>
                             </button>
                             <div class="slider" transition:slide>
-                                {#if expandPresPass }
+                                {#if expandPresPass}
                                     {@render longForms(inflection, presPassLongTable)}
                                     {@render shortForms(inflection, presPassShortTable)}
                                 {/if}
@@ -1094,11 +1103,14 @@
                     {/if}
                     {#if partPastActBase[inflection.inflectionId]}
                         <div>
-                            {#if partPastActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                            {partPastActBase[inflection.inflectionId].form}
-                            {partPastActBase[inflection.inflectionId].isIrregular}
+                            <span class="section-subheading">Part. Past Active:</span>
+                            <span class="base-form">
+                                {#if partPastActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                {partPastActBase[inflection.inflectionId].form}
+                                {partPastActBase[inflection.inflectionId].isIrregular}
+                            </span>
                             <button class="expand-btn" onclick={() => pastActToggleExpand() }>
-                                <span class="icon" class:rotated={showLongPastAct}>▼</span>
+                                <span class="icon" class:rotated={showLongPastAct}>&gt;</span>
                             </button>
                             <div class="slider" transition:slide>
                                 {#if showLongPastAct }
@@ -1108,17 +1120,23 @@
                         </div>
                     {/if}
                     {#if adverbialPast[inflection.inflectionId]}
-                        {#if adverbialPast[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                        {adverbialPast[inflection.inflectionId].form}
-                        {adverbialPast[inflection.inflectionId].isIrregular}
+                        <span class="section-subheading">Past Adverbial:</span>
+                         <span class="base-form">
+                            {#if adverbialPast[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                            {adverbialPast[inflection.inflectionId].form}
+                            {adverbialPast[inflection.inflectionId].isIrregular}
+                         </span>
                     {/if}
                     {#if partPastPassBase[inflection.inflectionId]}
-                            <div>
-                            {#if partPastPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                            {partPastPassBase[inflection.inflectionId].form}
-                            {partPastPassBase[inflection.inflectionId].isIrregular}
+                        <div>
+                            <span class="section-subheading">Part. Past Passive:</span>
+                            <span class="base-form">
+                                {#if partPastPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                {partPastPassBase[inflection.inflectionId].form}
+                                {partPastPassBase[inflection.inflectionId].isIrregular}
+                            </span>
                             <button class="expand-btn" onclick={() => pastPassToggleExpand() }>
-                                <span class="icon" class:rotated={showLongPastPass}>▼</span>
+                                <span class="icon" class:rotated={showLongPastPass}>&gt;</span>
                             </button>
                             <div class="slider" transition:slide>
                                 {#if showLongPastPass }
@@ -1207,7 +1225,7 @@
 
     .section-heading {
         font-weight: normal;
-        font-size: large;
+        font-size: larger;
         text-align: left;
         color: gray;
         margin-top: 25px;
@@ -1224,6 +1242,20 @@
 
     .paradigm-table row {
         padding: 20px;
+    }
+
+    .section-subheading {
+        display: inline-block;
+        width: 150px;
+        font-weight: normal;
+        font-size: medium;
+        text-align: left;
+        color: gray;
+    }
+
+    .base-form {
+        display: inline-block;
+        width: 150px;
     }
 
     .col-present-tense-person, .col-noun-case {
@@ -1348,13 +1380,19 @@
         cursor: pointer;
 /*        justify-content: space-between;   */
     }
+
+    .btn-text
+    {
+        color: gray;
+    }
+
     .icon {
         display: inline-block;
         color: black;
-        transition: transform 0.2s;
+        transition: rotate 0.2s;
     }
     .rotated {
-        transform: rotate(180deg);
+        rotate: 90deg;
     }
 /* ----------------------------------------------------------------------*/
 

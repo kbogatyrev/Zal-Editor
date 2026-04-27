@@ -614,7 +614,7 @@
                 return;
             }
 
-            if(lexeme['partOfSpeech'] === 'Noun') {
+            if(lexeme['partOfSpeech'] === 'Noun' || lexeme['partOfSpeech'] === 'Pronoun') {
                 handleNounForms(inflectionId, forms);
             }
             else if (lexeme['partOfSpeech'] === 'Adj') {
@@ -917,7 +917,7 @@
 
         <div class="right-panel">
             {#each lexProp.inflections as inflection (inflection.seqNum)}
-                {#if lexProp['partOfSpeech'] == 'Noun'}
+                {#if lexProp['partOfSpeech'] == 'Noun' || lexProp['partOfSpeech'] == 'Pronoun'}
                     <!--  NOUN               -->
                     <table class="paradigm-table">
                     <thead class="paradigm-header">
@@ -1368,7 +1368,6 @@
         padding-right: 25px;
         padding-top: 2px;
         padding-bottom: 5px;
-
         font-style: italic;
         color:gray;
     }

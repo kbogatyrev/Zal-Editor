@@ -480,7 +480,7 @@
                 && formGender === 'm' &&  formNumber === 'Sg' && formCase === 'N') {
                 if (partBase) {
                     partBase.form = form['wordForm'];
-                    isIrregular ? triangle : '';
+                    partBase.isIrregular = isIrregular ? triangle : '';
                     }
                     if (isDifficult) {
                         partBase.isDifficult = true;
@@ -527,7 +527,7 @@
             let isAssumed: boolean = form['status'] === 'Assumed';
             if (subParadigm === form['subParadigm']) {
                 adverbial.form = form['wordForm'];
-                isIrregular ? triangle : '';
+                adverbial.isIrregular = isIrregular ? triangle : '';
                 if (isDifficult) {
                     adverbial.isDifficult = true;
                 }
@@ -614,7 +614,9 @@
                 return;
             }
 
-            if(lexeme['partOfSpeech'] === 'Noun' || lexeme['partOfSpeech'] === 'Pronoun') {
+            if(lexeme['partOfSpeech'] === 'Noun'
+                || lexeme['partOfSpeech'] === 'Pronoun'
+                || lexeme['partOfSpeech'] === 'Numeral') {
                 handleNounForms(inflectionId, forms);
             }
             else if (lexeme['partOfSpeech'] === 'Adj') {
@@ -917,7 +919,9 @@
 
         <div class="right-panel">
             {#each lexProp.inflections as inflection (inflection.seqNum)}
-                {#if lexProp['partOfSpeech'] == 'Noun' || lexProp['partOfSpeech'] == 'Pronoun'}
+                {#if lexProp['partOfSpeech'] == 'Noun'
+                    || lexProp['partOfSpeech'] == 'Pronoun'
+                    || lexProp['partOfSpeech'] == 'Numeral'}
                     <!--  NOUN               -->
                     <table class="paradigm-table">
                     <thead class="paradigm-header">

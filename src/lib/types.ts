@@ -14,6 +14,7 @@ export interface ILexeme {
     lexemeId: number;
     sourceForm: string;
     homonyms: string[];
+    headwordComment: string;
     mainSymbol: string;
     partOfSpeech: string;
     isTransitive: boolean;

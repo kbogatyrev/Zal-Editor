@@ -28,7 +28,8 @@
     let inputValue: string = $state('');
     let lexemeDescr: object[];
     let lexemes = $state([]);
-    let homonymsVisible: boolean = $state(false);
+//    let homonymsVisible: boolean = $state(false);
+//    let hasHeadwordComment: boolean = $state(false);
     let nounTable: INounTable = $state({});
     let adjLongTable: IAdjLongTable = $state({});
     let adjShortTable: IAdjShortTable = $state({});
@@ -663,6 +664,8 @@
                 lexemeId: lexemeData['lexemeId'],
                 sourceForm: lexemeData['sourceForm'],
                 homonyms: [],
+                headwordComment: lexemeData['headwordComment'],
+                lexTrailingComment: lexemeData['lexTrailingComment'],
                 mainSymbol: lexemeData['mainSymbol'],
                 partOfSpeech: lexemeData['partOfSpeech'],
                 isTransitive: lexemeData['isTransitive'],
@@ -670,12 +673,17 @@
                 inflections: []
             };
 
-            if ('homonyms' in lexemeData) {
-                lexeme.homonyms = Object.values(lexemeData['homonyms']);
-                homonymsVisible = true;
-            } else {
-                homonymsVisible = false;
-            }
+//            if ('homonyms' in lexemeData) {
+//                lexeme.homonyms = Object.values(lexemeData['homonyms']);
+//                homonymsVisible = true;
+//            } else {
+//                homonymsVisible = false;
+//            }
+//            if ('headwordComment' in lexemeData) {
+//                hasHeadwordComment = true;
+//            } else {
+//                hasHeadwordComment = false;
+//            }
 
             if ('inflections' in lexemeData) {
                 let inflectionsData = lexemeData['inflections'];
@@ -885,11 +893,23 @@
                 <div class="lex-col">Source form:</div>
                 <div class="lex-col">{lexProp.sourceForm}</div>
             </div>
-            {#if homonymsVisible}
+            {#if lexProp.homonyms.length > 0}
                 <div class="lex-row">
-                <div class="lex-col">Homonyms:</div>
-                <div class="lex-col">{lexProp.homonyms.join(', ')}</div>
-            </div>
+                    <div class="lex-col">Homonyms:</div>
+                    <div class="lex-col">{lexProp.homonyms.join(', ')}</div>
+                </div>
+            {/if}
+            {#if lexProp.headwordComment}
+                <div class="lex-row">
+                    <div class="lex-col">Headword comment:</div>
+                    <div class="lex-col">{lexProp.headwordComment}</div>
+                </div>
+            {/if}
+            {#if lexProp.lexTrailingComment}
+                <div class="lex-row">
+                    <div class="lex-col">Trailing comment:</div>
+                    <div class="lex-col">{lexProp.lexTrailingComment}</div>
+                </div>
             {/if}
             <div class="lex-row">
                 <div class="lex-col">Part of speech:</div>

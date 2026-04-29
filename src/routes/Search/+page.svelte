@@ -28,8 +28,6 @@
     let inputValue: string = $state('');
     let lexemeDescr: object[];
     let lexemes = $state([]);
-//    let homonymsVisible: boolean = $state(false);
-//    let hasHeadwordComment: boolean = $state(false);
     let nounTable: INounTable = $state({});
     let adjLongTable: IAdjLongTable = $state({});
     let adjShortTable: IAdjShortTable = $state({});
@@ -515,7 +513,7 @@
             default:
                 console.log('*** Unknown subParadigm: ', subParadigm);
         }
-        console.log ('============================================== Base form: ', partBase);
+//        console.log ('============================================== Base form: ', partBase);
     }
 
     function handleAdverbials(inflectionId: number, subParadigm:string, jsonForms: Array<any>)
@@ -554,7 +552,7 @@
         else {
             console.log('*** Unknown subParadigm: ', subParadigm);
         }
-        console.log ('============================================== Adverbial: ', adverbial);
+//        console.log ('============================================== Adverbial: ', adverbial);
 
     }       //  handleAdverbials()
 
@@ -673,17 +671,9 @@
                 inflections: []
             };
 
-//            if ('homonyms' in lexemeData) {
-//                lexeme.homonyms = Object.values(lexemeData['homonyms']);
-//                homonymsVisible = true;
-//            } else {
-//                homonymsVisible = false;
-//            }
-//            if ('headwordComment' in lexemeData) {
-//                hasHeadwordComment = true;
-//            } else {
-//                hasHeadwordComment = false;
-//            }
+            if ('homonyms' in lexemeData) {
+                lexeme.homonyms = Object.values(lexemeData['homonyms']);
+            }
 
             if ('inflections' in lexemeData) {
                 let inflectionsData = lexemeData['inflections'];
@@ -695,7 +685,7 @@
                         inflectionType: inflectionData['inflectionType'],
                         accentType1: inflectionData['accentType1'],
                         accentType2: inflectionData['accentType2'],
-                        aspectPair: inflectionData['aspectPair'],
+                        aspectPairs: inflectionData['aspectPairs'],
                         altAspectPair: inflectionData['altAspectPair']
                     };
                     lexeme.inflections.push(inflection);
@@ -933,6 +923,14 @@
                         <div class="lex-col">Accent type:</div>
                         <div class="lex-col">{inflection.accentType1}</div>
                     </div>
+                    {#if inflection.aspectPairs.length > 0}
+                        {#each inflection.aspectPairs as aspectPair (aspectPair.seqNum)}
+                            <div class="lex-row">
+                                <div class="lex-col">Aspect pair:</div>
+                                <div class="lex-col">{inflection.aspectPairs[0]}</div>
+                            </div>
+                        {/each}
+                    {/if}
                 </div>
             {/each}
         </div>      <!-- lexeme-container  -->

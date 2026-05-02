@@ -686,7 +686,8 @@
                         accentType1: inflectionData['accentType1'],
                         accentType2: inflectionData['accentType2'],
                         aspectPairs: inflectionData['aspectPairs'],
-                        altAspectPair: inflectionData['altAspectPair']
+                        altAspectPair: inflectionData['altAspectPair'],
+                        commonDeviations: inflectionData['commonDeviations']
                     };
                     lexeme.inflections.push(inflection);
                     mapInflectionToLexeme.set(inflection.inflectionId, lexeme);
@@ -923,13 +924,19 @@
                         <div class="lex-col">Accent type:</div>
                         <div class="lex-col">{inflection.accentType1}</div>
                     </div>
-                    {#if inflection.aspectPairs.length > 0}
+                    {#if inflection.aspectPairs && inflection.aspectPairs.length > 0}
                         {#each inflection.aspectPairs as aspectPair (aspectPair.seqNum)}
                             <div class="lex-row">
                                 <div class="lex-col">Aspect pair:</div>
                                 <div class="lex-col">{inflection.aspectPairs[0]}</div>
                             </div>
                         {/each}
+                    {/if}
+                    {#if inflection.commonDeviations && inflection.commonDeviations.length > 0}
+                            <div class="lex-row">
+                                <div class="lex-col">Common deviations:</div>
+                                <div class="lex-col">{inflection.commonDeviations}</div>
+                            </div>
                     {/if}
                 </div>
             {/each}
@@ -1185,7 +1192,7 @@
         background-color: #FFFAF0;
         margin-left: 15px;
         padding: 20px;
-        max-width:350px;
+        max-width:400px;
         justify-content: center;
 /*        border: #b3b3b3;    */
     }
@@ -1213,7 +1220,7 @@
         background-color: #FFFAF0;
         margin-left: 15px;
         padding: 20px;
-        max-width: 350px;
+        max-width: 400px;
         /*        border: #b3b3b3;    */
     }
 
@@ -1365,7 +1372,6 @@
         padding-right: 25px;
         padding-top: 2px;
         padding-bottom: 1px;
-
         font-style: italic;
         color:gray;
 /*        border: 1px solid #e5e7eb;  */
@@ -1376,9 +1382,8 @@
         width: 250px;
         padding-left: 25px;
         padding-right: 25px;
-                padding-top: 2px;
-                padding-bottom: 1px;
-
+        padding-top: 2px;
+        padding-bottom: 1px;
         font-style: italic;
         color:gray;
         border: 1px solid #e5e7eb;
@@ -1416,7 +1421,7 @@
     }
 
     .icon {
-        display: inline-block;
+        display: flex;
         color: black;
         transition: rotate 0.2s;
     }
@@ -1429,11 +1434,12 @@
 /*     .accordion {
          margin-bottom: 0;
      }
+*/
     .slider {
-        border: 1px solid #eee;
-        padding: 4px 20px;
+        height: 10px;
+/*        border: 1px solid #eee;    */
+/*        padding: 4px 20px;         */
     }
-    */
 /* ----------------------------------------------------------------------*/
 
 </style>

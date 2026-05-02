@@ -7,6 +7,7 @@ export interface IInflection {
     accentType2: string;
     aspectPair: string;
     altAspectPair: string;
+    commonDeviations: string[];
 }
 
 export interface ILexeme {

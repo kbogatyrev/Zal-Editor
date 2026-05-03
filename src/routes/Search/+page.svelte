@@ -131,7 +131,7 @@
             }
             table.push(row);
         }
-        console.log ('Present tense template', table);
+//        console.log ('Present tense template', table);
         return table;
     }
 
@@ -283,7 +283,7 @@
             aAnimPl.form = gPl.form;
         }
 
-        console.log ('==============================', table);
+//        console.log ('==============================', table);
     }       //  handleLongForms
 
     function handleShortForms(inflectionId: number, subParadigm: string, jsonForms: Array<any>)
@@ -341,7 +341,7 @@
 //            findCell = adjTableShort[inflectionId].flat().find(item => item.gender === formGender && item.number === formNumber);
 //            console.log ('******* ', findCell);
         }
-        console.log ('=======================', adjShortTable);
+//        console.log ('=======================', adjShortTable);
 
     }       //  handleShortForms
 
@@ -466,7 +466,7 @@
 
     function handlePartBaseForm(inflectionId: number, subParadigm:string, jsonForms: Array<any>)
     {
-        console.log(jsonForms);
+//        console.log(jsonForms);
         let partBase = getBaseParticiplesTableTemplate(subParadigm);
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
@@ -493,7 +493,7 @@
         }
 
         if (!partBase.form) {
-            console.log('*** %s base form not found');
+            console.log('*** Base form not found');
             return;
         }
 
@@ -518,7 +518,7 @@
 
     function handleAdverbials(inflectionId: number, subParadigm:string, jsonForms: Array<any>)
     {
-        console.log(jsonForms);
+//        console.log(jsonForms);
         let adverbial = getBaseParticiplesTableTemplate(subParadigm);
         for (const [,form] of jsonForms.entries()) {
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
@@ -539,7 +539,7 @@
         }
 
         if (!adverbial.form) {
-            console.log('*** %s not found');
+            console.log('*** Adverbial not found');
             return;
         }
 
@@ -925,10 +925,10 @@
                         <div class="lex-col">{inflection.accentType1}</div>
                     </div>
                     {#if inflection.aspectPairs && inflection.aspectPairs.length > 0}
-                        {#each inflection.aspectPairs as aspectPair (aspectPair.seqNum)}
+                        {#each inflection.aspectPairs as aspectPair, iAt (aspectPair+iAt)}
                             <div class="lex-row">
                                 <div class="lex-col">Aspect pair:</div>
-                                <div class="lex-col">{inflection.aspectPairs[0]}</div>
+                                <div class="lex-col">{aspectPair}</div>
                             </div>
                         {/each}
                     {/if}

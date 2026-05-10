@@ -663,11 +663,13 @@
                 sourceForm: lexemeData['sourceForm'],
                 homonyms: [],
                 headwordComment: lexemeData['headwordComment'],
+                headwordVariantComment: lexemeData['headwordVariantComment'],
                 lexTrailingComment: lexemeData['lexTrailingComment'],
                 mainSymbol: lexemeData['mainSymbol'],
                 partOfSpeech: lexemeData['partOfSpeech'],
                 isTransitive: lexemeData['isTransitive'],
                 section: lexemeData['section'],
+                restrictedContexts: lexemeData['restrictedContexts'],
                 inflections: []
             };
 
@@ -896,6 +898,12 @@
                     <div class="lex-col">{lexProp.headwordComment}</div>
                 </div>
             {/if}
+            {#if lexProp.headwordVariantComment}
+                <div class="lex-row">
+                    <div class="lex-col">Variant comment:</div>
+                    <div class="lex-col">{lexProp.headwordVariantComment}</div>
+                </div>
+            {/if}
             {#if lexProp.lexTrailingComment}
                 <div class="lex-row">
                     <div class="lex-col">Trailing comment:</div>
@@ -910,6 +918,10 @@
                 <div class="lex-col">Main symbol:</div>
                 <div class="lex-col">{lexProp.mainSymbol}</div>
             </div>
+            {#if lexProp.restrictedContexts}
+                <div class="lex-col">Restricted contexts:</div>
+                <div class="lex-col">{lexProp.restrictedContexts}</div>
+            {/if}
             {#each lexProp.inflections as inflection (inflection.seqNum)}
                 <div class="inflection-container">
                     <div class="lex-row">

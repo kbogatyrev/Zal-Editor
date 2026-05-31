@@ -60,7 +60,21 @@
 
     function getNounTableTemplate()
     {
-        const declRowTemplate = { number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        const declRowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        let table = [];
+        for (let caseName of ['N', 'A', 'G', 'D', 'P', 'I']) {
+            let row = [];
+            for (let number of ['Sg', 'Pl']) {
+                row.push({...declRowTemplate, number: number, case: caseName});
+            }
+            table.push(row);
+        }
+        return table;
+    }
+
+    function getDualNumberLastNameTableTemplate()
+    {
+        const declRowTemplate = { numberGender: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
         for (let caseName of ['N', 'A', 'G', 'D', 'P', 'I']) {
@@ -75,7 +89,7 @@
 
     function getAdjLongTableTemplate()
     {
-        const declRowTemplate = { gender: '', number: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        const declRowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
         for (let caseName of ['N', 'A', 'A (anim)', 'G', 'D', 'P', 'I']) {
@@ -95,7 +109,7 @@
 
     function getAdjShortTableTemplate()
     {
-        const rowTemplate = { gender: '', number: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
         let row = [];
@@ -122,7 +136,7 @@
 
     function getPresentTenseTableTemplate()
     {
-        const rowTemplate = { number: '', person: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
         for (let personName of ['1', '2', '3']) {
             let row = [];
@@ -137,13 +151,13 @@
 
     function getPastTenseTableTemplate()
     {
-        const rowTemplate = { gender: '', number: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
         let row = [];
         for (let col of ['m', 'f', 'n', 'Pl']) {
             if (col === 'Pl') {
-                row.push({...rowTemplate, subParadigm: 'PastTense', number: 'Pl'});
+                row.push({...rowTemplate, subParadigm: 'PastTense', gender: ''});
             }
             else{
                 row.push({...rowTemplate, subParadigm: 'PastTense', gender: col, number: 'Sg'});
@@ -158,7 +172,7 @@
 
     function getImperativeTableTemplate()
     {
-        const rowTemplate = { number: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
         let row = [];
@@ -400,6 +414,7 @@
 
     function handlePastTenseForms(inflectionId: number, jsonForms: Array<any>)
     {
+console.log('-------------------------', jsonForms);
         pastTenseTable[inflectionId] = getPastTenseTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             if (form['subParadigm'] !== 'PastTense') continue;
@@ -956,10 +971,10 @@
 
         <div class="right-panel">
             {#each lexProp.inflections as inflection (inflection.seqNum)}
+                <!--  NOUN               -->
                 {#if lexProp['partOfSpeech'] == 'Noun'
                     || lexProp['partOfSpeech'] == 'Pronoun'
                     || lexProp['partOfSpeech'] == 'Numeral'}
-                    <!--  NOUN               -->
                     <table class="paradigm-table">
                     <thead class="paradigm-header">
                         <tr>
@@ -985,6 +1000,45 @@
                             </tr>
                         {/each}
                     </tbody>
+                    </table>
+                {/if}
+
+                <!--  DUAL-GENDER LAST NAME -->
+                {#if lexProp['partOfSpeech'] == 'LastName'}
+                    <table class="paradigm-table">
+                    <thead class="paradigm-header">
+                        <tr>
+                            <th class="col-noun-case"></th>
+                            <th class="col-head">Sg</th>
+                            <th class="col-head">Pl</th>
+                        </tr>
+                    </thead>
+                    </table>
+                    <table class="paradigm-table">
+                        <thead class="paradigm-header">
+                        <tr>
+                            <th class="col-noun-case"></th>
+                            <th class="col-head">Sg</th>
+                            <th class="col-head">Pl</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {#each nounTable[inflection.inflectionId] as itemPair}
+                            <tr>
+                                <td class="col-noun-case">{itemPair[0].case}</td>
+                                <td class={getNounFormClass(itemPair[0])}>
+                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair[0].form}
+                                    {itemPair[0].isIrregular}
+                                </td>
+                                <td class={getNounFormClass(itemPair[1])}>
+                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {itemPair[1].form}
+                                    {itemPair[1].isIrregular}
+                                </td>
+                            </tr>
+                        {/each}
+                        </tbody>
                     </table>
                 {/if}
 

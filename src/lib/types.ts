@@ -25,17 +25,6 @@ export interface ILexeme {
     inflections: object[];
 }
 
-export interface IWordFormNoun
-{
-    wordForm: string;
-    subParadigm: string;
-    case: string;
-    number: string;
-    isIrregular: boolean;
-    isDifficult: boolean;
-    status: string;
-}
-
 export interface INounTableEntry
 {
     number: string;
@@ -48,6 +37,21 @@ export interface INounTableEntry
 
 export interface INounTable {
     [inflectionId: number]: INounTableEntry[][];
+}
+
+export interface ILastNameTableEntry
+{
+    number: string;
+    case: string;
+    gender: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface ILastNameTable {
+    [inflectionId: number]: ILastNameTableEntry[][];
 }
 
 export interface IAdjLongTableEntry
@@ -102,13 +106,13 @@ export interface IPresentTenseTableEntry
 }
 
 export interface IPresentTenseTable {
-    [inflectionId: number]: IPresentTenseTable[][];
+    [inflectionId: number]: IPresentTenseTableEntry[][];
 }
 
 export interface IPastTenseTableEntry
 {
     number: string;
-    person: string;
+    gender: string;
     form: string;
     isIrregular: string;
     isDifficult: boolean;
@@ -116,7 +120,7 @@ export interface IPastTenseTableEntry
 }
 
 export interface IPastTenseTable {
-    [inflectionId: number]: IPastTenseTable[][];
+    [inflectionId: number]: IPastTenseTableEntry[][];
 }
 
 export interface IImperativeTableEntry
@@ -129,7 +133,7 @@ export interface IImperativeTableEntry
 }
 
 export interface IImperativeTable {
-    [inflectionId: number]: IImperativeTable[][];
+    [inflectionId: number]: IImperativeTableEntry[][];
 }
 
 export interface IBaseParticiplesTableEntry

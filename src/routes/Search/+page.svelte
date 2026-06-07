@@ -4,7 +4,9 @@
 
 // Props
     import type {
-        INounTable, INounTableEntry, IAdjLongTable, IAdjLongTableEntry,
+        INounTable, INounTableEntry,
+        ILastNameTable, ILastNameTableEntry,
+        IAdjLongTable, IAdjLongTableEntry,
         IAdjShortTable, IAdjShortTableEntry,
         IComparativesEntry, IComparatives,
         IPresentTenseTableEntry, IPresentTenseTable,
@@ -14,7 +16,7 @@
     } from "$lib/types";
 
     import {caseToHash, numberToHash, genderToHash} from "$lib/stores";
-    import {presentTenseToPerson} from "$lib/stores.ts";
+    import {presentTenseToPerson} from "$lib/stores";
 
     function preventDefault(fn: Function) {
         return (e: Event) => {
@@ -29,6 +31,7 @@
     let lexemeDescr: object[];
     let lexemes = $state([]);
     let nounTable: INounTable = $state({});
+    let lastNameTable: ILastNameTable = $state({});
     let adjLongTable: IAdjLongTable = $state({});
     let adjShortTable: IAdjShortTable = $state({});
     let comparatives: IComparatives = $state({});
@@ -72,15 +75,19 @@
         return table;
     }
 
-    function getDualNumberLastNameTableTemplate()
+    function getLastNameTableTemplate()
     {
-        const declRowTemplate = { numberGender: '', case: '', form: '', isIrregular: '', isDifficult: false, isAssumed: false };
-
+        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
         for (let caseName of ['N', 'A', 'G', 'D', 'P', 'I']) {
             let row = [];
-            for (let number of ['Sg', 'Pl']) {
-                row.push({...declRowTemplate, number: number, case: caseName});
+            for (let col of ['m', 'f', 'Pl']) {
+                if (col === 'Pl') {
+                    row.push({...rowTemplate, number: 'Pl', gender: '', case: caseName});
+                }
+                else {
+                    row.push({...rowTemplate, number: 'Sg', gender: col, case: caseName});
+                }
             }
             table.push(row);
         }
@@ -199,7 +206,7 @@
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             if (formCase !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
-                const findCell = nounTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
+                let findCell = nounTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
                 if (findCell) {
                     findCell.form = form['wordForm'];
                     if (isIrregular) {
@@ -225,6 +232,54 @@
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
+
+    function handleLastNameForms(inflectionId: number, jsonForms: Array<any>)
+    {
+        lastNameTable[inflectionId] = getLastNameTableTemplate();
+        for (const [,form] of jsonForms.entries()) {
+            let formCase: string = caseToHash.get(form['case']) || '';
+            let formNumber: string = numberToHash.get(form['number']) || '';
+            let formGender = '';
+            if (form['subParadigm'] === 'LastNameNounF') {
+                formGender = 'f';
+            } else if (form['subParadigm'] === 'LastNameNoun') {
+                if( formNumber === 'Sg' )
+                {
+                    formGender = 'm';
+                } else {
+                    formGender = '';
+                }
+            } else if (form['subParadigm'] === 'LastNameLongAdj' || form['subParadigm'] === 'LastNamePronAdj') {
+                formGender = genderToHash.get(form['gender']);
+            }
+
+            let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
+            let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
+            let isAssumed: boolean = form['status'] === 'Assumed';
+            let findCell = undefined;
+            if (formCase !== '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f')) {
+                findCell = lastNameTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
+            }
+            else if (formCase !== '' && formNumber === 'Pl' ) {
+                findCell = lastNameTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
+            }
+
+            if (findCell) {
+                findCell.form = form['wordForm'];
+                if (isIrregular) {
+                    findCell.isIrregular = triangle;
+                }
+                if (isDifficult) {
+                    findCell.isDifficult = true;
+                }
+                if (isAssumed) {
+                    findCell.isAssumed = true;
+                }
+            } else {
+                console.log('*** Last name entry not found');
+            }
+        }
+    }
 
     function handleLongForms(inflectionId: number, subParadigm: string, jsonForms: Array<any>)
     {
@@ -414,7 +469,6 @@
 
     function handlePastTenseForms(inflectionId: number, jsonForms: Array<any>)
     {
-console.log('-------------------------', jsonForms);
         pastTenseTable[inflectionId] = getPastTenseTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             if (form['subParadigm'] !== 'PastTense') continue;
@@ -632,6 +686,9 @@ console.log('-------------------------', jsonForms);
                 || lexeme['partOfSpeech'] === 'Pronoun'
                 || lexeme['partOfSpeech'] === 'Numeral') {
                 handleNounForms(inflectionId, forms);
+            }
+            else if (lexeme['partOfSpeech'] === 'LastName') {
+                handleLastNameForms(inflectionId, forms);
             }
             else if (lexeme['partOfSpeech'] === 'Adj') {
                 handleLongForms(inflectionId, 'LongAdj', forms);
@@ -870,10 +927,11 @@ console.log('-------------------------', jsonForms);
 {#snippet comparative(inflection)}
     <div class="section-subheading">Comparative</div>
     {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
-        <div class={getComparativeClass(comparatives[inflection.inflectionId])} />
-        {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-        {comparatives[inflection.inflectionId].form}
-        {comparatives[inflection.inflectionId].isIrregular}
+        <div class={getComparativeClass(comparatives[inflection.inflectionId])}>
+            {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+            {comparatives[inflection.inflectionId].form}
+            {comparatives[inflection.inflectionId].isIrregular}
+        </div>
     {/if}
 {/snippet}
 
@@ -1003,42 +1061,39 @@ console.log('-------------------------', jsonForms);
                     </table>
                 {/if}
 
-                <!--  DUAL-GENDER LAST NAME -->
+                <!--  LAST NAME -->
                 {#if lexProp['partOfSpeech'] == 'LastName'}
                     <table class="paradigm-table">
                     <thead class="paradigm-header">
                         <tr>
                             <th class="col-noun-case"></th>
-                            <th class="col-head">Sg</th>
+                            <th class="col-head">m Sg</th>
+                            <th class="col-head">f Sg</th>
                             <th class="col-head">Pl</th>
                         </tr>
                     </thead>
-                    </table>
-                    <table class="paradigm-table">
-                        <thead class="paradigm-header">
+                    <tbody>
+                    {#each lastNameTable[inflection.inflectionId] as item}
                         <tr>
-                            <th class="col-noun-case"></th>
-                            <th class="col-head">Sg</th>
-                            <th class="col-head">Pl</th>
+                            <td class="col-noun-case">{item[0].case}</td>
+                            <td class={getNounFormClass(item[0])}>
+                                {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                {item[0].form}
+                                {item[0].isIrregular}
+                            </td>
+                            <td class={getNounFormClass(item[1])}>
+                                {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                {item[1].form}
+                                {item[1].isIrregular}
+                            </td>
+                            <td class={getNounFormClass(item[2])}>
+                                {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                {item[2].form}
+                                {item[2].isIrregular}
+                            </td>
                         </tr>
-                        </thead>
-                        <tbody>
-                        {#each nounTable[inflection.inflectionId] as itemPair}
-                            <tr>
-                                <td class="col-noun-case">{itemPair[0].case}</td>
-                                <td class={getNounFormClass(itemPair[0])}>
-                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[0].form}
-                                    {itemPair[0].isIrregular}
-                                </td>
-                                <td class={getNounFormClass(itemPair[1])}>
-                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[1].form}
-                                    {itemPair[1].isIrregular}
-                                </td>
-                            </tr>
-                        {/each}
-                        </tbody>
+                    {/each}
+                    </tbody>
                     </table>
                 {/if}
 

@@ -29,3 +29,5 @@ presentTenseToPerson.set('1stPerson', '1');
 presentTenseToPerson.set('2ndPerson', '2');
 presentTenseToPerson.set('3rdPerson', '3');
 
+// Search term to be passed from the landing page to the Search page
+export const searchRequest = writable(null);

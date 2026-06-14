@@ -1,6 +1,7 @@
 <script lang="ts">
 
     import { slide } from 'svelte/transition';
+    import { searchRequest } from '$lib/stores';
 
 // Props
     import type {
@@ -778,6 +779,13 @@
         }
     }
 
+    $effect(() => {
+        if ($searchRequest?.submit) {
+            inputValue = $searchRequest.query;
+            handleClick();
+        }
+    });
+
     async function handleClick() {
         try {
 //            console.log('Input value: ' + inputValue);
@@ -935,7 +943,7 @@
     {/if}
 {/snippet}
 
-<h1>Поиск в словаре</h1>
+<!-- <h1>Поиск в словаре</h1>  -->
 <div class="prompt-container">
 <!--    <form onsubmit={handleClick}>    -->
     <form class="word-entry" onsubmit={preventDefault(handleClick)}>
@@ -1315,9 +1323,8 @@
         padding: 20px;
         max-width:400px;
         justify-content: center;
-/*        border: #b3b3b3;    */
+        border: #b3b3b3;
     }
-
     .word-entry {
         display: flex;
         flex-direction: row;
@@ -1403,6 +1410,7 @@
         font-size: medium;
         text-align: left;
         color: gray;
+        padding-top: 15px;
     }
 
     .base-form {

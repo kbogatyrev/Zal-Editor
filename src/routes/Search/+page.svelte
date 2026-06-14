@@ -1,7 +1,7 @@
 <script lang="ts">
 
     import { slide } from 'svelte/transition';
-    import { searchRequest } from '$lib/stores';
+    import { searchRequest } from '$lib/stores.svelte';
 
 // Props
     import type {
@@ -16,8 +16,8 @@
         ILexeme, IInflection, IBaseParticiplesTable, IBaseParticiplesTableEntry
     } from "$lib/types";
 
-    import {caseToHash, numberToHash, genderToHash} from "$lib/stores";
-    import {presentTenseToPerson} from "$lib/stores";
+    import {caseToHash, numberToHash, genderToHash} from "$lib/stores.svelte";
+    import {presentTenseToPerson} from "$lib/stores.svelte";
 
     function preventDefault(fn: Function) {
         return (e: Event) => {
@@ -780,9 +780,14 @@
     }
 
     $effect(() => {
-        if ($searchRequest?.submit) {
-            inputValue = $searchRequest.query;
+        if (searchRequest?.query && !searchRequest.ignore) {
+            inputValue = searchRequest.query;
             handleClick();
+        }
+        return () => {
+            inputValue = '';
+            searchRequest.query = '';
+            searchRequest.ignore = true;
         }
     });
 
@@ -797,6 +802,7 @@
             lexemeDescr = await response.json(); // Assign the fetched data
 
             if (lexemeDescr.length === 0) {
+                alert('Input not recognized.');
                 console.log('No lexeme data');
                 return;
             }
@@ -943,9 +949,7 @@
     {/if}
 {/snippet}
 
-<!-- <h1>Поиск в словаре</h1>  -->
 <div class="prompt-container">
-<!--    <form onsubmit={handleClick}>    -->
     <form class="word-entry" onsubmit={preventDefault(handleClick)}>
         <label>
             <input type="text"

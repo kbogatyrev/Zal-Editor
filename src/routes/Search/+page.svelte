@@ -665,7 +665,10 @@
     {
         console.log('Requesting forms for inflection ID: ' + inflectionId);
         try {
-            const response = await fetch(`http://localhost:8088/forms?inflection-id=${inflectionId}`);
+//            const response = await fetch(`http://localhost:8088/forms?inflection-id=${inflectionId}`);
+            const response = await fetch(
+                `https://api.bogatyrev.org/forms?inflection-id=${encodeURIComponent(inflectionId)}`
+            );
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -794,7 +797,10 @@
     async function handleClick() {
         try {
 //            console.log('Input value: ' + inputValue);
-            const response = await fetch(`http://localhost:8088/query?word=${inputValue}`);
+//            const response = await fetch(`http://localhost:8088/query?word=${inputValue}`);
+            const response = await fetch(
+                `https://api.bogatyrev.org/query?word=${encodeURIComponent(inputValue)}`
+            );
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }

@@ -10,21 +10,21 @@ export const searchRequest =
              ignore: false });
 
 export const caseToHash = new Map<string, string>();
-caseToHash.set('Nominative', 'N');
-caseToHash.set('Accusative', 'A');
-caseToHash.set('Dative', 'D');
-caseToHash.set('Genitive', 'G');
-caseToHash.set('Prepositional', 'P');
-caseToHash.set('Instrumental', 'I');
+caseToHash.set('Nominative', 'И');
+caseToHash.set('Accusative', 'В');
+caseToHash.set('Dative', 'Д');
+caseToHash.set('Genitive', 'Р');
+caseToHash.set('Prepositional', 'П');
+caseToHash.set('Instrumental', 'Т');
 
 export const numberToHash = new Map<string, string>();
-numberToHash.set('Singular', 'Sg');
-numberToHash.set('Plural', 'Pl');
+numberToHash.set('Singular', 'ед.');
+numberToHash.set('Plural', 'мн.');
 
 export const genderToHash = new Map<string, string>();
-genderToHash.set('Masculine', 'm');
-genderToHash.set('Feminine', 'f');
-genderToHash.set('Neuter', 'n');
+genderToHash.set('Masculine', 'м');
+genderToHash.set('Feminine', 'ж');
+genderToHash.set('Neuter', 'с');
 
 export const presentTenseToPerson = new Map<string, string>();
 presentTenseToPerson.set('1stPerson', '1');

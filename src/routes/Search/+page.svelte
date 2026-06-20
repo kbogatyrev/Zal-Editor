@@ -66,9 +66,9 @@
     {
         const declRowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
-        for (let caseName of ['N', 'A', 'G', 'D', 'P', 'I']) {
+        for (let caseName of ['И', 'В', 'Р', 'Д', 'П', 'Т']) {
             let row = [];
-            for (let number of ['Sg', 'Pl']) {
+            for (let number of ['ед.', 'мн.']) {
                 row.push({...declRowTemplate, number: number, case: caseName});
             }
             table.push(row);
@@ -80,14 +80,14 @@
     {
         const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
-        for (let caseName of ['N', 'A', 'G', 'D', 'P', 'I']) {
+        for (let caseName of ['И', 'В', 'Р', 'Д', 'П', 'Т']) {
             let row = [];
-            for (let col of ['m', 'f', 'Pl']) {
-                if (col === 'Pl') {
-                    row.push({...rowTemplate, number: 'Pl', gender: '', case: caseName});
+            for (let col of ['м', 'ж', 'мн.']) {
+                if (col === 'мн.') {
+                    row.push({...rowTemplate, number: 'мн.', gender: '', case: caseName});
                 }
                 else {
-                    row.push({...rowTemplate, number: 'Sg', gender: col, case: caseName});
+                    row.push({...rowTemplate, number: 'ед.', gender: col, case: caseName});
                 }
             }
             table.push(row);
@@ -100,14 +100,14 @@
         const declRowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
-        for (let caseName of ['N', 'A', 'A (anim)', 'G', 'D', 'P', 'I']) {
+        for (let caseName of ['И', 'В', 'В (одуш.)', 'Р', 'Д', 'П', 'Т']) {
             let row = [];
-            for (let col of ['m', 'f', 'n', 'Pl']) {
-                if (col === 'Pl') {
-                    row.push({...declRowTemplate, number: 'Pl', case: caseName});
+            for (let col of ['м', 'ж', 'с', 'мн.']) {
+                if (col === 'мн.') {
+                    row.push({...declRowTemplate, number: 'мн.', case: caseName});
                 }
                 else{
-                    row.push({...declRowTemplate, gender: col, number: 'Sg', case: caseName});
+                    row.push({...declRowTemplate, gender: col, number: 'ед.', case: caseName});
                 }
             }
             table.push(row);
@@ -121,12 +121,12 @@
 
         let table = [];
         let row = [];
-        for (let col of ['m', 'f', 'n', 'Pl']) {
-            if (col === 'Pl') {
-                row.push({...rowTemplate, subParadigm: 'ShortAdj', number: 'Pl'});
+        for (let col of ['м', 'ж', 'с', 'мн.']) {
+            if (col === 'мн.') {
+                row.push({...rowTemplate, subParadigm: 'ShortAdj', number: 'мн.'});
             }
             else{
-                row.push({...rowTemplate, subParadigm: 'ShortAdj', gender: col, number: 'Sg'});
+                row.push({...rowTemplate, subParadigm: 'ShortAdj', gender: col, number: 'ед.'});
             }
         }
         table.push(row);
@@ -148,7 +148,7 @@
         let table = [];
         for (let personName of ['1', '2', '3']) {
             let row = [];
-            for (let numberName of ['Sg', 'Pl']) {
+            for (let numberName of ['ед.', 'мн.']) {
                 row.push({...rowTemplate, number: numberName, person: personName});
             }
             table.push(row);
@@ -163,12 +163,12 @@
 
         let table = [];
         let row = [];
-        for (let col of ['m', 'f', 'n', 'Pl']) {
-            if (col === 'Pl') {
+        for (let col of ['м', 'ж', 'с', 'мн.']) {
+            if (col === 'мн.') {
                 row.push({...rowTemplate, subParadigm: 'PastTense', gender: ''});
             }
             else{
-                row.push({...rowTemplate, subParadigm: 'PastTense', gender: col, number: 'Sg'});
+                row.push({...rowTemplate, subParadigm: 'PastTense', gender: col, number: 'ед.'});
             }
         }
         table.push(row);
@@ -184,7 +184,7 @@
 
         let table = [];
         let row = [];
-        for (const col of ['Sg', 'Pl']) {
+        for (const col of ['ед.', 'мн.']) {
             row.push({...rowTemplate, subParadigm: 'Imperative', number: col});
         }
         table.push(row);
@@ -206,7 +206,7 @@
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
-            if (formCase !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
+            if (formCase !== '' && (formNumber === 'ед.' || formNumber === 'мн.')) {
                 let findCell = nounTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
                 if (findCell) {
                     findCell.form = form['wordForm'];
@@ -242,11 +242,11 @@
             let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender = '';
             if (form['subParadigm'] === 'LastNameNounF') {
-                formGender = 'f';
+                formGender = 'ж';
             } else if (form['subParadigm'] === 'LastNameNoun') {
-                if( formNumber === 'Sg' )
+                if( formNumber === 'ед.' )
                 {
-                    formGender = 'm';
+                    formGender = 'м';
                 } else {
                     formGender = '';
                 }
@@ -258,10 +258,10 @@
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
-            if (formCase !== '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f')) {
+            if (formCase !== '' && formNumber === 'ед.' && (formGender === 'м' || formGender === 'ж')) {
                 findCell = lastNameTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
             }
-            else if (formCase !== '' && formNumber === 'Pl' ) {
+            else if (formCase !== '' && formNumber === 'мн.' ) {
                 findCell = lastNameTable[inflectionId].flat().find(item => item.case === formCase && item.number === formNumber);
             }
 
@@ -318,10 +318,10 @@
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
-            if (formCase !== '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f' || formGender === 'n')) {
+            if (formCase !== '' && formNumber === 'ед.' && (formGender === 'м' || formGender === 'ж' || formGender === 'с')) {
                 findCell = table.flat().find(item => item.case === formCase && item.gender === formGender);
             }
-            else if (formCase !== '' && formNumber === 'Pl' ) {
+            else if (formCase !== '' && formNumber === 'мн.' ) {
                 findCell = table.flat().find(item => item.case === formCase && item.number === formNumber);
             }
             if (findCell) {
@@ -341,14 +341,14 @@
 //            console.log ('******* ', findCell);
         }
 
-        let gSgM = table.flat().find(item => item.case === 'G' && item.gender === 'm' && item.number==='Sg');
-        let aAnimSgM = table.flat().find(item => item.case === 'A (anim)' && item.gender === 'm' && item.number==='Sg');
+        let gSgM = table.flat().find(item => item.case === 'Р' && item.gender === 'м' && item.number==='ед.');
+        let aAnimSgM = table.flat().find(item => item.case === 'В (одуш.)' && item.gender === 'м' && item.number==='ед.');
         if (gSgM && aAnimSgM) {
             aAnimSgM.form = gSgM.form;
         }
 
-        let gPl = table.flat().find(item => item.case === 'G' && item.number==='Pl');
-        let aAnimPl = table.flat().find(item => item.case === 'A (anim)' && item.number==='Pl');
+        let gPl = table.flat().find(item => item.case === 'Р' && item.number==='мн.');
+        let aAnimPl = table.flat().find(item => item.case === 'В (одуш.)' && item.number==='мн.');
         if (gPl && aAnimPl) {
             aAnimPl.form = gPl.form;
         }
@@ -386,10 +386,10 @@
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
-            if (formNumber != '' && formNumber === 'Sg' && (formGender === 'm' || formGender === 'f' || formGender === 'n')) {
-                findCell = table.flat().find(item => item.gender === formGender && item.number==='Sg');
+            if (formNumber != '' && formNumber === 'ед.' && (formGender === 'м' || formGender === 'ж' || formGender === 'с')) {
+                findCell = table.flat().find(item => item.gender === formGender && item.number==='ед.');
             }
-            else if (formNumber === 'Pl' ) {
+            else if (formNumber === 'мн.' ) {
                 findCell = table.flat().find(item => item.number === formNumber);
             }
             if (findCell) {
@@ -446,7 +446,7 @@
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] !== undefined && form['status'] === 'Assumed';
-            if (formPerson !== '' && (formNumber === 'Sg' || formNumber === 'Pl')) {
+            if (formPerson !== '' && (formNumber === 'ед.' || formNumber === 'мн.')) {
                 const findCell = presentTenseTable[inflectionId].flat().find(item => item.person === formPerson && item.number === formNumber);
                 if (findCell) {
                     findCell.form = form['wordForm'];
@@ -479,8 +479,8 @@
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
-            if (formGender === 'm' || formGender === 'f' || formGender === 'n') {
-                findCell = pastTenseTable[inflectionId].flat().find(item => item.gender === formGender && item.number==='Sg');
+            if (formGender === 'м' || formGender === 'ж' || formGender === 'с') {
+                findCell = pastTenseTable[inflectionId].flat().find(item => item.gender === formGender && item.number==='ед.');
             }
 //            else if (formNumber === 'Pl' ) {          // need to fix Node
             else {
@@ -514,8 +514,6 @@
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
-//            else if (formNumber === 'Pl' ) {          // need to fix Node
-//                findCell = pastTenseTable[inflectionId].flat().find(item => item.number === formNumber);
             findCell = imperativeTable[inflectionId].flat().find(item => item.number === formNumber);
             if (findCell) {
                 findCell.form = form['wordForm'];
@@ -546,7 +544,7 @@
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             if (subParadigm === form['subParadigm']
-                && formGender === 'm' &&  formNumber === 'Sg' && formCase === 'N') {
+                && formGender === 'м' &&  formNumber === 'ед.' && formCase === 'И') {
                 if (partBase) {
                     partBase.form = form['wordForm'];
                     partBase.isIrregular = isIrregular ? triangle : '';
@@ -840,7 +838,7 @@
 </script>
 
 {#snippet longForms(inflection, table)}
-    <div class="section-subheading">Long Forms</div>
+    <div class="section-subheading">Полные формы</div>
     <table class="paradigm-table">
         <colgroup>
             <col class="col-adj-case" span="1"/>
@@ -849,10 +847,10 @@
         <thead class="paradigm-header">
         <tr>
             <th class="col-adj-case"></th>
-            <th class="col-head">m</th>
-            <th class="col-head">f</th>
-            <th class="col-head">n</th>
-            <th class="col-head">Pl</th>
+            <th class="col-head">м</th>
+            <th class="col-head">ж</th>
+            <th class="col-head">с</th>
+            <th class="col-head">мн.</th>
         </tr>
         </thead>
         <tbody>
@@ -864,26 +862,26 @@
                     {item[0].form}
                     {item[0].isIrregular}
                 </td>
-                {#if item[1].case === 'A' && item[1].number === 'Sg'}
+                {#if item[1].case === 'В' && item[1].number === 'ед.'}
                     <td class={getAdjLongFormClass(item[1])} rowspan="2">
                         {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                         {item[1].form}
                         {item[1].isIrregular}
                     </td>
-                {:else if item[1].case !== 'A (anim)'}
+                {:else if item[1].case !== 'В (одуш.)'}
                     <td class={getAdjLongFormClass(item[1])}>
                         {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                         {item[1].form}
                         {item[1].isIrregular}
                     </td>
                 {/if}
-                {#if item[2].case === 'A' && item[2].number === 'Sg'}
+                {#if item[2].case === 'В' && item[2].number === 'ед.'}
                     <td class={getAdjLongFormClass(item[2])} rowspan="2">
                         {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                         {item[2].form}
                         {item[2].isIrregular}
                     </td>
-                {:else if item[2].case !== 'A (anim)'}
+                {:else if item[2].case !== 'В (одуш.)'}
                     <td class={getAdjLongFormClass(item[2])}>
                         {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                         {item[2].form}
@@ -902,17 +900,17 @@
 {/snippet}
 
 {#snippet shortForms(inflection, table)}
-    <div class="section-subheading">Short Forms</div>
+    <div class="section-subheading">Краткие формы</div>
     <table class="paradigm-table">
         <colgroup>
             <col class="col-form" span="4"/>
         </colgroup>
         <thead class="paradigm-header">
         <tr>
-            <th class="col-head">m</th>
-            <th class="col-head">f</th>
-            <th class="col-head">n</th>
-            <th class="col-head">Pl</th>
+            <th class="col-head">м</th>
+            <th class="col-head">ж</th>
+            <th class="col-head">с</th>
+            <th class="col-head">мн.</th>
         </tr>
         </thead>
         <tbody>
@@ -945,7 +943,7 @@
 {/snippet}
 
 {#snippet comparative(inflection)}
-    <div class="section-subheading">Comparative</div>
+    <div class="section-subheading">Сравн. степень</div>
     {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
         <div class={getComparativeClass(comparatives[inflection.inflectionId])}>
             {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
@@ -974,43 +972,43 @@
                 <div class="lex-col">{lexProp.lexemeId}</div>
             </div>
             <div class="lex-row">
-                <div class="lex-col">Source form:</div>
+                <div class="lex-col">Исходная форма:</div>
                 <div class="lex-col">{lexProp.sourceForm}</div>
             </div>
             {#if lexProp.homonyms.length > 0}
                 <div class="lex-row">
-                    <div class="lex-col">Homonyms:</div>
+                    <div class="lex-col">Индекс омонима:</div>
                     <div class="lex-col">{lexProp.homonyms.join(', ')}</div>
                 </div>
             {/if}
             {#if lexProp.headwordComment}
                 <div class="lex-row">
-                    <div class="lex-col">Headword comment:</div>
+                    <div class="lex-col">Помета (1):</div>
                     <div class="lex-col">{lexProp.headwordComment}</div>
                 </div>
             {/if}
             {#if lexProp.headwordVariantComment}
                 <div class="lex-row">
-                    <div class="lex-col">Variant comment:</div>
+                    <div class="lex-col">Помета (2):</div>
                     <div class="lex-col">{lexProp.headwordVariantComment}</div>
                 </div>
             {/if}
             {#if lexProp.lexTrailingComment}
                 <div class="lex-row">
-                    <div class="lex-col">Trailing comment:</div>
+                    <div class="lex-col">Помета (3):</div>
                     <div class="lex-col">{lexProp.lexTrailingComment}</div>
                 </div>
             {/if}
             <div class="lex-row">
-                <div class="lex-col">Part of speech:</div>
+                <div class="lex-col">Часть речи:</div>
                 <div class="lex-col">{lexProp.partOfSpeech}</div>
             </div>
             <div class="lex-row">
-                <div class="lex-col">Main symbol:</div>
+                <div class="lex-col">Основной символ:</div>
                 <div class="lex-col">{lexProp.mainSymbol}</div>
             </div>
             {#if lexProp.restrictedContexts}
-                <div class="lex-col">Restricted contexts:</div>
+                <div class="lex-col">Фразеологизмы:</div>
                 <div class="lex-col">{lexProp.restrictedContexts}</div>
             {/if}
             {#each lexProp.inflections as inflection (inflection.seqNum)}
@@ -1020,24 +1018,24 @@
                         <div class="lex-col">{inflection.inflectionId}</div>
                     </div>
                     <div class="lex-row">
-                        <div class="lex-col">Inflection type:</div>
+                        <div class="lex-col">Словоизм. индекс:</div>
                         <div class="lex-col">{inflection.inflectionType}</div>
                     </div>
                     <div class="lex-row">
-                        <div class="lex-col">Accent type:</div>
+                        <div class="lex-col">Схема ударения:</div>
                         <div class="lex-col">{inflection.accentType1}</div>
                     </div>
                     {#if inflection.aspectPairs && inflection.aspectPairs.length > 0}
                         {#each inflection.aspectPairs as aspectPair, iAt (aspectPair+iAt)}
                             <div class="lex-row">
-                                <div class="lex-col">Aspect pair:</div>
+                                <div class="lex-col">Видовая пара:</div>
                                 <div class="lex-col">{aspectPair}</div>
                             </div>
                         {/each}
                     {/if}
                     {#if inflection.commonDeviations && inflection.commonDeviations.length > 0}
                             <div class="lex-row">
-                                <div class="lex-col">Common deviations:</div>
+                                <div class="lex-col">Отклонения:</div>
                                 <div class="lex-col">{inflection.commonDeviations}</div>
                             </div>
                     {/if}
@@ -1085,9 +1083,9 @@
                     <thead class="paradigm-header">
                         <tr>
                             <th class="col-noun-case"></th>
-                            <th class="col-head">m Sg</th>
-                            <th class="col-head">f Sg</th>
-                            <th class="col-head">Pl</th>
+                            <th class="col-head">м. ед.</th>
+                            <th class="col-head">ж. ед.</th>
+                            <th class="col-head">мн.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1126,13 +1124,13 @@
 
                 <!--  VERB -->
                 {#if lexProp['partOfSpeech'] == 'Verb'}
-                    <div class="section-heading">Present Tense</div>
+                    <div class="section-heading">Настоящее время</div>
                     <table class="paradigm-table">
                         <thead class="paradigm-header">
                         <tr>
                             <th class="col-present-tense-person"></th>
-                            <th class="col-head">Sg</th>
-                            <th class="col-head">Pl</th>
+                            <th class="col-head">ед.</th>
+                            <th class="col-head">мн.</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -1154,17 +1152,17 @@
                         </tbody>
                     </table>
 
-                    <div class="section-heading">Past Tense</div>
+                    <div class="section-heading">Прошедшее время</div>
                     <table class="paradigm-table">
                         <colgroup>
                             <col class="col-form" span="4"/>
                         </colgroup>
                         <thead class="paradigm-header">
                         <tr>
-                            <th class="col-head">m</th>
-                            <th class="col-head">f</th>
-                            <th class="col-head">n</th>
-                            <th class="col-head">Pl</th>
+                            <th class="col-head">м</th>
+                            <th class="col-head">ж</th>
+                            <th class="col-head">с</th>
+                            <th class="col-head">мн.</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -1195,12 +1193,12 @@
                         </tbody>
                     </table>        <!-- end past tense  -->
 
-                    <div class="section-heading">Imperative</div>
+                    <div class="section-heading">Повелительное наклонение</div>
                     <table class="paradigm-table">
                         <thead class="paradigm-header">
                         <tr>
-                            <th class="col-head">Sg</th>
-                            <th class="col-head">Pl</th>
+                            <th class="col-head">ед.</th>
+                            <th class="col-head">мн.</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -1220,10 +1218,10 @@
                         </tbody>
                     </table>        <!-- imperative -->
 
-                    <div class="section-heading">Participles & Adverbials</div>
+                    <div class="section-heading">Неличные формы</div>
                     {#if partPresActBase[inflection.inflectionId]}
                         <div class="participle-container">
-                            <span class="section-subheading">Part. Pres. Active:</span>
+                            <span class="section-subheading">Действ. прич. наст.:</span>
                             <span class="base-form">
                                 {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                 {partPresActBase[inflection.inflectionId].form}
@@ -1242,7 +1240,7 @@
                     {/if}
                     {#if adverbialPresent[inflection.inflectionId]}
                         <div class="adverbial-container">
-                            <span class="section-subheading">Pres. Adverbial:</span>
+                            <span class="section-subheading">Деепр. наст.:</span>
                             <span class="base-form">
                                 {#if adverbialPresent[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                 {adverbialPresent[inflection.inflectionId].form}
@@ -1252,7 +1250,7 @@
                     {/if}
                     {#if partPresPassBase[inflection.inflectionId]}
                         <div class="participle-container">
-                            <span class="section-subheading">Part. Pres. Passive:</span>
+                            <span class="section-subheading">Страд. прич. наст.:</span>
                             <span class="base-form">
                                 {#if partPresPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                 {partPresPassBase[inflection.inflectionId].form}
@@ -1271,7 +1269,7 @@
                     {/if}
                     {#if partPastActBase[inflection.inflectionId]}
                         <div class="participle-container">
-                            <span class="section-subheading">Part. Past Active:</span>
+                            <span class="section-subheading">Действ. прич. прош.:</span>
                             <span class="base-form">
                                 {#if partPastActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                 {partPastActBase[inflection.inflectionId].form}
@@ -1289,7 +1287,7 @@
                     {/if}
                     {#if adverbialPast[inflection.inflectionId]}
                         <div class="adverbial-container">
-                            <span class="section-subheading">Past Adverbial:</span>
+                            <span class="section-subheading">Деепр. прош.:</span>
                              <span class="base-form">
                                 {#if adverbialPast[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                 {adverbialPast[inflection.inflectionId].form}
@@ -1299,7 +1297,7 @@
                     {/if}
                     {#if partPastPassBase[inflection.inflectionId]}
                         <div class="participle-container">
-                            <span class="section-subheading">Part. Past Passive:</span>
+                            <span class="section-subheading">Страд. прич. прош.:</span>
                             <span class="base-form">
                                 {#if partPastPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                 {partPastPassBase[inflection.inflectionId].form}
@@ -1415,12 +1413,14 @@
 
     .section-subheading {
         display: inline-block;
-        width: 140px;
+        width: 160px;
         font-weight: normal;
         font-size: medium;
         text-align: left;
-        color: gray;
+        color: grey;
         padding-top: 15px;
+        padding-right: 15px;
+        text-align: right;
     }
 
     .base-form {

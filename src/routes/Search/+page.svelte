@@ -1502,7 +1502,6 @@
         text-align: left;
     }
 
-/*
     comparative-difficult-form {
         width: 250px;
         padding-left: 25px;
@@ -1514,7 +1513,6 @@
         border-collapse: collapse;
     }
 
-/*
     .col-difficult-form {
         width: 250px;
         padding-left: 25px;
@@ -1525,7 +1523,6 @@
         color:gray;
         border: 1px solid #e5e7eb;
     }
-*/
 
     .col-difficult-form-no-border {
         width: 250px;

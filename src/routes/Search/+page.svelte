@@ -6,14 +6,14 @@
 // Props
     import type {
         INounTable, INounTableEntry,
-        ILastNameTable, ILastNameTableEntry,
+//        ILastNameTable, ILastNameTableEntry,
         IAdjLongTable, IAdjLongTableEntry,
         IAdjShortTable, IAdjShortTableEntry,
         IComparativesEntry, IComparatives,
         IPresentTenseTableEntry, IPresentTenseTable,
-        IPastTenseTableEntry, IPastTenseTable,
-        IImperativeTableEntry, IImperativeTable,
-        ILexeme, IInflection, IBaseParticiplesTable, IBaseParticiplesTableEntry
+//        IPastTenseTableEntry, IPastTenseTable,
+//        IImperativeTableEntry, IImperativeTable,
+        ILexeme, IInflection, IBaseParticiplesTable
     } from "$lib/types";
 
     import {caseToHash, numberToHash, genderToHash} from "$lib/stores.svelte";
@@ -26,7 +26,7 @@
         };
     }
 
-    let prompt: string = 'Введите слово...';
+//    let prompt: string = 'Введите слово...';
     let btnText: string = 'Искать';
     let inputValue: string = $state('');
     let lexemeDescr: object[];
@@ -138,8 +138,7 @@
 
     function getComparativesTableTemplate()
     {
-        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
-        return rowTemplate;
+        return { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
     }
 
     function getPresentTenseTableTemplate()
@@ -473,7 +472,7 @@
         pastTenseTable[inflectionId] = getPastTenseTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             if (form['subParadigm'] !== 'PastTense') continue;
-            let formNumber: string = numberToHash.get(form['number']) || '';
+//            let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
@@ -649,21 +648,23 @@
         return "col-form";
     };
 
+/*
     const getImperative = (item: IImperativeTableEntry) => {
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
-
+*/
+/*
     const getParticipleListClass = (item: IBaseParticiplesTableEntry | undefined) => {
         if (!item || item.isDifficult) return "col-difficult-form-no-border";
         return "col-form-no-border";
     };
+*/
 
     async function requestForms(inflectionId: number)
     {
         console.log('Requesting forms for inflection ID: ' + inflectionId);
         try {
-//            const response = await fetch(`http://localhost:8088/forms?inflection-id=${inflectionId}`);
             const response = await fetch(
                 `https://api.bogatyrev.org/forms?inflection-id=${encodeURIComponent(inflectionId)}`
             );
@@ -794,8 +795,6 @@
 
     async function handleClick() {
         try {
-//            console.log('Input value: ' + inputValue);
-//            const response = await fetch(`http://localhost:8088/query?word=${inputValue}`);
             const response = await fetch(
                 `https://api.bogatyrev.org/query?word=${encodeURIComponent(inputValue)}`
             );
@@ -943,14 +942,16 @@
 {/snippet}
 
 {#snippet comparative(inflection)}
-    <div class="section-subheading">Сравн. степень</div>
-    {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
-        <div class={getComparativeClass(comparatives[inflection.inflectionId])}>
-            {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-            {comparatives[inflection.inflectionId].form}
-            {comparatives[inflection.inflectionId].isIrregular}
-        </div>
-    {/if}
+    <div class="comparative-container">    <!-- make it a single line -->
+        <div class="section-subheading-single-line">Сравн. степень:</div>
+        {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
+            <div class={getComparativeClass(comparatives[inflection.inflectionId])}>
+                {#if comparatives[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                {comparatives[inflection.inflectionId].form}
+                {comparatives[inflection.inflectionId].isIrregular}
+            </div>
+        {/if}
+    </div>
 {/snippet}
 
 <div class="prompt-container">
@@ -1046,9 +1047,9 @@
         <div class="right-panel">
             {#each lexProp.inflections as inflection (inflection.seqNum)}
                 <!--  NOUN               -->
-                {#if lexProp['partOfSpeech'] == 'Noun'
-                    || lexProp['partOfSpeech'] == 'Pronoun'
-                    || lexProp['partOfSpeech'] == 'Numeral'}
+                {#if lexProp['partOfSpeech'] === 'Noun'
+                    || lexProp['partOfSpeech'] === 'Pronoun'
+                    || lexProp['partOfSpeech'] === 'Numeral'}
                     <table class="paradigm-table">
                     <thead class="paradigm-header">
                         <tr>
@@ -1078,7 +1079,7 @@
                 {/if}
 
                 <!--  LAST NAME -->
-                {#if lexProp['partOfSpeech'] == 'LastName'}
+                {#if lexProp['partOfSpeech'] === 'LastName'}
                     <table class="paradigm-table">
                     <thead class="paradigm-header">
                         <tr>
@@ -1114,7 +1115,7 @@
                 {/if}
 
                 <!--  ADJECTIVES          -->
-                {#if lexProp['partOfSpeech'] == 'Adj'}
+                {#if lexProp['partOfSpeech'] === 'Adj'}
                     <!--  ADJ               -->
                     {@render longForms(inflection, adjLongTable)}
                     {@render shortForms(inflection, adjShortTable)}
@@ -1123,7 +1124,7 @@
                 <!-- END ADJ -->
 
                 <!--  VERB -->
-                {#if lexProp['partOfSpeech'] == 'Verb'}
+                {#if lexProp['partOfSpeech'] === 'Verb'}
                     <div class="section-heading">Настоящее время</div>
                     <table class="paradigm-table">
                         <thead class="paradigm-header">
@@ -1324,7 +1325,7 @@
     .prompt-container {
         display: flex;
         flex-direction: row;
-        border: 1px solid black;
+/*        border: 1px solid black;   */
         margin: 5px 0;
         background-color: #FFFAF0;
         margin-left: 15px;
@@ -1351,7 +1352,7 @@
         border: 1px solid black;
         display: flex;
         flex-direction: column;
-        padding: 15px;
+/*        padding: 15px;        */
         margin: 5px 0;
         background-color: #FFFAF0;
         margin-left: 15px;
@@ -1411,16 +1412,19 @@
         padding: 20px;
     }
 
-    .section-subheading {
+    .section-subheading, .section-subheading-single-line {
         display: inline-block;
         width: 160px;
         font-weight: normal;
         font-size: medium;
-        text-align: left;
         color: grey;
         padding-top: 15px;
         padding-right: 15px;
         text-align: right;
+    }
+
+    .section-subheading-single-line {
+        padding-top: 0px;
     }
 
     .base-form {
@@ -1444,12 +1448,6 @@
         border: 1px solid #e5e7eb;
     }
 
-    .col-invisible {
-        width: 100px;
-        border-collapse: collapse;
-        border: none;
-    }
-
     .col-head {
         width: 175px;
         padding-left: 25px;
@@ -1459,17 +1457,6 @@
         font-weight: normal;
 /*        border: none;   */
         border: 1px solid #e5e7eb;
-    }
-
-    .col-head-invisible {
-        width: 175px;
-        padding-left: 25px;
-        padding-right: 25px;
-        color: gray;
-        text-align: center;
-        font-weight: normal;
-        border: none;
-        border-collapse: collapse;
     }
 
     .paradigm-header {
@@ -1490,11 +1477,9 @@
         border: 1px solid #e5e7eb;
     }
 
-    .col-form-no-border {
-        width: 175px;
-        padding-left: 25px;
-        padding-right: 25px;
-        padding-bottom: 5px;
+    .comparative-container {
+        display: flex;       /* Aligns children in a horizontal row */
+        padding-top: 15px;
     }
 
     .comparative-form {
@@ -1505,6 +1490,7 @@
         text-align: left;
     }
 
+/*
     comparative-difficult-form {
         width: 250px;
         padding-left: 25px;
@@ -1513,10 +1499,10 @@
         padding-bottom: 1px;
         font-style: italic;
         color:gray;
-/*        border: 1px solid #e5e7eb;  */
         border-collapse: collapse;
     }
 
+/*
     .col-difficult-form {
         width: 250px;
         padding-left: 25px;
@@ -1527,6 +1513,7 @@
         color:gray;
         border: 1px solid #e5e7eb;
     }
+*/
 
     .col-difficult-form-no-border {
         width: 250px;

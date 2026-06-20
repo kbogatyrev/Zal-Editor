@@ -969,75 +969,77 @@
     <div class="display-container">
         <div class="lexeme-container">
             <div class="lex-row">
-                <div class="lex-col">Lexeme ID:</div>
-                <div class="lex-col">{lexProp.lexemeId}</div>
+                <div class="lex-col-left">Lexeme ID:</div>
+                <div class="lex-col-right">{lexProp.lexemeId}</div>
             </div>
             <div class="lex-row">
-                <div class="lex-col">Исходная форма:</div>
-                <div class="lex-col">{lexProp.sourceForm}</div>
+                <div class="lex-col-left">Исходная форма:</div>
+                <div class="lex-col-right">{lexProp.sourceForm}</div>
             </div>
             {#if lexProp.homonyms.length > 0}
                 <div class="lex-row">
-                    <div class="lex-col">Индекс омонима:</div>
-                    <div class="lex-col">{lexProp.homonyms.join(', ')}</div>
+                    <div class="lex-col-left">Индекс омонима:</div>
+                    <div class="lex-col-right">{lexProp.homonyms.join(', ')}</div>
                 </div>
             {/if}
             {#if lexProp.headwordComment}
                 <div class="lex-row">
-                    <div class="lex-col">Помета (1):</div>
-                    <div class="lex-col">{lexProp.headwordComment}</div>
+                    <div class="lex-col-left">Помета (1):</div>
+                    <div class="lex-col-right">{lexProp.headwordComment}</div>
                 </div>
             {/if}
             {#if lexProp.headwordVariantComment}
                 <div class="lex-row">
-                    <div class="lex-col">Помета (2):</div>
-                    <div class="lex-col">{lexProp.headwordVariantComment}</div>
+                    <div class="lex-col-left">Помета (2):</div>
+                    <div class="lex-col-right">{lexProp.headwordVariantComment}</div>
                 </div>
             {/if}
             {#if lexProp.lexTrailingComment}
                 <div class="lex-row">
-                    <div class="lex-col">Помета (3):</div>
-                    <div class="lex-col">{lexProp.lexTrailingComment}</div>
+                    <div class="lex-col-left">Помета (3):</div>
+                    <div class="lex-col-right">{lexProp.lexTrailingComment}</div>
                 </div>
             {/if}
             <div class="lex-row">
-                <div class="lex-col">Часть речи:</div>
-                <div class="lex-col">{lexProp.partOfSpeech}</div>
+                <div class="lex-col-left">Часть речи:</div>
+                <div class="lex-col-right">{lexProp.partOfSpeech}</div>
             </div>
             <div class="lex-row">
-                <div class="lex-col">Основной символ:</div>
-                <div class="lex-col">{lexProp.mainSymbol}</div>
+                <div class="lex-col-left">Основной символ:</div>
+                <div class="lex-col-right">{lexProp.mainSymbol}</div>
             </div>
             {#if lexProp.restrictedContexts}
-                <div class="lex-col">Фразеологизмы:</div>
-                <div class="lex-col">{lexProp.restrictedContexts}</div>
+                <div class="lex-row">
+                    <div class="lex-col-left">Фразеологизмы:</div>
+                    <div class="lex-col-right">{lexProp.restrictedContexts}</div>
+                </div>
             {/if}
             {#each lexProp.inflections as inflection (inflection.seqNum)}
                 <div class="inflection-container">
                     <div class="lex-row">
-                        <div class="lex-col">Inflection ID:</div>
-                        <div class="lex-col">{inflection.inflectionId}</div>
+                        <div class="lex-col-left">Inflection ID:</div>
+                        <div class="lex-col-right">{inflection.inflectionId}</div>
                     </div>
                     <div class="lex-row">
-                        <div class="lex-col">Словоизм. индекс:</div>
-                        <div class="lex-col">{inflection.inflectionType}</div>
+                        <div class="lex-col-left">Словоизм. индекс:</div>
+                        <div class="lex-col-right">{inflection.inflectionType}</div>
                     </div>
                     <div class="lex-row">
-                        <div class="lex-col">Схема ударения:</div>
-                        <div class="lex-col">{inflection.accentType1}</div>
+                        <div class="lex-col-left">Схема ударения:</div>
+                        <div class="lex-col-right">{inflection.accentType1}</div>
                     </div>
                     {#if inflection.aspectPairs && inflection.aspectPairs.length > 0}
                         {#each inflection.aspectPairs as aspectPair, iAt (aspectPair+iAt)}
                             <div class="lex-row">
-                                <div class="lex-col">Видовая пара:</div>
-                                <div class="lex-col">{aspectPair}</div>
+                                <div class="lex-col-left">Видовая пара:</div>
+                                <div class="lex-col-right">{aspectPair}</div>
                             </div>
                         {/each}
                     {/if}
                     {#if inflection.commonDeviations && inflection.commonDeviations.length > 0}
                             <div class="lex-row">
-                                <div class="lex-col">Отклонения:</div>
-                                <div class="lex-col">{inflection.commonDeviations}</div>
+                                <div class="lex-col-left">Отклонения:</div>
+                                <div class="lex-col-right">{inflection.commonDeviations}</div>
                             </div>
                     {/if}
                 </div>
@@ -1342,13 +1344,17 @@
     }
 
     .display-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+/*        display: grid;   */
+        display: flex;
+        align-items: flex-start;
+/*        grid-template-columns: 1fr 1fr;     */
 /*        padding: 20px;   */
         max-width: 1000px;
+        gap: 70px;
     }
 
     .lexeme-container {
+        flex: 4.5;
         border: 1px solid black;
         display: flex;
         flex-direction: column;
@@ -1357,34 +1363,40 @@
         background-color: #FFFAF0;
         margin-left: 15px;
         padding: 20px;
-        max-width: 400px;
+/*        max-width: 500px;   */
         /*        border: #b3b3b3;    */
     }
 
     .lex-row {
-        display: flex;
+        display: grid;
         justify-content: space-between;
         padding: 3px 0;
-        border-left: 1px solid #eee;
-        /*        border-right: 1px solid #eee;  */
-        padding-left: 25px;
+        padding-left: 0px;
         padding-right: 5px;
+        grid-template-columns: 1.5fr 1fr;
     }
 
-    .lex-col {
-        flex: 1;
+    .lex-col-left {
+        text-align: right;
+        padding-right: 25px;
+    }
+
+    .lex-col-right {
     }
 
     .inflection-container {
         display: flex;
         flex-direction: column;
         margin: 5px 0;
-        margin-left: 50px;
         padding: 5px;
-        max-width: 350px;
+        border: 1px solid lightgray;
+
     }
 
     .right-panel {
+        display:flex;
+        flex-direction: column;
+        flex: 5;
         padding: 20px;
         margin: 5px 0;
         column-gap: 50px;

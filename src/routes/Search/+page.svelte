@@ -286,6 +286,7 @@
         let targetContainer: IAdjLongTable;
         switch (subParadigm) {
             case 'LongAdj':
+            case 'PronounAdj':
                 targetContainer = adjLongTable;
                 break;
             case 'PartPresAct':
@@ -664,9 +665,16 @@
     async function requestForms(inflectionId: number)
     {
         console.log('Requesting forms for inflection ID: ' + inflectionId);
+        let uri = '';
+        const host = window.location.hostname;
+        if (host === 'localhost') {
+            uri = 'http://localhost:8088';
+        } else if (host === 'bogatyrev.org') {
+            uri = 'https://api.bogatyrev.org';
+        }
         try {
             const response = await fetch(
-                `https://api.bogatyrev.org/forms?inflection-id=${encodeURIComponent(inflectionId)}`
+                `${uri}/forms?inflection-id=${encodeURIComponent(inflectionId)}`
             );
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -694,9 +702,14 @@
                 handleLastNameForms(inflectionId, forms);
             }
             else if (lexeme['partOfSpeech'] === 'Adj') {
-                handleLongForms(inflectionId, 'LongAdj', forms);
-                handleShortForms(inflectionId, 'ShortAdj', forms);
-                handleComparatives(inflectionId, forms);
+                if (lexeme['inflectionSymbol'] === 'мс') {
+                    handleLongForms(inflectionId, 'PronounAdj', forms);
+                }
+                else {
+                    handleLongForms(inflectionId, 'LongAdj', forms);
+                    handleShortForms(inflectionId, 'ShortAdj', forms);
+                    handleComparatives(inflectionId, forms);
+                }
            }
            else if (lexeme['partOfSpeech'] === 'Verb') {
                handlePresentTenseForms(inflectionId, forms);
@@ -741,6 +754,7 @@
                 headwordVariantComment: lexemeData['headwordVariantComment'],
                 lexTrailingComment: lexemeData['lexTrailingComment'],
                 mainSymbol: lexemeData['mainSymbol'],
+                inflectionSymbol: lexemeData['inflectionSymbol'],
                 partOfSpeech: lexemeData['partOfSpeech'],
                 isTransitive: lexemeData['isTransitive'],
                 section: lexemeData['section'],
@@ -759,7 +773,7 @@
                     let inflection: IInflection = {
                         seqNum: i + j + 1,
                         inflectionId: inflectionData['inflectionId'],
-                        inflectionType: inflectionData['inflectionType'],
+                        inflectionIndex: inflectionData['inflectionIndex'],
                         accentType1: inflectionData['accentType1'],
                         accentType2: inflectionData['accentType2'],
                         aspectPairs: inflectionData['aspectPairs'],
@@ -794,9 +808,16 @@
     });
 
     async function handleClick() {
+        let uri = '';
+        const host = window.location.hostname;
+        if (host === 'localhost') {
+            uri = 'http://localhost:8088';
+        } else if (host === 'bogatyrev.org') {
+            uri = 'https://api.bogatyrev.org';
+        }
         try {
             const response = await fetch(
-                `https://api.bogatyrev.org/query?word=${encodeURIComponent(inputValue)}`
+                `${uri}/query?word=${encodeURIComponent(inputValue)}`
             );
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -1008,6 +1029,12 @@
                 <div class="lex-col-left">Основной символ:</div>
                 <div class="lex-col-right">{lexProp.mainSymbol}</div>
             </div>
+            {#if lexProp.inflectionSymbol}
+                <div class="lex-row">
+                    <div class="lex-col-left">Словоизм. тип:</div>
+                    <div class="lex-col-right">{lexProp.inflectionSymbol}</div>
+                </div>
+            {/if}
             {#if lexProp.restrictedContexts}
                 <div class="lex-row">
                     <div class="lex-col-left">Фразеологизмы:</div>
@@ -1022,7 +1049,7 @@
                     </div>
                     <div class="lex-row">
                         <div class="lex-col-left">Словоизм. индекс:</div>
-                        <div class="lex-col-right">{inflection.inflectionType}</div>
+                        <div class="lex-col-right">{inflection.inflectionIndex}</div>
                     </div>
                     <div class="lex-row">
                         <div class="lex-col-left">Схема ударения:</div>

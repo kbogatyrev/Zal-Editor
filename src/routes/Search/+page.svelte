@@ -287,6 +287,7 @@
         switch (subParadigm) {
             case 'LongAdj':
             case 'PronounAdj':
+            case 'NumeralAdj':
                 targetContainer = adjLongTable;
                 break;
             case 'PartPresAct':
@@ -310,7 +311,9 @@
         targetContainer[inflectionId] = getAdjLongTableTemplate();
         let table = targetContainer[inflectionId];
         for (const [,form] of jsonForms.entries()) {
-            if (subParadigm !== form['subParadigm']) continue;
+            const longOnly = ['LongAdj', 'NumeralAdj', 'PronounAdj'];
+            if (!longOnly.includes(subParadigm) && form['subParadigm'] !== form['subParadigm']) continue;
+//            if (subParadigm !== form['subParadigm']) continue;
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
@@ -353,7 +356,7 @@
             aAnimPl.form = gPl.form;
         }
 
-//        console.log ('==============================', table);
+        console.log ('==============================', table);
     }       //  handleLongForms
 
     function handleShortForms(inflectionId: number, subParadigm: string, jsonForms: Array<any>)
@@ -701,9 +704,13 @@
             else if (lexeme['partOfSpeech'] === 'LastName') {
                 handleLastNameForms(inflectionId, forms);
             }
-            else if (lexeme['partOfSpeech'] === 'Adj') {
-                if (lexeme['inflectionSymbol'] === 'мс') {
-                    handleLongForms(inflectionId, 'PronounAdj', forms);
+            else if (lexeme['partOfSpeech'] === 'Adj' ||
+                lexeme['partOfSpeech'] === 'PronounAdj' ||
+                lexeme['partOfSpeech'] === 'NumeralAdj'){
+                if (lexeme['inflectionSymbol'] !== 'п') {
+//                    lexeme['inflectionSymbol'] === 'мс-п' ||
+//                    lexeme['inflectionSymbol'] === 'числ.-п') {
+                    handleLongForms(inflectionId, 'LongAdj', forms);
                 }
                 else {
                     handleLongForms(inflectionId, 'LongAdj', forms);
@@ -857,8 +864,10 @@
     }
 </script>
 
-{#snippet longForms(inflection, table)}
-    <div class="section-subheading">Полные формы</div>
+{#snippet longForms(inflection, table, showSubHeading)}
+    {#if showSubHeading}
+        <div class="section-subheading">Полные формы</div>
+    {/if}
     <table class="paradigm-table">
         <colgroup>
             <col class="col-adj-case" span="1"/>
@@ -1021,10 +1030,12 @@
                     <div class="lex-col-right">{lexProp.lexTrailingComment}</div>
                 </div>
             {/if}
+<!--
             <div class="lex-row">
                 <div class="lex-col-left">Часть речи:</div>
                 <div class="lex-col-right">{lexProp.partOfSpeech}</div>
             </div>
+-->
             <div class="lex-row">
                 <div class="lex-col-left">Основной символ:</div>
                 <div class="lex-col-right">{lexProp.mainSymbol}</div>
@@ -1144,12 +1155,16 @@
                 {/if}
 
                 <!--  ADJECTIVES          -->
-                {#if lexProp['partOfSpeech'] === 'Adj'}
+                {#if lexProp['partOfSpeech'] === 'Adj' && lexProp['inflectionSymbol'] === 'п'}
                     <!--  ADJ               -->
-                    {@render longForms(inflection, adjLongTable)}
+                    {@render longForms(inflection, adjLongTable, true)}
                     {@render shortForms(inflection, adjShortTable)}
                     {@render comparative(inflection)}
-                {/if}                           <!-- if adj -->
+                {:else if lexProp['partOfSpeech'] === 'Adj' || lexProp['partOfSpeech'] === 'PronounAdj'
+                    || lexProp['partOfSpeech'] === 'NumeralAdj' }
+                    {@render longForms(inflection, adjLongTable, false)}
+                {/if}
+
                 <!-- END ADJ -->
 
                 <!--  VERB -->
@@ -1263,7 +1278,7 @@
                             {#if showLongPresAct }
                                 <span class="slider" transition:slide>
                                         <span transition:slide={{duration: 300}} />
-                                        {@render longForms(inflection, presActLongTable)}
+                                        {@render longForms(inflection, presActLongTable, false)}
                                 </span>
                             {/if}
                         </div>
@@ -1291,8 +1306,8 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if expandPresPass}
-                                    {@render longForms(inflection, presPassLongTable)}
-                                    {@render shortForms(inflection, presPassShortTable)}
+                                    {@render longForms(inflection, presPassLongTable, false)}
+                                    {@render shortForms(inflection, presPassShortTable, false)}
                                 {/if}
                             </span>
                         </div>
@@ -1310,7 +1325,7 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if showLongPastAct }
-                                    {@render longForms(inflection, pastActLongTable)}
+                                    {@render longForms(inflection, pastActLongTable, false)}
                                 {/if}
                             </span>
                         </div>
@@ -1338,7 +1353,7 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if showLongPastPass }
-                                    {@render longForms(inflection, pastPassLongTable)}
+                                    {@render longForms(inflection, pastPassLongTable, true)}
                                     {@render shortForms(inflection, pastPassShortTable)}
                                 {/if}
                             </span>

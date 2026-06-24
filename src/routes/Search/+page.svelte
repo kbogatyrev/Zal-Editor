@@ -1386,20 +1386,23 @@
     }
 
     .display-container {
-/*        display: grid;   */
-        display: flex;
+        display: grid;
+/*        display: flex;   */
         align-items: flex-start;
-/*        grid-template-columns: 1fr 1fr;     */
+        grid-template-columns: 1fr 1fr;
 /*        padding: 20px;   */
         max-width: 1000px;
         gap: 70px;
+        top: 50px;
     }
 
     .lexeme-container {
-        flex: 4.5;
+/*        flex: 4.5;    */
+        position: sticky;
+        top: 170px;
         border: 1px solid black;
-        display: flex;
-        flex-direction: column;
+/*        display: flex;   */
+/*        flex-direction: column;   */
 /*        padding: 15px;        */
         margin: 5px 0;
         background-color: #FFFAF0;
@@ -1427,12 +1430,12 @@
     }
 
     .inflection-container {
-        display: flex;
-        flex-direction: column;
+/*        display: flex;  */
+/*        flex-direction: column;  */
         margin: 5px 0;
         padding: 5px;
         border: 1px solid lightgray;
-
+        overflow-y: auto;
     }
 
     .right-panel {

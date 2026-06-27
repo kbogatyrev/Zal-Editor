@@ -3,6 +3,8 @@
     import { slide } from 'svelte/transition';
     import { searchRequest } from '$lib/stores.svelte';
 
+    import Modal from './Modal.svelte';
+
 // Props
     import type {
         INounTable, INounTableEntry,
@@ -28,6 +30,9 @@
 
 //    let prompt: string = 'Введите слово...';
     let btnText: string = 'Искать';
+    let showModal = $state(false);
+    let modalTitle = $state('');
+    let modalText = $state('');
     let inputValue: string = $state('');
     let lexemeDescr: object[];
     let lexemes = $state([]);
@@ -680,8 +685,8 @@
                 `${uri}/forms?inflection-id=${encodeURIComponent(inflectionId)}`
             );
             if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+                console.error(await response.text());
+                throw new Error(`HTTP ${response.status}`);            }
 
             let resp = await response.json(); // Assign the fetched data
             let forms = resp['wordForms'];
@@ -833,7 +838,10 @@
             lexemeDescr = await response.json(); // Assign the fetched data
 
             if (lexemeDescr.length === 0) {
-                alert('Input not recognized.');
+//                alert('Input not recognized.');
+                modalTitle = 'Слово не найдено';
+                modalText = `Слово с исходной формой <b>${inputValue}</b> отсутствует в базе данных.`;
+                showModal = true;
                 console.log('No lexeme data');
                 return;
             }
@@ -862,7 +870,27 @@
     const pastPassToggleExpand = () => {
         showLongPastPass = !showLongPastPass;
     }
+
+    let { isOpen = $bindable(false), children } = $props();
+    let dialogRef;
+
+    // Automatically call native dialog methods when the isOpen state changes
+    $effect(() => {
+        if (!dialogRef) return;
+        if (isOpen) {
+            dialogRef.showModal();
+        } else {
+            dialogRef.close();
+        }
+    });
+
 </script>
+
+<!-- Pass state using the bind: syntax -->
+<Modal bind:isOpen={showModal}>
+    <h2>{modalTitle}</h2>
+    <p>{@html modalText}</p>
+</Modal>
 
 {#snippet longForms(inflection, table, showSubHeading)}
     {#if showSubHeading}

@@ -763,14 +763,18 @@
                 sourceForm: lexemeData['sourceForm'],
                 homonyms: [],
                 headwordComment: lexemeData['headwordComment'],
+                headwordVariant: lexemeData['headwordVariant'],
                 headwordVariantComment: lexemeData['headwordVariantComment'],
                 lexTrailingComment: lexemeData['lexTrailingComment'],
                 mainSymbol: lexemeData['mainSymbol'],
                 inflectionSymbol: lexemeData['inflectionSymbol'],
+                isPluralOf: lexemeData['isPluralOf'],
+                pluralOf: lexemeData['pluralOf'],
                 partOfSpeech: lexemeData['partOfSpeech'],
                 isTransitive: lexemeData['isTransitive'],
                 section: lexemeData['section'],
                 restrictedContexts: lexemeData['restrictedContexts'],
+                contexts: lexemeData['contexts'],
                 inflections: []
             };
 
@@ -1046,6 +1050,12 @@
                     <div class="lex-col-right">{lexProp.headwordComment}</div>
                 </div>
             {/if}
+            {#if lexProp.headwordVariant}
+                <div class="lex-row">
+                    <div class="lex-col-left">Вариант:</div>
+                    <div class="lex-col-right">{lexProp.headwordVariant}</div>
+                </div>
+            {/if}
             {#if lexProp.headwordVariantComment}
                 <div class="lex-row">
                     <div class="lex-col-left">Помета (2):</div>
@@ -1074,10 +1084,34 @@
                     <div class="lex-col-right">{lexProp.inflectionSymbol}</div>
                 </div>
             {/if}
+            {#if lexProp.isPluralOf}
+                {#if !lexProp.pluralOf}
+                    <div class="lex-row">
+                        <div class="lex-col-left">Plurale tantum</div>
+                    </div>
+                    {:else}
+                    <div class="lex-row">
+                        <div class="lex-col-left">Мн. от:</div>
+                        <div class="lex-col-right">{lexProp.pluralOf}</div>
+                    </div>
+                {/if}
+            {/if}
             {#if lexProp.restrictedContexts}
                 <div class="lex-row">
                     <div class="lex-col-left">Фразеологизмы:</div>
                     <div class="lex-col-right">{lexProp.restrictedContexts}</div>
+                </div>
+            {/if}
+            {#if lexProp.contexts}
+                <div class="lex-row">
+                    <div class="lex-col-left">Огр. сочетаемость:</div>
+                    <div class="lex-col-right">{lexProp.contexts}</div>
+                </div>
+            {/if}
+            {#if lexProp.section}
+                <div class="lex-row">
+                    <div class="lex-col-left">Параграф:</div>
+                    <div class="lex-col-right">{lexProp.section}</div>
                 </div>
             {/if}
             {#each lexProp.inflections as inflection (inflection.seqNum)}

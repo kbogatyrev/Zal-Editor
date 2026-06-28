@@ -23,6 +23,7 @@ export interface ILexeme {
 //  spryazhSmRef
     section: number;
     inflections: object[];
+    contexts: string;
 }
 
 export interface INounTableEntry

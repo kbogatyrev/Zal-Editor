@@ -71,7 +71,7 @@
     {
         const declRowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
-        for (let caseName of ['И', 'В', 'Р', 'Д', 'П', 'Т']) {
+        for (let caseName of ['И', 'В', 'Р', 'Д', 'П', 'Т', 'Р2', 'П2']) {
             let row = [];
             for (let number of ['ед.', 'мн.']) {
                 row.push({...declRowTemplate, number: number, case: caseName});
@@ -794,7 +794,8 @@
                         accentType2: inflectionData['accentType2'],
                         aspectPairs: inflectionData['aspectPairs'],
                         altAspectPair: inflectionData['altAspectPair'],
-                        commonDeviations: inflectionData['commonDeviations']
+                        commonDeviations: inflectionData['commonDeviations'],
+                        hasFleetingVowel: inflectionData['hasFleetingVowel']
                     };
                     lexeme.inflections.push(inflection);
                     mapInflectionToLexeme.set(inflection.inflectionId, lexeme);
@@ -1136,6 +1137,11 @@
                             </div>
                         {/each}
                     {/if}
+                    {#if inflection.hasFleetingVowel}
+                        <div class="lex-row">
+                            <div class="lex-col-left">Беглая гласная</div>
+                        </div>
+                    {/if}
                     {#if inflection.commonDeviations && inflection.commonDeviations.length > 0}
                             <div class="lex-row">
                                 <div class="lex-col-left">Отклонения:</div>
@@ -1163,7 +1169,13 @@
                     <tbody>
                         {#each nounTable[inflection.inflectionId] as itemPair}
                             <tr>
-                                <td class="col-noun-case">{itemPair[0].case}</td>
+                                {#if itemPair[0].case === 'П2'}
+                                    <td class="col-noun-case">{@html 'П<sub>2</sub>'}</td>
+                                {:else if itemPair[0].case === 'Р2'}
+                                    <td class="col-noun-case">{@html 'Р<sub>2</sub>'}</td>
+                                {:else}
+                                    <td class="col-noun-case">{itemPair[0].case}</td>
+                                {/if}
                                 <td class={getNounFormClass(itemPair[0])}>
                                     {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {itemPair[0].form}

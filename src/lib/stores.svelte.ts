@@ -16,6 +16,8 @@ caseToHash.set('Dative', 'Д');
 caseToHash.set('Genitive', 'Р');
 caseToHash.set('Prepositional', 'П');
 caseToHash.set('Instrumental', 'Т');
+caseToHash.set('Locative', 'П2');
+caseToHash.set('Partitive', 'Р2');
 
 export const numberToHash = new Map<string, string>();
 numberToHash.set('Singular', 'ед.');

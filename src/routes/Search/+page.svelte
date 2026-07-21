@@ -44,17 +44,17 @@
     let presentTenseTable: IPresentTenseTable = $state({});
     let pastTenseTable: IPastTenseTable = $state({});
     let imperativeTable: IImperativeTable = $state({});
-    let presActLongTable: IAdjLongTable = $state({});
+    let partPresActLongTable: IAdjLongTable = $state({});
     let adverbialPresent: IBaseParticiplesTable = $state({});
     let partPresActBase: IBaseParticiplesTable = $state({});
     let partPresPassBase: IBaseParticiplesTable = $state({});
+    let partPresPassLongTable: IAdjLongTable = $state({});
+    let partPresPassShortTable: IAdjShortTable = $state({});
     let partPastActBase: IBaseParticiplesTable = $state({});
+    let partPastActLongTable: IAdjLongTable = $state({});
     let partPastPassBase: IBaseParticiplesTable = $state({});
-    let presPassLongTable: IAdjLongTable = $state({});
-    let presPassShortTable: IAdjShortTable = $state({});
-    let pastActLongTable: IAdjLongTable = $state({});
-    let pastPassLongTable: IAdjLongTable = $state({});
-    let pastPassShortTable: IAdjShortTable = $state({});
+    let partPastPassLongTable: IAdjLongTable = $state({});
+    let partPastPassShortTable: IAdjShortTable = $state({});
     let adverbialPast: IBaseParticiplesTable = $state({});
 
     let showLongPresAct: boolean = $state(false);
@@ -203,6 +203,11 @@
 
     function handleNounForms(inflectionId: number, jsonForms: Array<any>)
     {
+        const locative = jsonForms.find(entry => entry.case === "Locative");
+        if ( locative)
+        {
+//            locative['wordForm'] = locative['wordForm']+= '_NAX';
+        }
         nounTable[inflectionId] = getNounTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToHash.get(form['case']) || '';
@@ -296,16 +301,16 @@
                 targetContainer = adjLongTable;
                 break;
             case 'PartPresAct':
-                targetContainer = presActLongTable;
+                targetContainer = partPresActLongTable;
                 break;
             case 'PartPresPassLong':
-                targetContainer = presPassLongTable;
+                targetContainer = partPresPassLongTable;
                 break;
             case 'PartPastAct':
-                targetContainer = pastActLongTable;
+                targetContainer = partPastActLongTable;
                 break;
             case 'PartPastPassLong':
-                targetContainer = pastPassLongTable;
+                targetContainer = partPastPassLongTable;
                 break;
             default:
                 console.log('*** Unknown subParadigm: ', subParadigm);
@@ -317,7 +322,7 @@
         let table = targetContainer[inflectionId];
         for (const [,form] of jsonForms.entries()) {
             const longOnly = ['LongAdj', 'NumeralAdj', 'PronounAdj'];
-            if (!longOnly.includes(subParadigm) && form['subParadigm'] !== form['subParadigm']) continue;
+            if (!longOnly.includes(subParadigm) && subParadigm !== form['subParadigm']) continue;
 //            if (subParadigm !== form['subParadigm']) continue;
             let formCase: string = caseToHash.get(form['case']) || '';
             let formNumber: string = numberToHash.get(form['number']) || '';
@@ -373,10 +378,10 @@
                 targetContainer = adjShortTable;
                 break;
             case 'PartPresPassShort':
-                targetContainer = presPassShortTable;
+                targetContainer = partPresPassShortTable;
                 break;
             case 'PartPastPassShort':
-                targetContainer = pastPassShortTable;
+                targetContainer = partPastPassShortTable;
                 break;
             default:
                 console.log('*** Unknown subParadigm: ', subParadigm);
@@ -1352,7 +1357,7 @@
                             {#if showLongPresAct }
                                 <span class="slider" transition:slide>
                                         <span transition:slide={{duration: 300}} />
-                                        {@render longForms(inflection, presActLongTable, false)}
+                                        {@render longForms(inflection, partPresActLongTable, false)}
                                 </span>
                             {/if}
                         </div>
@@ -1380,8 +1385,8 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if expandPresPass}
-                                    {@render longForms(inflection, presPassLongTable, false)}
-                                    {@render shortForms(inflection, presPassShortTable, false)}
+                                    {@render longForms(inflection, partPresPassLongTable, false)}
+                                    {@render shortForms(inflection, partPresPassShortTable, false)}
                                 {/if}
                             </span>
                         </div>
@@ -1399,7 +1404,7 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if showLongPastAct }
-                                    {@render longForms(inflection, pastActLongTable, false)}
+                                    {@render longForms(inflection, partPastActLongTable, false)}
                                 {/if}
                             </span>
                         </div>
@@ -1427,8 +1432,8 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if showLongPastPass }
-                                    {@render longForms(inflection, pastPassLongTable, true)}
-                                    {@render shortForms(inflection, pastPassShortTable)}
+                                    {@render longForms(inflection, partPastPassLongTable, true)}
+                                    {@render shortForms(inflection, partPastPassShortTable)}
                                 {/if}
                             </span>
                         </div>

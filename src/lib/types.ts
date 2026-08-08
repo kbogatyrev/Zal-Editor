@@ -24,6 +24,7 @@ export interface ILexeme {
     section: number;
     inflections: object[];
     contexts: string;
+    isTwoGenderNumeral: boolean | undefined;
 }
 
 export interface INounTableEntry
@@ -38,6 +39,33 @@ export interface INounTableEntry
 
 export interface INounTable {
     [inflectionId: number]: INounTableEntry[][];
+}
+
+export interface ITwoGenderNumTableEntry
+{
+    gender: string;
+    case: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface ITwoGenderNumTable {
+    [inflectionId: number]: ITwoGenderNumTableEntry[][];
+}
+
+export interface INumTableEntry
+{
+    case: string;
+    form: string;
+    isIrregular: string;
+    isDifficult: boolean;
+    isAssumed: boolean;
+}
+
+export interface INumTable {
+    [inflectionId: number]: INumTableEntry[][];
 }
 
 export interface ILastNameTableEntry

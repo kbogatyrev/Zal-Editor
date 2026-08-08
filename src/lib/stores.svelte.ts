@@ -28,6 +28,10 @@ genderToHash.set('Masculine', 'м');
 genderToHash.set('Feminine', 'ж');
 genderToHash.set('Neuter', 'с');
 
+export const genderToHash2 = new Map<string, string>();
+genderToHash2.set('Masculine', 'м, с');
+genderToHash2.set('Feminine', 'ж');
+
 export const presentTenseToPerson = new Map<string, string>();
 presentTenseToPerson.set('1stPerson', '1');
 presentTenseToPerson.set('2ndPerson', '2');

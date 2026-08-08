@@ -8,6 +8,8 @@
 // Props
     import type {
         INounTable, INounTableEntry,
+        ITwoGenderNumTable, ITwoGenderNumTableEntry,
+        INumTable, INumTableEntry,
 //        ILastNameTable, ILastNameTableEntry,
         IAdjLongTable, IAdjLongTableEntry,
         IAdjShortTable, IAdjShortTableEntry,
@@ -18,7 +20,7 @@
         ILexeme, IInflection, IBaseParticiplesTable
     } from "$lib/types";
 
-    import {caseToHash, numberToHash, genderToHash} from "$lib/stores.svelte";
+    import {caseToHash, numberToHash, genderToHash, genderToHash2} from "$lib/stores.svelte";
     import {presentTenseToPerson} from "$lib/stores.svelte";
 
     function preventDefault(fn: Function) {
@@ -28,7 +30,6 @@
         };
     }
 
-//    let prompt: string = 'Введите слово...';
     let btnText: string = 'Искать';
     let showModal = $state(false);
     let modalTitle = $state('');
@@ -37,6 +38,8 @@
     let lexemeDescr: object[];
     let lexemes = $state([]);
     let nounTable: INounTable = $state({});
+    let twoGenderNumTable: ITwoGenderNumTable = $state({});
+    let numTable: INumTable = $state({});
     let lastNameTable: ILastNameTable = $state({});
     let adjLongTable: IAdjLongTable = $state({});
     let adjShortTable: IAdjShortTable = $state({});
@@ -79,6 +82,35 @@
             table.push(row);
         }
         return table;
+    }
+
+    function getTwoGenderNumeralsTemplate() {
+        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        let table = [];
+        for (let caseName of ['И', 'В', 'Р', 'Д', 'П', 'Т']) {
+            let row = [];
+            for (let col of ['м, с', 'ж']) {
+                row.push({...rowTemplate, gender: col, case: caseName});
+            }
+            table.push(row);
+        }
+        return table;
+    }
+
+    function getNumeralsTemplate() {
+        const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
+        let table = [];
+        for (let caseName of ['И', 'В', 'Р', 'Д', 'П', 'Т']) {
+            let row = [];
+            row.push({...rowTemplate, case: caseName});
+            table.push(row);
+        }
+        return table;
+    }
+
+    function getNumeralsTableTemplate()
+    {
+        return { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
     }
 
     function getLastNameTableTemplate()
@@ -242,6 +274,69 @@
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
+
+    function handleTwoGenderNumerals(inflectionId: number, jsonForms: Array<any>)
+    {
+        twoGenderNumTable[inflectionId] = getTwoGenderNumeralsTemplate();
+        for (const [,form] of jsonForms.entries()) {
+            let formCase: string = caseToHash.get(form['case']) || '';
+            let formGender: string = genderToHash2.get(form['gender']) || '';
+            let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
+            let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
+            let isAssumed: boolean = form['status'] === 'Assumed';
+            if (formCase !== '' && (formGender === 'м, с' || formGender === 'ж')) {
+                let findCell = twoGenderNumTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
+                if (findCell) {
+                    findCell.form = form['wordForm'];
+                    if (isIrregular) {
+                        findCell.isIrregular = triangle;
+                    }
+                    if (isDifficult) {
+                        findCell.isDifficult = true;
+                    }
+                    if (isAssumed) {
+                        findCell.isAssumed = true;
+//                        findCell.form = supQuestionMark + form['wordForm'];
+//                        console.log('*** Assumed form', findCell.form);
+                    }
+                } else {
+                    console.log('*** Two-gender numeral entry not found');
+                }
+            }
+        }
+        console.log (twoGenderNumTable);
+    }
+
+    function handleNumerals(inflectionId: number, jsonForms: Array<any>)
+    {
+        numTable[inflectionId] = getNumeralsTemplate();
+        for (const [,form] of jsonForms.entries()) {
+            let formCase: string = caseToHash.get(form['case']) || '';
+            let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
+            let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
+            let isAssumed: boolean = form['status'] === 'Assumed';
+            if (formCase !== '') {
+                let findCell = numTable[inflectionId].flat().find(item => item.case === formCase);
+                if (findCell) {
+                    findCell.form = form['wordForm'];
+                    if (isIrregular) {
+                        findCell.isIrregular = triangle;
+                    }
+                    if (isDifficult) {
+                        findCell.isDifficult = true;
+                    }
+                    if (isAssumed) {
+                        findCell.isAssumed = true;
+//                        findCell.form = supQuestionMark + form['wordForm'];
+//                        console.log('*** Assumed form', findCell.form);
+                    }
+                } else {
+                    console.log('*** Numeral entry not found');
+                }
+            }
+        }
+        console.log (numTable[inflectionId]);
+    }
 
     function handleLastNameForms(inflectionId: number, jsonForms: Array<any>)
     {
@@ -706,10 +801,19 @@
                 return;
             }
 
-            if(lexeme['partOfSpeech'] === 'Noun'
-                || lexeme['partOfSpeech'] === 'Pronoun'
-                || lexeme['partOfSpeech'] === 'Numeral') {
+            if (lexeme['partOfSpeech'] === 'Noun'
+                || lexeme['partOfSpeech'] === 'Pronoun') {
                 handleNounForms(inflectionId, forms);
+            }
+            else if (lexeme['partOfSpeech'] === 'Numeral') {
+                if(forms[0]['subParadigm'] === 'Numeral2To4') {
+                    lexeme.isTwoGenderNumeral = true;
+                    handleTwoGenderNumerals(inflectionId, forms);
+                }
+                else {
+                    lexeme.isTwoGenderNumeral = false;
+                    handleNumerals(inflectionId, forms);
+                }
             }
             else if (lexeme['partOfSpeech'] === 'LastName') {
                 handleLastNameForms(inflectionId, forms);
@@ -780,7 +884,8 @@
                 section: lexemeData['section'],
                 restrictedContexts: lexemeData['restrictedContexts'],
                 contexts: lexemeData['contexts'],
-                inflections: []
+                inflections: [],
+                twoGenderNumeral: undefined
             };
 
             if ('homonyms' in lexemeData) {
@@ -803,10 +908,15 @@
                         hasFleetingVowel: inflectionData['hasFleetingVowel']
                     };
                     lexeme.inflections.push(inflection);
-                    mapInflectionToLexeme.set(inflection.inflectionId, lexeme);
                 }
             }
             lexemes.push(lexeme);
+            let reactiveLexeme = lexemes[lexemes.length - 1];   // svelte just created a new reactive object
+
+            // Populate the map using the reactive reference, AFTER pushing
+            for (const inflection of reactiveLexeme.inflections) {
+                mapInflectionToLexeme.set(inflection.inflectionId, reactiveLexeme);
+            }
         }
 
         for(let lexeme of lexemes) {
@@ -1160,15 +1270,13 @@
         <div class="right-panel">
             {#each lexProp.inflections as inflection (inflection.seqNum)}
                 <!--  NOUN               -->
-                {#if lexProp['partOfSpeech'] === 'Noun'
-                    || lexProp['partOfSpeech'] === 'Pronoun'
-                    || lexProp['partOfSpeech'] === 'Numeral'}
+                {#if lexProp['partOfSpeech'] === 'Noun' }
                     <table class="paradigm-table">
                     <thead class="paradigm-header">
                         <tr>
                             <th class="col-noun-case"></th>
-                            <th class="col-head">Sg</th>
-                            <th class="col-head">Pl</th>
+                            <th class="col-head">Ед.</th>
+                            <th class="col-head">Мн.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1195,6 +1303,62 @@
                         {/each}
                     </tbody>
                     </table>
+                {/if}
+
+                <!-- NUMERAL -->
+                {#if lexProp['partOfSpeech'] === 'Numeral'}
+                    {#if lexProp.isTwoGenderNumeral === true }
+                        {@const twoGenderRows = twoGenderNumTable[inflection.inflectionId]}
+                        {#if twoGenderRows}
+                            <table class="paradigm-table">
+                                <thead class="paradigm-header">
+                                <tr>
+                                    <th class="col-noun-case"></th>
+                                    <th class="col-head">м, с</th>
+                                    <th class="col-head">ж</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {#each twoGenderRows as itemPair}
+                                        <tr>
+                                            <td class="col-noun-case">{itemPair[0].case}</td>
+                                            <td class={getNounFormClass(itemPair[0])}>
+                                                {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                {itemPair[0].form}
+                                                {itemPair[0].isIrregular}
+                                            </td>
+                                            <td class={getNounFormClass(itemPair[1])}>
+                                                {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                {itemPair[1].form}
+                                                {itemPair[1].isIrregular}
+                                            </td>
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        {/if}
+                    {:else}
+                        {@const rows = numTable[inflection.inflectionId]}
+                        <table class="paradigm-table">
+                            <thead class="paradigm-header">
+                            <tr>
+                                <th class="col-noun-case"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {#each rows as itemPair}
+                                <tr>
+                                    <td class="col-noun-case">{itemPair[0].case}</td>
+                                    <td class={getNounFormClass(itemPair[0])}>
+                                        {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {itemPair[0].form}
+                                        {itemPair[0].isIrregular}
+                                    </td>
+                                </tr>
+                            {/each}
+                            </tbody>
+                        </table>
+                    {/if}
                 {/if}
 
                 <!--  LAST NAME -->

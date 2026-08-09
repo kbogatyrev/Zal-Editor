@@ -1270,7 +1270,7 @@
         <div class="right-panel">
             {#each lexProp.inflections as inflection (inflection.seqNum)}
                 <!--  NOUN               -->
-                {#if lexProp['partOfSpeech'] === 'Noun' }
+                {#if lexProp['partOfSpeech'] === 'Noun' || lexProp['partOfSpeech'] === 'Pronoun'}
                     <table class="paradigm-table">
                     <thead class="paradigm-header">
                         <tr>
@@ -1282,9 +1282,9 @@
                     <tbody>
                         {#each nounTable[inflection.inflectionId] as itemPair}
                             <tr>
-                                {#if itemPair[0].case === 'П2'}
+                                {#if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'П2'}
                                     <td class="col-noun-case">{@html 'П<sub>2</sub>'}</td>
-                                {:else if itemPair[0].case === 'Р2'}
+                                {:else if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'Р2'}
                                     <td class="col-noun-case">{@html 'Р<sub>2</sub>'}</td>
                                 {:else}
                                     <td class="col-noun-case">{itemPair[0].case}</td>

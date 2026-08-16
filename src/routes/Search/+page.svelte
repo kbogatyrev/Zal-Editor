@@ -905,7 +905,7 @@
                         aspectPairs: inflectionData['aspectPairs'],
                         altAspectPair: inflectionData['altAspectPair'],
                         commonDeviations: inflectionData['commonDeviations'],
-                        hasFleetingVowel: inflectionData['hasFleetingVowel']
+                        fleetingVowel: inflectionData['fleetingVowel']
                     };
                     lexeme.inflections.push(inflection);
                 }
@@ -1252,7 +1252,7 @@
                             </div>
                         {/each}
                     {/if}
-                    {#if inflection.hasFleetingVowel}
+                    {#if inflection.fleetingVowel}
                         <div class="lex-row">
                             <div class="lex-col-left">Беглая гласная</div>
                         </div>

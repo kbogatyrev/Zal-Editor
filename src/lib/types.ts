@@ -8,6 +8,7 @@ export interface IInflection {
     aspectPair: string;
     altAspectPair: string;
     commonDeviations: string[];
+    fleetingVowel: boolean | undefined;
 }
 
 export interface ILexeme {

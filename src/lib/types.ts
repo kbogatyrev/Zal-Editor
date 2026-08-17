@@ -21,7 +21,7 @@ export interface ILexeme {
     partOfSpeech: string;
     isTransitive: boolean;
 //    spryazhSm
-//  spryazhSmRef
+    spryazhSmRef: string
     section: number;
     inflections: object[];
     contexts: string;

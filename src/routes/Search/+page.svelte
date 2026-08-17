@@ -884,6 +884,7 @@
                 section: lexemeData['section'],
                 restrictedContexts: lexemeData['restrictedContexts'],
                 contexts: lexemeData['contexts'],
+                spryazhSmRef: lexemeData['spryazhSmRef'],
                 inflections: [],
                 twoGenderNumeral: undefined
             };
@@ -1182,6 +1183,12 @@
                 <div class="lex-row">
                     <div class="lex-col-left">Помета (3):</div>
                     <div class="lex-col-right">{lexProp.lexTrailingComment}</div>
+                </div>
+            {/if}
+            {#if lexProp.spryazhSmRef}
+                <div class="lex-row">
+                    <div class="lex-col-left">Спрягается как:</div>
+                    <div class="lex-col-right">{lexProp.spryazhSmRef}</div>
                 </div>
             {/if}
 <!--

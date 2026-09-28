@@ -1,7 +1,9 @@
 <script lang="ts">
 
     import { slide } from 'svelte/transition';
-    import { searchRequest } from '$lib/stores.svelte';
+    import {searchRequest} from '$lib/stores.svelte';
+    import {animacyToHash, caseToDisplay, numberToDisplay, genderToHash, genderToHash2, displayToHash} from "$lib/constants.ts";
+    import {presentTenseToPerson} from "$lib/constants.ts";
 
     import Modal from './Modal.svelte';
 
@@ -19,9 +21,6 @@
 //        IImperativeTableEntry, IImperativeTable,
         ILexeme, IInflection, IBaseParticiplesTable
     } from "$lib/types";
-
-    import {caseToHash, numberToHash, genderToHash, genderToHash2} from "$lib/stores.svelte";
-    import {presentTenseToPerson} from "$lib/stores.svelte";
 
     function preventDefault(fn: Function) {
         return (e: Event) => {
@@ -132,19 +131,53 @@
         return table;
     }
 
-    function getAdjLongTableTemplate()
+    function assembleGramHash(category:string, gender: string, number: string, caseName: string)
+    {
+        let hash = category + '_';      // always a literal
+
+        if(category === 'AdjL') {
+            if (gender !== '') {
+                hash += displayToHash.get(gender) + '_';
+            }
+            hash += displayToHash.get(number) + '_' + displayToHash.get(caseName);
+            if (caseName === 'В (одуш.)') {
+                hash += '_Anim';
+            }
+            if (caseName === 'В (неод.)') {
+                hash += '_Inanim';
+            }
+        }
+
+        if(category === 'AdjS')
+        {
+            if (gender !== '') {
+                hash += displayToHash.get(gender);
+            }
+            else {
+                hash += displayToHash.get(number);
+            }
+        }
+
+        console.log('Gram hash: ', hash);
+
+        return hash;
+    }
+
+    function getAdjLongTableTemplate(subParadigm: string, animacyRelevant: boolean = false)
     {
         const declRowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
 
         let table = [];
-        for (let caseName of ['И', 'В', 'В (одуш.)', 'Р', 'Д', 'П', 'Т']) {
+        for (let rowLabel of ['И', 'В (одуш.)', 'В (неод.)', 'Р', 'Д', 'П', 'Т']) {
             let row = [];
-            for (let col of ['м', 'ж', 'с', 'мн.']) {
-                if (col === 'мн.') {
-                    row.push({...declRowTemplate, number: 'мн.', case: caseName});
+            for (let colLabel of ['м', 'ж', 'с', 'мн.']) {
+                if (colLabel === 'мн.') {
+                    const gramHash = assembleGramHash('AdjL', '', colLabel, rowLabel);
+                    row.push({...declRowTemplate, gramHash});
                 }
                 else{
-                    row.push({...declRowTemplate, gender: col, number: 'ед.', case: caseName});
+                    const gramHash = assembleGramHash('AdjL', colLabel, 'ед.', rowLabel);
+                        row.push({...declRowTemplate, gramHash});
                 }
             }
             table.push(row);
@@ -160,10 +193,12 @@
         let row = [];
         for (let col of ['м', 'ж', 'с', 'мн.']) {
             if (col === 'мн.') {
-                row.push({...rowTemplate, subParadigm: 'ShortAdj', number: 'мн.'});
+                const gramHash = assembleGramHash('AdjS', '', col, '');
+                row.push({...rowTemplate, subParadigm: 'ShortAdj', gramHash});
             }
             else{
-                row.push({...rowTemplate, subParadigm: 'ShortAdj', gender: col, number: 'ед.'});
+                const gramHash = assembleGramHash('AdjS', col, '', '');
+                row.push({...rowTemplate, subParadigm: 'ShortAdj', gramHash});
             }
         }
         table.push(row);
@@ -242,8 +277,8 @@
         }
         nounTable[inflectionId] = getNounTableTemplate();
         for (const [,form] of jsonForms.entries()) {
-            let formCase: string = caseToHash.get(form['case']) || '';
-            let formNumber: string = numberToHash.get(form['number']) || '';
+            let formCase: string = caseToDisplay.get(form['case']) || '';
+            let formNumber: string = numberToDisplay.get(form['number']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
@@ -279,7 +314,7 @@
     {
         twoGenderNumTable[inflectionId] = getTwoGenderNumeralsTemplate();
         for (const [,form] of jsonForms.entries()) {
-            let formCase: string = caseToHash.get(form['case']) || '';
+            let formCase: string = caseToDisplay.get(form['case']) || '';
             let formGender: string = genderToHash2.get(form['gender']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
@@ -311,7 +346,7 @@
     {
         numTable[inflectionId] = getNumeralsTemplate();
         for (const [,form] of jsonForms.entries()) {
-            let formCase: string = caseToHash.get(form['case']) || '';
+            let formCase: string = caseToDisplay.get(form['case']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
@@ -342,8 +377,8 @@
     {
         lastNameTable[inflectionId] = getLastNameTableTemplate();
         for (const [,form] of jsonForms.entries()) {
-            let formCase: string = caseToHash.get(form['case']) || '';
-            let formNumber: string = numberToHash.get(form['number']) || '';
+            let formCase: string = caseToDisplay.get(form['case']) || '';
+            let formNumber: string = numberToDisplay.get(form['number']) || '';
             let formGender = '';
             if (form['subParadigm'] === 'LastNameNounF') {
                 formGender = 'ж';
@@ -413,25 +448,28 @@
                 return;
         }
 
-        targetContainer[inflectionId] = getAdjLongTableTemplate();
+        targetContainer[inflectionId] = getAdjLongTableTemplate(subParadigm);
         let table = targetContainer[inflectionId];
         for (const [,form] of jsonForms.entries()) {
             const longOnly = ['LongAdj', 'NumeralAdj', 'PronounAdj'];
-            if (!longOnly.includes(subParadigm) && subParadigm !== form['subParadigm']) continue;
-//            if (subParadigm !== form['subParadigm']) continue;
-            let formCase: string = caseToHash.get(form['case']) || '';
-            let formNumber: string = numberToHash.get(form['number']) || '';
-            let formGender: string = genderToHash.get(form['gender']) || '';
+            if (!longOnly.includes(subParadigm) || subParadigm !== form['subParadigm']) continue;
+//            let formCase: string = caseToDisplay.get(form['case']) || '';
+//            let formNumber: string = numberToDisplay.get(form['number']) || '';
+//            let formGender: string = genderToHash.get(form['gender']) || '';
+//            let formAnimacy: string = animacyToHash.get(form['animacy']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
+/*
             if (formCase !== '' && formNumber === 'ед.' && (formGender === 'м' || formGender === 'ж' || formGender === 'с')) {
                 findCell = table.flat().find(item => item.case === formCase && item.gender === formGender);
             }
             else if (formCase !== '' && formNumber === 'мн.' ) {
                 findCell = table.flat().find(item => item.case === formCase && item.number === formNumber);
             }
+ */
+            findCell = table.flat().find(item => item.gramHash === form['gramHash']);
             if (findCell) {
                 findCell.form = form['wordForm'];
                 if (isIrregular) {
@@ -444,22 +482,22 @@
                     findCell.isAssumed = true;
                 }
             } else {
-                console.log('*** Long form not found');
+                console.log('*** Long form not found: ', form['gramHash']);
             }
 //            console.log ('******* ', findCell);
         }
 
-        let gSgM = table.flat().find(item => item.case === 'Р' && item.gender === 'м' && item.number==='ед.');
-        let aAnimSgM = table.flat().find(item => item.case === 'В (одуш.)' && item.gender === 'м' && item.number==='ед.');
-        if (gSgM && aAnimSgM) {
-            aAnimSgM.form = gSgM.form;
-        }
+//        let gSgM = table.flat().find(item => item.case === 'Р' && item.gender === 'м' && item.number==='ед.');
+//        let aAnimSgM = table.flat().find(item => item.case === 'В (одуш.)' && item.gender === 'м' && item.number==='ед.');
+//        if (gSgM && aAnimSgM) {
+//            aAnimSgM.form = gSgM.form;
+//        }
 
-        let gPl = table.flat().find(item => item.case === 'Р' && item.number==='мн.');
-        let aAnimPl = table.flat().find(item => item.case === 'В (одуш.)' && item.number==='мн.');
-        if (gPl && aAnimPl) {
-            aAnimPl.form = gPl.form;
-        }
+//        let gPl = table.flat().find(item => item.case === 'Р' && item.number==='мн.');
+//        let aAnimPl = table.flat().find(item => item.case === 'В (одуш.)' && item.number==='мн.');
+//        if (gPl && aAnimPl) {
+//            aAnimPl.form = gPl.form;
+//        }
 
         console.log ('==============================', table);
     }       //  handleLongForms
@@ -488,18 +526,18 @@
         let table = targetContainer[inflectionId];
         for (const [,form] of jsonForms.entries()) {
             if (subParadigm !== form['subParadigm']) continue;
-            let formNumber: string = numberToHash.get(form['number']) || '';
-            let formGender: string = genderToHash.get(form['gender']) || '';
+//            let formNumber: string = numberToDisplay.get(form['number']) || '';
+//            let formGender: string = genderToHash.get(form['gender']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
-            if (formNumber != '' && formNumber === 'ед.' && (formGender === 'м' || formGender === 'ж' || formGender === 'с')) {
-                findCell = table.flat().find(item => item.gender === formGender && item.number==='ед.');
-            }
-            else if (formNumber === 'мн.' ) {
-                findCell = table.flat().find(item => item.number === formNumber);
-            }
+//            if (formNumber != '' && formNumber === 'ед.' && (formGender === 'м' || formGender === 'ж' || formGender === 'с')) {
+//                findCell = table.flat().find(item => item.gender === formGender && item.number==='ед.');
+            findCell = table.flat().find(item => item.gramHash === form['gramHash']);
+        //    else if (formNumber === 'мн.' ) {
+        //        findCell = table.flat().find(item => item.number === formNumber);
+        //    }
             if (findCell) {
                 findCell.form = form['wordForm'];
                 if (isIrregular) {
@@ -550,7 +588,7 @@
             if (formSubParadigm !== 'PresentTense') continue;
 
             let formPerson: string = presentTenseToPerson.get(form['person']) || '';
-            let formNumber: string = numberToHash.get(form['number']) || '';
+            let formNumber: string = numberToDisplay.get(form['number']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] !== undefined && form['status'] === 'Assumed';
@@ -581,7 +619,7 @@
         pastTenseTable[inflectionId] = getPastTenseTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             if (form['subParadigm'] !== 'PastTense') continue;
-//            let formNumber: string = numberToHash.get(form['number']) || '';
+//            let formNumber: string = numberToDisplay.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
@@ -617,7 +655,7 @@
         imperativeTable[inflectionId] = getImperativeTableTemplate();
         for (const [,form] of jsonForms.entries()) {
             if (form['subParadigm'] !== 'Imperative') continue;
-            let formNumber: string = numberToHash.get(form['number']) || '';
+            let formNumber: string = numberToDisplay.get(form['number']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
@@ -645,8 +683,8 @@
 //        console.log(jsonForms);
         let partBase = getBaseParticiplesTableTemplate(subParadigm);
         for (const [,form] of jsonForms.entries()) {
-            let formCase: string = caseToHash.get(form['case']) || '';
-            let formNumber: string = numberToHash.get(form['number']) || '';
+            let formCase: string = caseToDisplay.get(form['case']) || '';
+            let formNumber: string = numberToDisplay.get(form['number']) || '';
             let formGender: string = genderToHash.get(form['gender']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
@@ -757,19 +795,6 @@
         return "col-form";
     };
 
-/*
-    const getImperative = (item: IImperativeTableEntry) => {
-        if (item.isDifficult) return "col-difficult-form";
-        return "col-form";
-    };
-*/
-/*
-    const getParticipleListClass = (item: IBaseParticiplesTableEntry | undefined) => {
-        if (!item || item.isDifficult) return "col-difficult-form-no-border";
-        return "col-form-no-border";
-    };
-*/
-
     async function requestForms(inflectionId: number)
     {
         console.log('Requesting forms for inflection ID: ' + inflectionId);
@@ -854,7 +879,6 @@
            }
         }
         catch (err: any) {
-//            error: string = err.message;
             console.log('Error: ' + err.message);
             return;
         } finally {
@@ -1007,13 +1031,17 @@
 
 </script>
 
+<!------------------------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------------------------->
+
 <!-- Pass state using the bind: syntax -->
 <Modal bind:isOpen={showModal}>
     <h2>{modalTitle}</h2>
     <p>{@html modalText}</p>
 </Modal>
 
-{#snippet longForms(inflection, table, showSubHeading)}
+{#snippet renderLongForms(inflection, table, showSubHeading)}
     {#if showSubHeading}
         <div class="section-subheading">Полные формы</div>
     {/if}
@@ -1077,7 +1105,7 @@
     </table>
 {/snippet}
 
-{#snippet shortForms(inflection, table)}
+{#snippet renderShortForms(inflection, table)}
     <div class="section-subheading">Краткие формы</div>
     <table class="paradigm-table">
         <colgroup>
@@ -1120,7 +1148,7 @@
     </table>
 {/snippet}
 
-{#snippet comparative(inflection)}
+{#snippet renderComparative(inflection)}
     <div class="comparative-container">    <!-- make it a single line -->
         <div class="section-subheading-single-line">Сравн. степень:</div>
         {#if comparatives[inflection.inflectionId] && comparatives[inflection.inflectionId].form}
@@ -1407,12 +1435,12 @@
                 <!--  ADJECTIVES          -->
                 {#if lexProp['partOfSpeech'] === 'Adj' && lexProp['inflectionSymbol'] === 'п'}
                     <!--  ADJ               -->
-                    {@render longForms(inflection, adjLongTable, true)}
-                    {@render shortForms(inflection, adjShortTable)}
-                    {@render comparative(inflection)}
+                    {@render renderLongForms(inflection, adjLongTable, true)}
+                    {@render renderShortForms(inflection, adjShortTable)}
+                    {@render renderComparative(inflection)}
                 {:else if lexProp['partOfSpeech'] === 'Adj' || lexProp['partOfSpeech'] === 'PronounAdj'
                     || lexProp['partOfSpeech'] === 'NumeralAdj' }
-                    {@render longForms(inflection, adjLongTable, false)}
+                    {@render renderLongForms(inflection, adjLongTable, false)}
                 {/if}
 
                 <!-- END ADJ -->
@@ -1528,7 +1556,7 @@
                             {#if showLongPresAct }
                                 <span class="slider" transition:slide>
                                         <span transition:slide={{duration: 300}} />
-                                        {@render longForms(inflection, partPresActLongTable, false)}
+                                        {@render renderLongForms(inflection, partPresActLongTable, false)}
                                 </span>
                             {/if}
                         </div>
@@ -1556,8 +1584,8 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if expandPresPass}
-                                    {@render longForms(inflection, partPresPassLongTable, false)}
-                                    {@render shortForms(inflection, partPresPassShortTable, false)}
+                                    {@render renderLongForms(inflection, partPresPassLongTable, false)}
+                                    {@render renderShortForms(inflection, partPresPassShortTable, false)}
                                 {/if}
                             </span>
                         </div>
@@ -1575,7 +1603,7 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if showLongPastAct }
-                                    {@render longForms(inflection, partPastActLongTable, false)}
+                                    {@render renderLongForms(inflection, partPastActLongTable, false)}
                                 {/if}
                             </span>
                         </div>
@@ -1603,8 +1631,8 @@
                             </button>
                             <span class="slider" transition:slide>
                                 {#if showLongPastPass }
-                                    {@render longForms(inflection, partPastPassLongTable, true)}
-                                    {@render shortForms(inflection, partPastPassShortTable)}
+                                    {@render renderLongForms(inflection, partPastPassLongTable, true)}
+                                    {@render renderShortForms(inflection, partPastPassShortTable)}
                                 {/if}
                             </span>
                         </div>
@@ -1732,6 +1760,15 @@
 
     .section-subheading-single-line {
         padding-top: 0px;
+    }
+
+    .paradigm-tables-row {
+        display: flex;
+        gap: 1.5em;
+    }
+
+    .paradigm-subtable {
+        border-collapse: collapse;
     }
 
     .base-form {

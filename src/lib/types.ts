@@ -89,7 +89,9 @@ export interface IAdjLongTableEntry
     gender: string;
     number: string;
     case: string;
+    animacy: string;
     form: string;
+    gramHash: string;
     isIrregular: string;
     isDifficult: boolean;
     isAssumed: boolean;

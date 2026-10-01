@@ -140,11 +140,13 @@
                 hash += displayToHash.get(gender) + '_';
             }
             hash += displayToHash.get(number) + '_' + displayToHash.get(caseName);
-            if (caseName === 'В (одуш.)') {
-                hash += '_Anim';
-            }
-            if (caseName === 'В (неод.)') {
-                hash += '_Inanim';
+            if(number === 'мн.' || gender === 'м') {
+                if (caseName === 'В (одуш.)') {
+                    hash += '_Anim';
+                }
+                if (caseName === 'В (неод.)') {
+                    hash += '_Inanim';
+                }
             }
         }
 
@@ -158,7 +160,7 @@
             }
         }
 
-        console.log('Gram hash: ', hash);
+//        console.log('Gram hash: ', hash);
 
         return hash;
     }
@@ -173,11 +175,11 @@
             for (let colLabel of ['м', 'ж', 'с', 'мн.']) {
                 if (colLabel === 'мн.') {
                     const gramHash = assembleGramHash('AdjL', '', colLabel, rowLabel);
-                    row.push({...declRowTemplate, gramHash});
+                    row.push({...declRowTemplate, case: rowLabel, gramHash});
                 }
-                else{
+                else {
                     const gramHash = assembleGramHash('AdjL', colLabel, 'ед.', rowLabel);
-                        row.push({...declRowTemplate, gramHash});
+                    row.push({...declRowTemplate,  case: rowLabel, gramHash});
                 }
             }
             table.push(row);
@@ -484,7 +486,6 @@
             } else {
                 console.log('*** Long form not found: ', form['gramHash']);
             }
-//            console.log ('******* ', findCell);
         }
 
 //        let gSgM = table.flat().find(item => item.case === 'Р' && item.gender === 'м' && item.number==='ед.');
@@ -1068,26 +1069,26 @@
                     {item[0].form}
                     {item[0].isIrregular}
                 </td>
-                {#if item[1].case === 'В' && item[1].number === 'ед.'}
-                    <td class={getAdjLongFormClass(item[1])} rowspan="2">
+                {#if item[1].case === 'В (одуш.)'}
+                    <td class={getAdjLongFormClass(item[1])}  rowspan="2">
                         {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                         {item[1].form}
                         {item[1].isIrregular}
                     </td>
-                {:else if item[1].case !== 'В (одуш.)'}
+                {:else if item[1].case !== 'В (неод.)'}
                     <td class={getAdjLongFormClass(item[1])}>
                         {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                         {item[1].form}
                         {item[1].isIrregular}
                     </td>
                 {/if}
-                {#if item[2].case === 'В' && item[2].number === 'ед.'}
+                {#if item[2].case === 'В (одуш.)'}
                     <td class={getAdjLongFormClass(item[2])} rowspan="2">
                         {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                         {item[2].form}
                         {item[2].isIrregular}
                     </td>
-                {:else if item[2].case !== 'В (одуш.)'}
+                {:else if item[2].case !== 'В (неод.)'}
                     <td class={getAdjLongFormClass(item[2])}>
                         {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                         {item[2].form}

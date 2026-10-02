@@ -135,7 +135,7 @@
     {
         let hash = category + '_';      // always a literal
 
-        if(category === 'AdjL') {
+        if (category === 'AdjL') {
             if (gender !== '') {
                 hash += displayToHash.get(gender) + '_';
             }
@@ -150,7 +150,7 @@
             }
         }
 
-        if(category === 'AdjS')
+        if (category === 'AdjS')
         {
             if (gender !== '') {
                 hash += displayToHash.get(gender);
@@ -222,7 +222,8 @@
         for (let personName of ['1', '2', '3']) {
             let row = [];
             for (let numberName of ['ед.', 'мн.']) {
-                row.push({...rowTemplate, number: numberName, person: personName});
+                let gramHash = 'Pres_' + displayToHash.get(numberName) + '_' + personName;
+                row.push({...rowTemplate, number: numberName, person: personName, gramHash});
             }
             table.push(row);
         }
@@ -238,10 +239,12 @@
         let row = [];
         for (let col of ['м', 'ж', 'с', 'мн.']) {
             if (col === 'мн.') {
-                row.push({...rowTemplate, subParadigm: 'PastTense', gender: ''});
+                let gramHash = 'Past_Pl';
+                row.push({...rowTemplate, subParadigm: 'PastTense', gender: '', gramHash});
             }
             else{
-                row.push({...rowTemplate, subParadigm: 'PastTense', gender: col, number: 'ед.'});
+                let gramHash = 'Past_' + displayToHash.get(col);
+                row.push({...rowTemplate, subParadigm: 'PastTense', gender: col, number: 'ед.', gramHash});
             }
         }
         table.push(row);
@@ -463,14 +466,7 @@
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
             let findCell = undefined;
-/*
-            if (formCase !== '' && formNumber === 'ед.' && (formGender === 'м' || formGender === 'ж' || formGender === 'с')) {
-                findCell = table.flat().find(item => item.case === formCase && item.gender === formGender);
-            }
-            else if (formCase !== '' && formNumber === 'мн.' ) {
-                findCell = table.flat().find(item => item.case === formCase && item.number === formNumber);
-            }
- */
+
             findCell = table.flat().find(item => item.gramHash === form['gramHash']);
             if (findCell) {
                 findCell.form = form['wordForm'];
@@ -500,7 +496,7 @@
 //            aAnimPl.form = gPl.form;
 //        }
 
-        console.log ('==============================', table);
+//        console.log ('==============================', table);
     }       //  handleLongForms
 
     function handleShortForms(inflectionId: number, subParadigm: string, jsonForms: Array<any>)
@@ -588,13 +584,14 @@
             let formSubParadigm: string = form['subParadigm'] || '';
             if (formSubParadigm !== 'PresentTense') continue;
 
-            let formPerson: string = presentTenseToPerson.get(form['person']) || '';
-            let formNumber: string = numberToDisplay.get(form['number']) || '';
+//            let formPerson: string = presentTenseToPerson.get(form['person']) || '';
+//            let formNumber: string = numberToDisplay.get(form['number']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] !== undefined && form['status'] === 'Assumed';
-            if (formPerson !== '' && (formNumber === 'ед.' || formNumber === 'мн.')) {
-                const findCell = presentTenseTable[inflectionId].flat().find(item => item.person === formPerson && item.number === formNumber);
+
+//            if (formPerson !== '' && (formNumber === 'ед.' || formNumber === 'мн.')) {
+                const findCell = presentTenseTable[inflectionId].flat().find(item => item.gramHash === form['gramHash']);
                 if (findCell) {
                     findCell.form = form['wordForm'];
                     if (isIrregular) {
@@ -611,7 +608,7 @@
                 } else {
                     console.log('*** Present tense form not found');
                 }
-            }
+//            }
         }
     }
 
@@ -621,19 +618,21 @@
         for (const [,form] of jsonForms.entries()) {
             if (form['subParadigm'] !== 'PastTense') continue;
 //            let formNumber: string = numberToDisplay.get(form['number']) || '';
-            let formGender: string = genderToHash.get(form['gender']) || '';
+//            let formGender: string = genderToHash.get(form['gender']) || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
-            let findCell = undefined;
-            if (formGender === 'м' || formGender === 'ж' || formGender === 'с') {
-                findCell = pastTenseTable[inflectionId].flat().find(item => item.gender === formGender && item.number==='ед.');
-            }
+//            if (formGender === 'м' || formGender === 'ж' || formGender === 'с') {
+//                findCell = pastTenseTable[inflectionId].flat().find(item => item.gender === formGender && item.number==='ед.');
+            const findCell = pastTenseTable[inflectionId].flat().find(item => item.gramHash === form['gramHash']);
+
+//            }
 //            else if (formNumber === 'Pl' ) {          // need to fix Node
-            else {
+//            else {
 //                findCell = pastTenseTable[inflectionId].flat().find(item => item.number === formNumber);
-                findCell = pastTenseTable[inflectionId].flat().find(item => item.gender === '');
-            }
+//                findCell = pastTenseTable[inflectionId].flat().find(item => item.gender === '');
+//            }
+
             if (findCell) {
                 findCell.form = form['wordForm'];
                 if (isIrregular) {

@@ -456,8 +456,7 @@
         targetContainer[inflectionId] = getAdjLongTableTemplate(subParadigm);
         let table = targetContainer[inflectionId];
         for (const [,form] of jsonForms.entries()) {
-            const longOnly = ['LongAdj', 'NumeralAdj', 'PronounAdj', 'PartPresAct', 'PartPastAct', 'PartPresPassLong', 'PartPastPassLong'];
-            if (!longOnly.includes(subParadigm) || subParadigm !== form['subParadigm']) continue;
+            if (subParadigm !== form['subParadigm']) continue;
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';

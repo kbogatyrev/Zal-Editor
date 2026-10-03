@@ -1,11 +1,14 @@
 export const subParadigmToHash = new Map<string, string>();
 subParadigmToHash.set('LongAdj', 'AdjL');
+subParadigmToHash.set('ShortAdj', 'AdjS');
 subParadigmToHash.set('PronounAdj', 'PronAdj');
 subParadigmToHash.set('NumeralAdj', 'NumAdj');
 subParadigmToHash.set('PartPresAct', 'PPresA');
 subParadigmToHash.set('PartPastAct', 'PPastA');
 subParadigmToHash.set('PartPresPassLong', 'PPresPL');
+subParadigmToHash.set('PartPresPassShort', 'PPresPS');
 subParadigmToHash.set('PartPastPassLong', 'PPastPL');
+subParadigmToHash.set('PartPastPassShort', 'PPastPS');
 
 export const caseToDisplay = new Map<string, string>();
 caseToDisplay.set('Nominative', 'И');

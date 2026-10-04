@@ -1271,25 +1271,29 @@
                     </thead>
                     <tbody>
                         {#each nounTable[inflection.inflectionId] as itemPair}
-                            <tr>
-                                {#if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'П2'}
-                                    <td class="col-noun-case">{@html 'П<sub>2</sub>'}</td>
-                                {:else if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'Р2'}
-                                    <td class="col-noun-case">{@html 'Р<sub>2</sub>'}</td>
-                                {:else}
-                                    <td class="col-noun-case">{itemPair[0].case}</td>
-                                {/if}
-                                <td class={getNounFormClass(itemPair[0])}>
-                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[0].form}
-                                    {itemPair[0].isIrregular}
-                                </td>
-                                <td class={getNounFormClass(itemPair[1])}>
-                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[1].form}
-                                    {itemPair[1].isIrregular}
-                                </td>
-                            </tr>
+                            {#if (itemPair[0].case === 'Р2' || itemPair[0].case === 'П2') && !itemPair[0].form && !itemPair[1].form}
+                                <!-- Skip empty Р2 and П2 rows -->
+                            {:else}
+                                <tr>
+                                    {#if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'П2'}
+                                        <td class="col-noun-case">{@html 'П<sub>2</sub>'}</td>
+                                    {:else if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'Р2'}
+                                        <td class="col-noun-case">{@html 'Р<sub>2</sub>'}</td>
+                                    {:else}
+                                        <td class="col-noun-case">{itemPair[0].case}</td>
+                                    {/if}
+                                    <td class={getNounFormClass(itemPair[0])}>
+                                        {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {itemPair[0].form}
+                                        {itemPair[0].isIrregular}
+                                    </td>
+                                    <td class={getNounFormClass(itemPair[1])}>
+                                        {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {itemPair[1].form}
+                                        {itemPair[1].isIrregular}
+                                    </td>
+                                </tr>
+                            {/if}
                         {/each}
                     </tbody>
                     </table>

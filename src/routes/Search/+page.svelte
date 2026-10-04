@@ -5,6 +5,7 @@
     import {animacyToHash, caseToDisplay, numberToDisplay, genderToHash, genderToHash2, displayToHash} from "$lib/constants.ts";
     import {subParadigmToHash} from "$lib/constants.ts";
     import {presentTenseToPerson} from "$lib/constants.ts";
+    import {triangle, largeAsterisk} from "$lib/constants.ts";
 
     import Modal from './Modal.svelte';
 
@@ -13,13 +14,10 @@
         INounTable, INounTableEntry,
         ITwoGenderNumTable, ITwoGenderNumTableEntry,
         INumTable, INumTableEntry,
-//        ILastNameTable, ILastNameTableEntry,
         IAdjLongTable, IAdjLongTableEntry,
         IAdjShortTable, IAdjShortTableEntry,
         IComparativesEntry, IComparatives,
         IPresentTenseTableEntry, IPresentTenseTable,
-//        IPastTenseTableEntry, IPastTenseTable,
-//        IImperativeTableEntry, IImperativeTable,
         ILexeme, IInflection, IBaseParticiplesTable
     } from "$lib/types";
 
@@ -66,9 +64,6 @@
     let showLongPastPass: boolean = $state(false);
 
     let mapInflectionToLexeme = new Map<number, ILexeme>();
-
-    const triangle: string = '\u25B3';
-    const largeAsterisk = '\uFF0A';
 
     function getNounTableTemplate()
     {

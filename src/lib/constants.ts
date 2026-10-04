@@ -80,6 +80,10 @@ presentTenseToPerson.set('1stPerson', '1');
 presentTenseToPerson.set('2ndPerson', '2');
 presentTenseToPerson.set('3rdPerson', '3');
 
+export const triangle: string = '\u25B3';
+export const largeAsterisk = '\uFF0A';
+
+
 /*
 export const AdjHashes = [
   "AdjL_M_Sg_N",

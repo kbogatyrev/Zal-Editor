@@ -1,11 +1,12 @@
 <script lang="ts">
 
+    import { fetchLexemes, fetchForms } from '$lib/api/config.ts';
     import { slide } from 'svelte/transition';
-    import {searchRequest} from '$lib/stores.svelte';
-    import {animacyToHash, caseToDisplay, numberToDisplay, genderToHash, genderToHash2, displayToHash} from "$lib/constants.ts";
-    import {subParadigmToHash} from "$lib/constants.ts";
-    import {presentTenseToPerson} from "$lib/constants.ts";
-    import {triangle, largeAsterisk} from "$lib/constants.ts";
+    import { searchRequest } from '$lib/stores.svelte';
+    import { animacyToHash, caseToDisplay, numberToDisplay, genderToHash, genderToHash2, displayToHash } from "$lib/constants.ts";
+    import { subParadigmToHash } from "$lib/constants.ts";
+    import { presentTenseToPerson } from "$lib/constants.ts";
+    import { triangle, largeAsterisk } from "$lib/constants.ts";
 
     import Modal from './Modal.svelte';
 
@@ -748,22 +749,8 @@
     async function requestForms(inflectionId: number)
     {
         console.log('Requesting forms for inflection ID: ' + inflectionId);
-        let uri = '';
-        const host = window.location.hostname;
-        if (host === 'localhost') {
-            uri = 'http://localhost:8088';
-        } else if (host === 'bogatyrev.org') {
-            uri = 'https://api.bogatyrev.org';
-        }
         try {
-            const response = await fetch(
-                `${uri}/forms?inflection-id=${encodeURIComponent(inflectionId)}`
-            );
-            if (!response.ok) {
-                console.error(await response.text());
-                throw new Error(`HTTP ${response.status}`);            }
-
-            let resp = await response.json(); // Assign the fetched data
+            const resp = await fetchForms(inflectionId);
             let forms = resp['wordForms'];
             if (forms.length === 0) {
                 console.log('No forms');
@@ -915,23 +902,8 @@
     });
 
     async function handleClick() {
-        let uri = '';
-        const host = window.location.hostname;
-        if (host === 'localhost') {
-            uri = 'http://localhost:8088';
-        } else if (host === 'bogatyrev.org') {
-            uri = 'https://api.bogatyrev.org';
-        }
         try {
-            const response = await fetch(
-                `${uri}/query?word=${encodeURIComponent(inputValue)}`
-            );
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            lexemeDescr = await response.json(); // Assign the fetched data
-
+            lexemeDescr = await fetchLexemes(inputValue);
             if (lexemeDescr.length === 0) {
 //                alert('Input not recognized.');
                 modalTitle = 'Слово не найдено';

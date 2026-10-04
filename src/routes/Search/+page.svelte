@@ -786,7 +786,7 @@
                 if (lexeme['inflectionSymbol'] !== 'п') {
 //                    lexeme['inflectionSymbol'] === 'мс-п' ||
 //                    lexeme['inflectionSymbol'] === 'числ.-п') {
-                    handleLongForms(inflectionId, 'LongAdj', forms);
+                    handleLongForms(inflectionId, lexeme['partOfSpeech'], forms);
                 }
                 else {
                     handleLongForms(inflectionId, 'LongAdj', forms);

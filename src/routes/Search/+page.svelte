@@ -784,9 +784,12 @@
                 lexeme['partOfSpeech'] === 'PronounAdj' ||
                 lexeme['partOfSpeech'] === 'NumeralAdj'){
                 if (lexeme['inflectionSymbol'] !== 'п') {
-//                    lexeme['inflectionSymbol'] === 'мс-п' ||
-//                    lexeme['inflectionSymbol'] === 'числ.-п') {
-                    handleLongForms(inflectionId, lexeme['partOfSpeech'], forms);
+                    let subParadigm = '';
+//                    if (lexeme['partOfSpeech'] === 'PronounAdj' || lexeme['partOfSpeech'] === 'NumeralAdj')
+//                    {
+                        subParadigm = 'PronounAdj';
+//                    }
+                    handleLongForms(inflectionId, subParadigm, forms);
                 }
                 else {
                     handleLongForms(inflectionId, 'LongAdj', forms);

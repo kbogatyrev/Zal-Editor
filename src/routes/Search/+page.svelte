@@ -83,10 +83,11 @@
     function getTwoGenderNumeralsTemplate() {
         const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
-        for (let caseName of ['И', 'В', 'Р', 'Д', 'П', 'Т']) {
+        for (let caseName of ['И', 'В (одуш.)', 'В (неод.)', 'Р', 'Д', 'П', 'Т']) {
+            let animacy = caseName === 'В (одуш.)' ? 'одуш.' : (caseName === 'В (неод.)' ? 'неод.' : '');
             let row = [];
             for (let col of ['м, с', 'ж']) {
-                row.push({...rowTemplate, gender: col, case: caseName});
+                row.push({...rowTemplate, gender: col, case: caseName, animacy: animacy});
             }
             table.push(row);
         }
@@ -315,26 +316,68 @@
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToDisplay.get(form['case']) || '';
             let formGender: string = genderToHash2.get(form['gender']) || '';
+            let formAnimacy: string = form['animacy'] || '';
+
+            // Check gramHash for animacy if not in animacy field
+            if (!formAnimacy && form['gramHash']) {
+                if (form['gramHash'].endsWith('_Anim')) {
+                    formAnimacy = 'Animate';
+                } else if (form['gramHash'].endsWith('_Inanim')) {
+                    formAnimacy = 'Inanimate';
+                }
+            }
+
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
+
             if (formCase !== '' && (formGender === 'м, с' || formGender === 'ж')) {
-                let findCell = twoGenderNumTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
-                if (findCell) {
-                    findCell.form = form['wordForm'];
-                    if (isIrregular) {
-                        findCell.isIrregular = triangle;
+                // For accusative case, handle animacy
+                if (formCase === 'В') {
+                    let cellsToFill = [];
+                    if (formAnimacy === 'Animate') {
+                        cellsToFill = [twoGenderNumTable[inflectionId].flat().find(item => item.case === 'В (одуш.)' && item.gender === formGender)];
+                    } else if (formAnimacy === 'Inanimate') {
+                        cellsToFill = [twoGenderNumTable[inflectionId].flat().find(item => item.case === 'В (неод.)' && item.gender === formGender)];
+                    } else {
+                        // No animacy specified - fill both cells with same form
+                        cellsToFill = [
+                            twoGenderNumTable[inflectionId].flat().find(item => item.case === 'В (одуш.)' && item.gender === formGender),
+                            twoGenderNumTable[inflectionId].flat().find(item => item.case === 'В (неод.)' && item.gender === formGender)
+                        ];
                     }
-                    if (isDifficult) {
-                        findCell.isDifficult = true;
-                    }
-                    if (isAssumed) {
-                        findCell.isAssumed = true;
-//                        findCell.form = supQuestionMark + form['wordForm'];
-//                        console.log('*** Assumed form', findCell.form);
+
+                    for (const findCell of cellsToFill) {
+                        if (findCell) {
+                            findCell.form = form['wordForm'];
+                            if (isIrregular) {
+                                findCell.isIrregular = triangle;
+                            }
+                            if (isDifficult) {
+                                findCell.isDifficult = true;
+                            }
+                            if (isAssumed) {
+                                findCell.isAssumed = true;
+                            }
+                        }
                     }
                 } else {
-                    console.log('*** Two-gender numeral entry not found');
+                    // Non-accusative cases
+                    let findCell = twoGenderNumTable[inflectionId].flat().find(item => item.case === formCase && item.gender === formGender);
+                    if (findCell) {
+                        findCell.form = form['wordForm'];
+                        if (isIrregular) {
+                            findCell.isIrregular = triangle;
+                        }
+                        if (isDifficult) {
+                            findCell.isDifficult = true;
+                        }
+                        if (isAssumed) {
+                            findCell.isAssumed = true;
+                        }
+                    } else {
+                        console.log('*** Two-gender numeral entry not found');
+                    }
                 }
             }
         }

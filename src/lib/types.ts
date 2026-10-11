@@ -59,6 +59,7 @@ export interface ITwoGenderNumTable {
 export interface INumTableEntry
 {
     case: string;
+    animacy: string;
     form: string;
     isIrregular: string;
     isDifficult: boolean;

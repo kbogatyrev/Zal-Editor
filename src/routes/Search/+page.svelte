@@ -96,17 +96,15 @@
     function getNumeralsTemplate() {
         const rowTemplate = { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
         let table = [];
-        for (let caseName of ['И', 'В', 'Р', 'Д', 'П', 'Т']) {
-            let row = [];
-            row.push({...rowTemplate, case: caseName});
-            table.push(row);
+        for (let caseName of ['И', 'В (одуш.)', 'В (неод.)', 'Р', 'Д', 'П', 'Т']) {
+            let animacy = caseName === 'В (одуш.)' ? 'одуш.' : (caseName === 'В (неод.)' ? 'неод.' : '');
+            table.push([{
+                ...rowTemplate,
+                case: caseName,
+                animacy: animacy
+            }]);
         }
         return table;
-    }
-
-    function getNumeralsTableTemplate()
-    {
-        return { form: '', isIrregular: '', isDifficult: false, isAssumed: false };
     }
 
     function getLastNameTableTemplate()
@@ -343,15 +341,46 @@
         console.log (twoGenderNumTable);
     }
 
-    function handleNumerals(inflectionId: number, jsonForms: Array<any>)
-    {
+    function handleNumerals(inflectionId: number, jsonForms: Array<any>) {
         numTable[inflectionId] = getNumeralsTemplate();
         for (const [,form] of jsonForms.entries()) {
             let formCase: string = caseToDisplay.get(form['case']) || '';
+            let formAnimacy: string = form['animacy'] || '';
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];
             let isDifficult: boolean = form['isDifficult'] !== undefined && form['isDifficult'];
             let isAssumed: boolean = form['status'] === 'Assumed';
-            if (formCase !== '') {
+
+            // For accusative case
+            if (formCase === 'В') {
+                let cellsToFill = [];
+                if (formAnimacy === 'Animate') {
+                    cellsToFill = [numTable[inflectionId].flat().find(item => item.case === 'В (одуш.)')];
+                } else if (formAnimacy === 'Inanimate') {
+                    cellsToFill = [numTable[inflectionId].flat().find(item => item.case === 'В (неод.)')];
+                } else {
+                    // No animacy specified - fill both cells with same form
+                    cellsToFill = [
+                        numTable[inflectionId].flat().find(item => item.case === 'В (одуш.)'),
+                        numTable[inflectionId].flat().find(item => item.case === 'В (неод.)')
+                    ];
+                }
+
+                for (const findCell of cellsToFill) {
+                    if (findCell) {
+                        findCell.form = form['wordForm'];
+                        if (isIrregular) {
+                            findCell.isIrregular = triangle;
+                        }
+                        if (isDifficult) {
+                            findCell.isDifficult = true;
+                        }
+                        if (isAssumed) {
+                            findCell.isAssumed = true;
+                        }
+                    }
+                }
+            } else {
+                // Non-accusative cases
                 let findCell = numTable[inflectionId].flat().find(item => item.case === formCase);
                 if (findCell) {
                     findCell.form = form['wordForm'];
@@ -363,15 +392,13 @@
                     }
                     if (isAssumed) {
                         findCell.isAssumed = true;
-//                        findCell.form = supQuestionMark + form['wordForm'];
-//                        console.log('*** Assumed form', findCell.form);
                     }
                 } else {
                     console.log('*** Numeral entry not found');
                 }
             }
         }
-        console.log (numTable[inflectionId]);
+        console.log (numTable);
     }
 
     function handleLastNameForms(inflectionId: number, jsonForms: Array<any>)
@@ -1313,17 +1340,44 @@
                             {#each rows as itemPair}
                                 <tr>
                                     <td class="col-noun-case">{itemPair[0].case}</td>
-                                    <td class={getNounFormClass(itemPair[0])}>
-                                        {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                        {itemPair[0].form}
-                                        {itemPair[0].isIrregular}
-                                    </td>
+                                    {#if itemPair[0].case === 'В (одуш.)'}
+                                        <!-- Check if inanimate form exists and is identical -->
+                                        {@const inanimForm = rows.find(r => r[0].case === 'В (неод.)')}
+                                        {#if inanimForm && itemPair[0].form && inanimForm[0].form === itemPair[0].form}
+                                            <td class={getNounFormClass(itemPair[0])} rowspan="2">
+                                                {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                {itemPair[0].form}
+                                                {itemPair[0].isIrregular}
+                                            </td>
+                                        {:else}
+                                            <td class={getNounFormClass(itemPair[0])}>
+                                                {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                {itemPair[0].form}
+                                                {itemPair[0].isIrregular}
+                                            </td>
+                                        {/if}
+                                    {:else if itemPair[0].case === 'В (неод.)'}
+                                        <!-- Skip cell only if it was merged with the row above -->
+                                        {@const animForm = rows.find(r => r[0].case === 'В (одуш.)')}
+                                        {#if !animForm || !animForm[0].form || animForm[0].form !== itemPair[0].form}
+                                            <td class={getNounFormClass(itemPair[0])}>
+                                                {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                {itemPair[0].form}
+                                                {itemPair[0].isIrregular}
+                                            </td>
+                                        {/if}
+                                    {:else}
+                                        <td class={getNounFormClass(itemPair[0])}>
+                                            {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                            {itemPair[0].form}
+                                            {itemPair[0].isIrregular}
+                                        </td>
+                                    {/if}
                                 </tr>
                             {/each}
                             </tbody>
                         </table>
-                    {/if}
-                {/if}
+                    {/if}                {/if}
 
                 <!--  LAST NAME -->
                 {#if lexProp['partOfSpeech'] === 'LastName'}
@@ -1706,7 +1760,7 @@
     }
 
     .col-present-tense-person, .col-noun-case {
-        width: 30px;
+        width: 100px;
 /*        background-color: #f3f4f6;    */
         color: gray;
         text-align: center;

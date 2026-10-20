@@ -1289,11 +1289,11 @@
                     </div>
                     <div class="lex-row">
                         <div class="lex-col-left">Словоизм. индекс:</div>
-                        <div class="lex-col-right">{inflection.inflectionIndex}</div>
+                        <div class="lex-col-right">{Number(inflection.inflectionIndex) === 0 ? '-' : inflection.inflectionIndex}</div>
                     </div>
                     <div class="lex-row">
                         <div class="lex-col-left">Схема ударения:</div>
-                        <div class="lex-col-right">{inflection.accentType1}</div>
+                        <div class="lex-col-right">{inflection.accentType1?.trim() || '-'}</div>
                     </div>
                     {#if inflection.aspectPairs && inflection.aspectPairs.length > 0}
                         {#each inflection.aspectPairs as aspectPair, iAt (aspectPair+iAt)}

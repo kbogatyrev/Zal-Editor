@@ -1170,20 +1170,37 @@
 {#each lexemes as lexProp (lexProp.seqNum)}
     <div class="display-container">
         <div class="lexeme-container">
-            <div class="lex-row">
-                <div class="lex-col-left">Lexeme ID:</div>
-                <div class="lex-col-right">{lexProp.lexemeId}</div>
+            <div class="lex-row headword">
+                <div class="lex-col-left">
+                    {#if lexProp.homonyms.length > 0}
+                        <sup class="homonym-index">{lexProp.homonyms.join('-')}</sup>
+                    {/if}
+                    {lexProp.sourceForm}
+                    {#if lexProp.headwordComment}
+                        <div class="headword-comment">({lexProp.headwordComment})</div>
+                    {/if}
+                    {#if lexProp.lexTrailingComment}
+                        <span class="headword-comment">({lexProp.lexTrailingComment})</span>
+                    {/if}
+                </div>
             </div>
+                <div class="lex-row">
+                    <div class="lex-col-left">Lexeme ID:</div>
+                    <div class="lex-col-right">{lexProp.lexemeId}</div>
+                </div>
+<!--
             <div class="lex-row">
                 <div class="lex-col-left">Исходная форма:</div>
                 <div class="lex-col-right">{lexProp.sourceForm}</div>
             </div>
+
             {#if lexProp.homonyms.length > 0}
                 <div class="lex-row">
                     <div class="lex-col-left">Индекс омонима:</div>
                     <div class="lex-col-right">{lexProp.homonyms.join(', ')}</div>
                 </div>
             {/if}
+
             {#if lexProp.headwordComment}
                 <div class="lex-row">
                     <div class="lex-col-left">Помета (1):</div>
@@ -1196,18 +1213,22 @@
                     <div class="lex-col-right">{lexProp.headwordVariant}</div>
                 </div>
             {/if}
+
             {#if lexProp.headwordVariantComment}
                 <div class="lex-row">
                     <div class="lex-col-left">Помета (2):</div>
                     <div class="lex-col-right">{lexProp.headwordVariantComment}</div>
+                    {lexProp.headwordVariantComment}
                 </div>
             {/if}
             {#if lexProp.lexTrailingComment}
                 <div class="lex-row">
                     <div class="lex-col-left">Помета (3):</div>
                     <div class="lex-col-right">{lexProp.lexTrailingComment}</div>
+                    <div class="lex-col-left">{lexProp.lexTrailingComment}</div>
                 </div>
             {/if}
+-->
             {#if lexProp.spryazhSmRef}
                 <div class="lex-row">
                     <div class="lex-col-left">Спрягается как:</div>
@@ -1299,99 +1320,117 @@
 
         <div class="right-panel">
             {#each lexProp.inflections as inflection (inflection.seqNum)}
-                <!--  NOUN               -->
-                {#if lexProp['partOfSpeech'] === 'Noun' || lexProp['partOfSpeech'] === 'Pronoun'}
-                    <table class="paradigm-table">
-                    <thead class="paradigm-header">
-                        <tr>
-                            <th class="col-noun-case"></th>
-                            <th class="col-head">Ед.</th>
-                            <th class="col-head">Мн.</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each nounTable[inflection.inflectionId] as itemPair}
-                            {#if (itemPair[0].case === 'Р2' || itemPair[0].case === 'П2') && !itemPair[0].form && !itemPair[1].form}
-                                <!-- Skip empty Р2 and П2 rows -->
-                            {:else}
-                                <tr>
-                                    {#if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'П2'}
-                                        <td class="col-noun-case">{@html 'П<sub>2</sub>'}</td>
-                                    {:else if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'Р2'}
-                                        <td class="col-noun-case">{@html 'Р<sub>2</sub>'}</td>
-                                    {:else}
-                                        <td class="col-noun-case">{itemPair[0].case}</td>
-                                    {/if}
-                                    <td class={getNounFormClass(itemPair[0])}>
-                                        {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                        {itemPair[0].form}
-                                        {itemPair[0].isIrregular}
-                                    </td>
-                                    <td class={getNounFormClass(itemPair[1])}>
-                                        {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                        {itemPair[1].form}
-                                        {itemPair[1].isIrregular}
-                                    </td>
-                                </tr>
-                            {/if}
-                        {/each}
-                    </tbody>
-                    </table>
-                {/if}
+                <div class="inflection-paradigm">
+                    <!--  NOUN               -->
+                    {#if lexProp['partOfSpeech'] === 'Noun' || lexProp['partOfSpeech'] === 'Pronoun'}
+                        <table class="paradigm-table">
+                        <thead class="paradigm-header">
+                            <tr>
+                                <th class="col-noun-case"></th>
+                                <th class="col-head">Ед.</th>
+                                <th class="col-head">Мн.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {#each nounTable[inflection.inflectionId] as itemPair}
+                                {#if (itemPair[0].case === 'Р2' || itemPair[0].case === 'П2') && !itemPair[0].form && !itemPair[1].form}
+                                    <!-- Skip empty Р2 and П2 rows -->
+                                {:else}
+                                    <tr>
+                                        {#if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'П2'}
+                                            <td class="col-noun-case">{@html 'П<sub>2</sub>'}</td>
+                                        {:else if lexProp['partOfSpeech'] === 'Noun' && itemPair[0].case === 'Р2'}
+                                            <td class="col-noun-case">{@html 'Р<sub>2</sub>'}</td>
+                                        {:else}
+                                            <td class="col-noun-case">{itemPair[0].case}</td>
+                                        {/if}
+                                        <td class={getNounFormClass(itemPair[0])}>
+                                            {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                            {itemPair[0].form}
+                                            {itemPair[0].isIrregular}
+                                        </td>
+                                        <td class={getNounFormClass(itemPair[1])}>
+                                            {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                            {itemPair[1].form}
+                                            {itemPair[1].isIrregular}
+                                        </td>
+                                    </tr>
+                                {/if}
+                            {/each}
+                        </tbody>
+                        </table>
+                    {/if}
 
-                <!-- NUMERAL -->
-                {#if lexProp['partOfSpeech'] === 'Numeral'}
-                    {#if lexProp.isTwoGenderNumeral === true }
-                        {@const twoGenderRows = twoGenderNumTable[inflection.inflectionId]}
-                        {#if twoGenderRows}
+                    <!-- NUMERAL -->
+                    {#if lexProp['partOfSpeech'] === 'Numeral'}
+                        {#if lexProp.isTwoGenderNumeral === true }
+                            {@const twoGenderRows = twoGenderNumTable[inflection.inflectionId]}
+                            {#if twoGenderRows}
+                                <table class="paradigm-table">
+                                    <thead class="paradigm-header">
+                                    <tr>
+                                        <th class="col-noun-case"></th>
+                                        <th class="col-head">м, с</th>
+                                        <th class="col-head">ж</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        {#each twoGenderRows as itemPair}
+                                            <tr>
+                                                <td class="col-noun-case">{itemPair[0].case}</td>
+                                                <td class={getNounFormClass(itemPair[0])}>
+                                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                    {itemPair[0].form}
+                                                    {itemPair[0].isIrregular}
+                                                </td>
+                                                <td class={getNounFormClass(itemPair[1])}>
+                                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                    {itemPair[1].form}
+                                                    {itemPair[1].isIrregular}
+                                                </td>
+                                            </tr>
+                                        {/each}
+                                    </tbody>
+                                </table>
+                            {/if}
+                        {:else}
+                            {@const rows = numTable[inflection.inflectionId]}
                             <table class="paradigm-table">
                                 <thead class="paradigm-header">
                                 <tr>
                                     <th class="col-noun-case"></th>
-                                    <th class="col-head">м, с</th>
-                                    <th class="col-head">ж</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    {#each twoGenderRows as itemPair}
-                                        <tr>
-                                            <td class="col-noun-case">{itemPair[0].case}</td>
-                                            <td class={getNounFormClass(itemPair[0])}>
-                                                {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                                {itemPair[0].form}
-                                                {itemPair[0].isIrregular}
-                                            </td>
-                                            <td class={getNounFormClass(itemPair[1])}>
-                                                {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                                {itemPair[1].form}
-                                                {itemPair[1].isIrregular}
-                                            </td>
-                                        </tr>
-                                    {/each}
-                                </tbody>
-                            </table>
-                        {/if}
-                    {:else}
-                        {@const rows = numTable[inflection.inflectionId]}
-                        <table class="paradigm-table">
-                            <thead class="paradigm-header">
-                            <tr>
-                                <th class="col-noun-case"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {#each rows as itemPair}
-                                <tr>
-                                    <td class="col-noun-case">{itemPair[0].case}</td>
-                                    {#if itemPair[0].case === 'В (одуш.)'}
-                                        <!-- Check if inanimate form exists and is identical -->
-                                        {@const inanimForm = rows.find(r => r[0].case === 'В (неод.)')}
-                                        {#if inanimForm && itemPair[0].form && inanimForm[0].form === itemPair[0].form}
-                                            <td class={getNounFormClass(itemPair[0])} rowspan="2">
-                                                {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                                {itemPair[0].form}
-                                                {itemPair[0].isIrregular}
-                                            </td>
+                                {#each rows as itemPair}
+                                    <tr>
+                                        <td class="col-noun-case">{itemPair[0].case}</td>
+                                        {#if itemPair[0].case === 'В (одуш.)'}
+                                            <!-- Check if inanimate form exists and is identical -->
+                                            {@const inanimForm = rows.find(r => r[0].case === 'В (неод.)')}
+                                            {#if inanimForm && itemPair[0].form && inanimForm[0].form === itemPair[0].form}
+                                                <td class={getNounFormClass(itemPair[0])} rowspan="2">
+                                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                    {itemPair[0].form}
+                                                    {itemPair[0].isIrregular}
+                                                </td>
+                                            {:else}
+                                                <td class={getNounFormClass(itemPair[0])}>
+                                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                    {itemPair[0].form}
+                                                    {itemPair[0].isIrregular}
+                                                </td>
+                                            {/if}
+                                        {:else if itemPair[0].case === 'В (неод.)'}
+                                            <!-- Skip cell only if it was merged with the row above -->
+                                            {@const animForm = rows.find(r => r[0].case === 'В (одуш.)')}
+                                            {#if !animForm || !animForm[0].form || animForm[0].form !== itemPair[0].form}
+                                                <td class={getNounFormClass(itemPair[0])}>
+                                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                                    {itemPair[0].form}
+                                                    {itemPair[0].isIrregular}
+                                                </td>
+                                            {/if}
                                         {:else}
                                             <td class={getNounFormClass(itemPair[0])}>
                                                 {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
@@ -1399,271 +1438,255 @@
                                                 {itemPair[0].isIrregular}
                                             </td>
                                         {/if}
-                                    {:else if itemPair[0].case === 'В (неод.)'}
-                                        <!-- Skip cell only if it was merged with the row above -->
-                                        {@const animForm = rows.find(r => r[0].case === 'В (одуш.)')}
-                                        {#if !animForm || !animForm[0].form || animForm[0].form !== itemPair[0].form}
-                                            <td class={getNounFormClass(itemPair[0])}>
-                                                {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                                {itemPair[0].form}
-                                                {itemPair[0].isIrregular}
-                                            </td>
-                                        {/if}
-                                    {:else}
-                                        <td class={getNounFormClass(itemPair[0])}>
-                                            {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                            {itemPair[0].form}
-                                            {itemPair[0].isIrregular}
-                                        </td>
-                                    {/if}
-                                </tr>
-                            {/each}
-                            </tbody>
-                        </table>
-                    {/if}                {/if}
+                                    </tr>
+                                {/each}
+                                </tbody>
+                            </table>
+                        {/if}                {/if}
 
-                <!--  LAST NAME -->
-                {#if lexProp['partOfSpeech'] === 'LastName'}
-                    <table class="paradigm-table">
-                    <thead class="paradigm-header">
-                        <tr>
-                            <th class="col-noun-case"></th>
-                            <th class="col-head">м. ед.</th>
-                            <th class="col-head">ж. ед.</th>
-                            <th class="col-head">мн.</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {#each lastNameTable[inflection.inflectionId] as item}
-                        <tr>
-                            <td class="col-noun-case">{item[0].case}</td>
-                            <td class={getNounFormClass(item[0])}>
-                                {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {item[0].form}
-                                {item[0].isIrregular}
-                            </td>
-                            <td class={getNounFormClass(item[1])}>
-                                {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {item[1].form}
-                                {item[1].isIrregular}
-                            </td>
-                            <td class={getNounFormClass(item[2])}>
-                                {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {item[2].form}
-                                {item[2].isIrregular}
-                            </td>
-                        </tr>
-                    {/each}
-                    </tbody>
-                    </table>
-                {/if}
-
-                <!--  ADJECTIVES          -->
-                {#if lexProp['partOfSpeech'] === 'Adj' && lexProp['inflectionSymbol'] === 'п'}
-                    <!--  ADJ               -->
-                    {@render renderLongForms(inflection, adjLongTable, true)}
-                    {@render renderShortForms(inflection, adjShortTable)}
-                    {@render renderComparative(inflection)}
-                {:else if lexProp['partOfSpeech'] === 'Adj' || lexProp['partOfSpeech'] === 'PronounAdj'
-                    || lexProp['partOfSpeech'] === 'NumeralAdj' }
-                    {@render renderLongForms(inflection, adjLongTable, false)}
-                {/if}
-
-                <!-- END ADJ -->
-
-                <!--  VERB -->
-                {#if lexProp['partOfSpeech'] === 'Verb'}
-                    <div class="section-heading">Настоящее время</div>
-                    <table class="paradigm-table">
+                    <!--  LAST NAME -->
+                    {#if lexProp['partOfSpeech'] === 'LastName'}
+                        <table class="paradigm-table">
                         <thead class="paradigm-header">
-                        <tr>
-                            <th class="col-present-tense-person"></th>
-                            <th class="col-head">ед.</th>
-                            <th class="col-head">мн.</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {#each presentTenseTable[inflection.inflectionId] as itemPair}
                             <tr>
-                                <td class="col-present-tense-person">{itemPair[0].person}</td>
-                                <td class={getPresentTenseClass(itemPair[0])}>
-                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[0].form}
-                                    {itemPair[0].isIrregular}
-                                </td>
-                                <td class={getPresentTenseClass(itemPair[1])}>
-                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[1].form}
-                                    {itemPair[1].isIrregular}
-                                </td>
+                                <th class="col-noun-case"></th>
+                                <th class="col-head">м. ед.</th>
+                                <th class="col-head">ж. ед.</th>
+                                <th class="col-head">мн.</th>
                             </tr>
-                        {/each}
-                        </tbody>
-                    </table>
-
-                    <div class="section-heading">Прошедшее время</div>
-                    <table class="paradigm-table">
-                        <colgroup>
-                            <col class="col-form" span="4"/>
-                        </colgroup>
-                        <thead class="paradigm-header">
-                        <tr>
-                            <th class="col-head">м</th>
-                            <th class="col-head">ж</th>
-                            <th class="col-head">с</th>
-                            <th class="col-head">мн.</th>
-                        </tr>
                         </thead>
                         <tbody>
-                        {#each pastTenseTable[inflection.inflectionId] as item}
+                        {#each lastNameTable[inflection.inflectionId] as item}
                             <tr>
-                                <td class={getPastTenseFormClass(item[0])}>
+                                <td class="col-noun-case">{item[0].case}</td>
+                                <td class={getNounFormClass(item[0])}>
                                     {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {item[0].form}
                                     {item[0].isIrregular}
                                 </td>
-                                <td class={getPastTenseFormClass(item[1])}>
+                                <td class={getNounFormClass(item[1])}>
                                     {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {item[1].form}
                                     {item[1].isIrregular}
                                 </td>
-                                <td class={getPastTenseFormClass(item[2])}>
+                                <td class={getNounFormClass(item[2])}>
                                     {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
                                     {item[2].form}
                                     {item[2].isIrregular}
                                 </td>
-                                <td class={getPastTenseFormClass(item[3])}>
-                                    {#if item[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {item[3].form}
-                                    {item[3].isIrregular}
-                                </td>
                             </tr>
                         {/each}
                         </tbody>
-                    </table>        <!-- end past tense  -->
+                        </table>
+                    {/if}
 
-                    <div class="section-heading">Повелительное наклонение</div>
-                    <table class="paradigm-table">
-                        <thead class="paradigm-header">
-                        <tr>
-                            <th class="col-head">ед.</th>
-                            <th class="col-head">мн.</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {#each imperativeTable[inflection.inflectionId] as itemPair}
+                    <!--  ADJECTIVES          -->
+                    {#if lexProp['partOfSpeech'] === 'Adj' && lexProp['inflectionSymbol'] === 'п'}
+                        <!--  ADJ               -->
+                        {@render renderLongForms(inflection, adjLongTable, true)}
+                        {@render renderShortForms(inflection, adjShortTable)}
+                        {@render renderComparative(inflection)}
+                    {:else if lexProp['partOfSpeech'] === 'Adj' || lexProp['partOfSpeech'] === 'PronounAdj'
+                        || lexProp['partOfSpeech'] === 'NumeralAdj' }
+                        {@render renderLongForms(inflection, adjLongTable, false)}
+                    {/if}
+
+                    <!-- END ADJ -->
+
+                    <!--  VERB -->
+                    {#if lexProp['partOfSpeech'] === 'Verb'}
+                        <div class="section-heading">Настоящее время</div>
+                        <table class="paradigm-table">
+                            <thead class="paradigm-header">
                             <tr>
-                                <td class={getPresentTenseClass(itemPair[0])}>
-                                    {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[0].form}
-                                    {itemPair[0].isIrregular}
-                                </td>
-                                <td class={getPresentTenseClass(itemPair[1])}>
-                                    {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                    {itemPair[1].form}
-                                    {itemPair[1].isIrregular}</td>
+                                <th class="col-present-tense-person"></th>
+                                <th class="col-head">ед.</th>
+                                <th class="col-head">мн.</th>
                             </tr>
-                        {/each}
-                        </tbody>
-                    </table>        <!-- imperative -->
+                            </thead>
+                            <tbody>
+                            {#each presentTenseTable[inflection.inflectionId] as itemPair}
+                                <tr>
+                                    <td class="col-present-tense-person">{itemPair[0].person}</td>
+                                    <td class={getPresentTenseClass(itemPair[0])}>
+                                        {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {itemPair[0].form}
+                                        {itemPair[0].isIrregular}
+                                    </td>
+                                    <td class={getPresentTenseClass(itemPair[1])}>
+                                        {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {itemPair[1].form}
+                                        {itemPair[1].isIrregular}
+                                    </td>
+                                </tr>
+                            {/each}
+                            </tbody>
+                        </table>
 
-                    <div class="section-heading">Неличные формы</div>
-                    {#if partPresActBase[inflection.inflectionId]}
-                        <div class="participle-container">
-                            <span class="section-subheading">Действ. прич. наст.:</span>
-                            <span class="base-form">
-                                {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {partPresActBase[inflection.inflectionId].form}
-                                {partPresActBase[inflection.inflectionId].isIrregular}
-                            </span>
-                            <button class="expand-btn"  onclick={() => presActToggleExpand()}>
-                                <span class="icon" class:rotated={showLongPresAct}>&gt;</span>
-                            </button>
-                            {#if showLongPresAct }
-                                <span class="slider" transition:slide>
-                                        <span transition:slide={{duration: 300}} />
-                                        {@render renderLongForms(inflection, partPresActLongTable, false)}
+                        <div class="section-heading">Прошедшее время</div>
+                        <table class="paradigm-table">
+                            <colgroup>
+                                <col class="col-form" span="4"/>
+                            </colgroup>
+                            <thead class="paradigm-header">
+                            <tr>
+                                <th class="col-head">м</th>
+                                <th class="col-head">ж</th>
+                                <th class="col-head">с</th>
+                                <th class="col-head">мн.</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {#each pastTenseTable[inflection.inflectionId] as item}
+                                <tr>
+                                    <td class={getPastTenseFormClass(item[0])}>
+                                        {#if item[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {item[0].form}
+                                        {item[0].isIrregular}
+                                    </td>
+                                    <td class={getPastTenseFormClass(item[1])}>
+                                        {#if item[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {item[1].form}
+                                        {item[1].isIrregular}
+                                    </td>
+                                    <td class={getPastTenseFormClass(item[2])}>
+                                        {#if item[2].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {item[2].form}
+                                        {item[2].isIrregular}
+                                    </td>
+                                    <td class={getPastTenseFormClass(item[3])}>
+                                        {#if item[3].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {item[3].form}
+                                        {item[3].isIrregular}
+                                    </td>
+                                </tr>
+                            {/each}
+                            </tbody>
+                        </table>        <!-- end past tense  -->
+
+                        <div class="section-heading">Повелительное наклонение</div>
+                        <table class="paradigm-table">
+                            <thead class="paradigm-header">
+                            <tr>
+                                <th class="col-head">ед.</th>
+                                <th class="col-head">мн.</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {#each imperativeTable[inflection.inflectionId] as itemPair}
+                                <tr>
+                                    <td class={getPresentTenseClass(itemPair[0])}>
+                                        {#if itemPair[0].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {itemPair[0].form}
+                                        {itemPair[0].isIrregular}
+                                    </td>
+                                    <td class={getPresentTenseClass(itemPair[1])}>
+                                        {#if itemPair[1].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                        {itemPair[1].form}
+                                        {itemPair[1].isIrregular}</td>
+                                </tr>
+                            {/each}
+                            </tbody>
+                        </table>        <!-- imperative -->
+
+                        <div class="section-heading">Неличные формы</div>
+                        {#if partPresActBase[inflection.inflectionId]}
+                            <div class="participle-container">
+                                <span class="section-subheading">Действ. прич. наст.:</span>
+                                <span class="base-form">
+                                    {#if partPresActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {partPresActBase[inflection.inflectionId].form}
+                                    {partPresActBase[inflection.inflectionId].isIrregular}
                                 </span>
-                            {/if}
-                        </div>
-                    {/if}
-                    {#if adverbialPresent[inflection.inflectionId]}
-                        <div class="adverbial-container">
-                            <span class="section-subheading">Деепр. наст.:</span>
-                            <span class="base-form">
-                                {#if adverbialPresent[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {adverbialPresent[inflection.inflectionId].form}
-                                {adverbialPresent[inflection.inflectionId].isIrregular}
-                            </span>
-                        </div>
-                    {/if}
-                    {#if partPresPassBase[inflection.inflectionId]}
-                        <div class="participle-container">
-                            <span class="section-subheading">Страд. прич. наст.:</span>
-                            <span class="base-form">
-                                {#if partPresPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {partPresPassBase[inflection.inflectionId].form}
-                                {partPresPassBase[inflection.inflectionId].isIrregular}
-                            </span>
-                            <button class="expand-btn" onclick={() => presPassToggleExpand()}>
-                                <span class="icon" class:rotated={expandPresPass}>&gt;</span>
-                            </button>
-                            <span class="slider" transition:slide>
-                                {#if expandPresPass}
-                                    {@render renderLongForms(inflection, partPresPassLongTable, false)}
-                                    {@render renderShortForms(inflection, partPresPassShortTable, false)}
+                                <button class="expand-btn"  onclick={() => presActToggleExpand()}>
+                                    <span class="icon" class:rotated={showLongPresAct}>&gt;</span>
+                                </button>
+                                {#if showLongPresAct }
+                                    <span class="slider" transition:slide>
+                                            <span transition:slide={{duration: 300}} />
+                                            {@render renderLongForms(inflection, partPresActLongTable, false)}
+                                    </span>
                                 {/if}
-                            </span>
-                        </div>
-                    {/if}
-                    {#if partPastActBase[inflection.inflectionId]}
-                        <div class="participle-container">
-                            <span class="section-subheading">Действ. прич. прош.:</span>
-                            <span class="base-form">
-                                {#if partPastActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {partPastActBase[inflection.inflectionId].form}
-                                {partPastActBase[inflection.inflectionId].isIrregular}
-                            </span>
-                            <button class="expand-btn" onclick={() => pastActToggleExpand() }>
-                                <span class="icon" class:rotated={showLongPastAct}>&gt;</span>
-                            </button>
-                            <span class="slider" transition:slide>
-                                {#if showLongPastAct }
-                                    {@render renderLongForms(inflection, partPastActLongTable, false)}
-                                {/if}
-                            </span>
-                        </div>
-                    {/if}
-                    {#if adverbialPast[inflection.inflectionId]}
-                        <div class="adverbial-container">
-                            <span class="section-subheading">Деепр. прош.:</span>
-                             <span class="base-form">
-                                {#if adverbialPast[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {adverbialPast[inflection.inflectionId].form}
-                                {adverbialPast[inflection.inflectionId].isIrregular}
-                             </span>
-                        </div>
-                    {/if}
-                    {#if partPastPassBase[inflection.inflectionId]}
-                        <div class="participle-container">
-                            <span class="section-subheading">Страд. прич. прош.:</span>
-                            <span class="base-form">
-                                {#if partPastPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
-                                {partPastPassBase[inflection.inflectionId].form}
-                                {partPastPassBase[inflection.inflectionId].isIrregular}
-                            </span>
-                            <button class="expand-btn" onclick={() => pastPassToggleExpand() }>
-                                <span class="icon" class:rotated={showLongPastPass}>&gt;</span>
-                            </button>
-                            <span class="slider" transition:slide>
-                                {#if showLongPastPass }
-                                    {@render renderLongForms(inflection, partPastPassLongTable, true)}
-                                    {@render renderShortForms(inflection, partPastPassShortTable)}
-                                {/if}
-                            </span>
-                        </div>
-                    {/if}
-                {/if}           <!-- verb  -->
+                            </div>
+                        {/if}
+                        {#if adverbialPresent[inflection.inflectionId]}
+                            <div class="adverbial-container">
+                                <span class="section-subheading">Деепр. наст.:</span>
+                                <span class="base-form">
+                                    {#if adverbialPresent[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {adverbialPresent[inflection.inflectionId].form}
+                                    {adverbialPresent[inflection.inflectionId].isIrregular}
+                                </span>
+                            </div>
+                        {/if}
+                        {#if partPresPassBase[inflection.inflectionId]}
+                            <div class="participle-container">
+                                <span class="section-subheading">Страд. прич. наст.:</span>
+                                <span class="base-form">
+                                    {#if partPresPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {partPresPassBase[inflection.inflectionId].form}
+                                    {partPresPassBase[inflection.inflectionId].isIrregular}
+                                </span>
+                                <button class="expand-btn" onclick={() => presPassToggleExpand()}>
+                                    <span class="icon" class:rotated={expandPresPass}>&gt;</span>
+                                </button>
+                                <span class="slider" transition:slide>
+                                    {#if expandPresPass}
+                                        {@render renderLongForms(inflection, partPresPassLongTable, false)}
+                                        {@render renderShortForms(inflection, partPresPassShortTable, false)}
+                                    {/if}
+                                </span>
+                            </div>
+                        {/if}
+                        {#if partPastActBase[inflection.inflectionId]}
+                            <div class="participle-container">
+                                <span class="section-subheading">Действ. прич. прош.:</span>
+                                <span class="base-form">
+                                    {#if partPastActBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {partPastActBase[inflection.inflectionId].form}
+                                    {partPastActBase[inflection.inflectionId].isIrregular}
+                                </span>
+                                <button class="expand-btn" onclick={() => pastActToggleExpand() }>
+                                    <span class="icon" class:rotated={showLongPastAct}>&gt;</span>
+                                </button>
+                                <span class="slider" transition:slide>
+                                    {#if showLongPastAct }
+                                        {@render renderLongForms(inflection, partPastActLongTable, false)}
+                                    {/if}
+                                </span>
+                            </div>
+                        {/if}
+                        {#if adverbialPast[inflection.inflectionId]}
+                            <div class="adverbial-container">
+                                <span class="section-subheading">Деепр. прош.:</span>
+                                 <span class="base-form">
+                                    {#if adverbialPast[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {adverbialPast[inflection.inflectionId].form}
+                                    {adverbialPast[inflection.inflectionId].isIrregular}
+                                 </span>
+                            </div>
+                        {/if}
+                        {#if partPastPassBase[inflection.inflectionId]}
+                            <div class="participle-container">
+                                <span class="section-subheading">Страд. прич. прош.:</span>
+                                <span class="base-form">
+                                    {#if partPastPassBase[inflection.inflectionId].isAssumed}<sup>{largeAsterisk}</sup>{/if}
+                                    {partPastPassBase[inflection.inflectionId].form}
+                                    {partPastPassBase[inflection.inflectionId].isIrregular}
+                                </span>
+                                <button class="expand-btn" onclick={() => pastPassToggleExpand() }>
+                                    <span class="icon" class:rotated={showLongPastPass}>&gt;</span>
+                                </button>
+                                <span class="slider" transition:slide>
+                                    {#if showLongPastPass }
+                                        {@render renderLongForms(inflection, partPastPassLongTable, true)}
+                                        {@render renderShortForms(inflection, partPastPassShortTable)}
+                                    {/if}
+                                </span>
+                            </div>
+                        {/if}
+                    {/if}           <!-- verb  -->
+                </div>
             {/each}
         </div>      <!-- right-panel  -->
     </div>      <!-- display-container  -->
@@ -1691,29 +1714,21 @@
 
     .display-container {
         display: grid;
-/*        display: flex;   */
         align-items: flex-start;
-        grid-template-columns: 1fr 1fr;
-/*        padding: 20px;   */
-        max-width: 1000px;
+        grid-template-columns: minmax(0, 2.5fr) minmax(0, 3.0fr);   /* let columns shrink below table content width */
+        max-width: 1100px;
+        box-sizing: border-box;   /* max-width includes border + padding */
         gap: 70px;
         top: 50px;
+/*        border: 1px solid black;    */
+/*        background-color: #FFFAF0;  */
+        margin: 5px 0 20px 15px;   /* same left margin the card had; space below between lexemes */
+        padding: 20px;
     }
 
     .lexeme-container {
-/*        flex: 4.5;    */
         position: sticky;
         top: 170px;
-        border: 1px solid black;
-/*        display: flex;   */
-/*        flex-direction: column;   */
-/*        padding: 15px;        */
-        margin: 5px 0;
-        background-color: #FFFAF0;
-        margin-left: 15px;
-        padding: 20px;
-/*        max-width: 500px;   */
-        /*        border: #b3b3b3;    */
     }
 
     .lex-row {
@@ -1742,16 +1757,37 @@
         overflow-y: auto;
     }
 
+    .headword {
+        margin-bottom: 10px;
+        font-size: large;
+        font-weight: bold;
+    }
+
+    .homonym-index {
+        font-weight: normal;
+        margin-right: 1px;   /* tiny gap so the number doesn't touch the first letter */
+    }
+
+    .headword-comment {
+        font-weight: normal;
+        font-style: italic;
+    }
+
     .right-panel {
         display:flex;
         flex-direction: column;
         flex: 5;
-        padding: 20px;
-        margin: 5px 0;
+        padding: 0;
+        margin: 0;
         column-gap: 50px;
         min-width: 300px;
     }
 
+    .inflection-paradigm  + .inflection-paradigm   {
+        margin-top: 40px;
+        padding-top: 20px;
+/*        border-top: 1px solid lightgray;    drop this line if you want space only */
+    }
     .section-heading {
         font-weight: normal;
         font-size: larger;
@@ -1763,9 +1799,8 @@
 
     .paradigm-table {
         border-collapse: collapse;
-        width: 100%;
+        width: calc(100% - 30px);   /* leave room for margin-left */
         table-layout: fixed;
-/*        margin-bottom: 25px;   */
         margin-left: 30px;
     }
 
@@ -1819,14 +1854,13 @@
     }
 
     .col-head {
-        width: 175px;
-        padding-left: 25px;
-        padding-right: 25px;
         color: gray;
         text-align: center;
         font-weight: normal;
-/*        border: none;   */
         border: 1px solid #e5e7eb;
+        padding-left: 10px;
+        padding-right: 10px;
+        color: gray;
     }
 
     .paradigm-header {
@@ -1841,9 +1875,9 @@
     }
 
     .col-form {
-        width: 175px;
-        padding-left: 25px;
-        padding-right: 25px;
+        border: 1px solid #e5e7eb;
+        padding-left: 10px;
+        padding-right: 10px;
         border: 1px solid #e5e7eb;
     }
 
@@ -1905,8 +1939,9 @@
 /*        justify-content: space-between;   */
     }
 
-    .participle-container {
-        margin-left: 30px;
+    .participle-container .paradigm-table {
+        table-layout: auto;   /* size columns to the longest form instead of splitting width equally */
+        width: auto;
     }
 
     .adverbial-container {

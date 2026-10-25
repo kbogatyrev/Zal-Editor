@@ -908,6 +908,7 @@
                 headwordComment: lexemeData['headwordComment'],
                 headwordVariant: lexemeData['headwordVariant'],
                 headwordVariantComment: lexemeData['headwordVariantComment'],
+                lexComment: lexemeData['lexComment'],
                 lexTrailingComment: lexemeData['lexTrailingComment'],
                 mainSymbol: lexemeData['mainSymbol'],
                 inflectionSymbol: lexemeData['inflectionSymbol'],
@@ -1177,10 +1178,13 @@
                     {/if}
                     {lexProp.sourceForm}
                     {#if lexProp.headwordComment}
-                        <div class="headword-comment">({lexProp.headwordComment})</div>
+                        <div class="headword-comment">{lexProp.headwordComment}</div>
+                    {/if}
+                    {#if lexProp.lexComment}
+                        <span class="headword-comment">{lexProp.lexComment}</span>
                     {/if}
                     {#if lexProp.lexTrailingComment}
-                        <span class="headword-comment">({lexProp.lexTrailingComment})</span>
+                        <span class="headword-comment">{lexProp.lexTrailingComment}</span>
                     {/if}
                 </div>
             </div>
@@ -1771,6 +1775,7 @@
     .headword-comment {
         font-weight: normal;
         font-style: italic;
+        font-size: smaller;
     }
 
     .right-panel {

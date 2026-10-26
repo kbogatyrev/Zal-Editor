@@ -1262,11 +1262,7 @@
                 </div>
             {/if}
             {#if lexProp.isPluralOf}
-                {#if !lexProp.pluralOf}
-                    <div class="lex-row">
-                        <div class="lex-col-left">Plurale tantum</div>
-                    </div>
-                    {:else}
+                {#if lexProp.pluralOf}
                     <div class="lex-row">
                         <div class="lex-col-left">Мн. от:</div>
                         <div class="lex-col-right">{lexProp.pluralOf}</div>

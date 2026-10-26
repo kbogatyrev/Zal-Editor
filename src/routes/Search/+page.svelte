@@ -306,6 +306,7 @@
     }
 
     const getNounFormClass = (item: INounTableEntry) => {
+        if (!item.form) return "col-form col-missing-form";
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
@@ -792,26 +793,31 @@
     }       //  handleAdverbials()
 
     const getAdjLongFormClass = (item: IAdjLongTableEntry) => {
+        if (!item.form) return "col-form col-missing-form";
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
 
     const getAdjShortFormClass = (item: IAdjShortTableEntry) => {
+        if (!item.form) return "col-form col-missing-form";
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
 
     const getComparativeClass = (item: IComparativesEntry | undefined) => {
+        if (!item.form) return "col-form col-missing-form";
         if (!item || item.isDifficult) return "col-difficult-form";
         return "comparative-form";
     };
 
     const getPresentTenseClass = (item: IPresentTenseTableEntry | undefined) => {
+        if (!item.form) return "col-form col-missing-form";
         if (!item || item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
 
     const getPastTenseFormClass = (item: IAdjShortTableEntry) => {
+        if (!item.form) return "col-form col-missing-form";
         if (item.isDifficult) return "col-difficult-form";
         return "col-form";
     };
@@ -1930,6 +1936,13 @@
         font-style: italic;
         color:gray;
     }
+
+    .col-missing-form {
+        background-color: #f5f5f5;   /* light gray hatch/fill */
+        color: #b3b3b3;
+        text-align: center;
+    }
+    .col-missing-form::after { content: '—'; }
 
     .expand-btn {
         padding-top: 0;

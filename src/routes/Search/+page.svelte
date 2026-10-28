@@ -1704,18 +1704,30 @@
         flex-direction: row;
 /*        border: 1px solid black;   */
         margin: 5px 0;
-        background-color: #FFFAF0;
         margin-left: 15px;
         padding: 20px;
-        max-width:400px;
+        max-width: 1100px;          /* same as .display-container */
+        box-sizing: border-box;
         justify-content: center;
         border: #b3b3b3;
     }
     .word-entry {
         display: flex;
         flex-direction: row;
-        justify-content:space-between;
-        width: 300px;
+        justify-content: space-between;
+        gap: 10px;
+        /* left edge of .lex-col-right: lexeme column = (W - 70px gap) * 2.5/5.5,
+           value column starts at 60% of it (1.5fr 1fr, minus 5px row padding) */
+        margin-left: calc((100% - 70px) * 3 / 11 - 3px);
+        width: auto;
+        flex: 1;
+    }
+    .word-entry label {
+        flex: 1;                    /* input stretches, button keeps its natural size */
+    }
+    .word-entry input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .display-container {
@@ -1786,6 +1798,7 @@
         flex: 5;
         padding: 0;
         margin: 0;
+        margin-top: 2em;   /* drop the paradigm about a line below the headword */
         column-gap: 50px;
         min-width: 300px;
     }
@@ -1802,6 +1815,7 @@
         color: gray;
         margin-top: 25px;
         margin-bottom: 5px;
+        margin-left: 30px;   /* match .paradigm-table indent so heading is flush with the table border */
     }
 
     .paradigm-table {

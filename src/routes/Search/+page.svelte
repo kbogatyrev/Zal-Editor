@@ -3,7 +3,7 @@
     import { fetchLexemes, fetchForms } from '$lib/api/config.ts';
     import { slide } from 'svelte/transition';
     import { searchRequest } from '$lib/stores.svelte';
-    import { animacyToHash, caseToDisplay, numberToDisplay, genderToHash, genderToHash2, displayToHash } from "$lib/constants.ts";
+    import { animacyToHash, caseToDisplay, numberToDisplay, genderToHash, genderToHash2, lastNameGenderToDisplay, displayToHash } from "$lib/constants.ts";
     import { subParadigmToHash } from "$lib/constants.ts";
     import { presentTenseToPerson } from "$lib/constants.ts";
     import { triangle, largeAsterisk } from "$lib/constants.ts";
@@ -462,7 +462,7 @@
                     formGender = '';
                 }
             } else if (form['subParadigm'] === 'LastNameLongAdj' || form['subParadigm'] === 'LastNamePronAdj') {
-                formGender = genderToHash.get(form['gender']);
+                formGender = lastNameGenderToDisplay.get(form['gender']) || '';
             }
 
             let isIrregular: boolean = form['isIrregular'] !== undefined && form['isIrregular'];

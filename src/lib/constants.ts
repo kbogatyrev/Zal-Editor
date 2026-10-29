@@ -66,6 +66,11 @@ genderToHash.set('Masculine', 'M');
 genderToHash.set('Feminine', 'F');
 genderToHash.set('Neuter', 'N');
 
+// Last-name table columns
+export const lastNameGenderToDisplay = new Map<string, string>();
+lastNameGenderToDisplay.set('Masculine', 'м');
+lastNameGenderToDisplay.set('Feminine', 'ж');
+
 // Some numerals only
 export const genderToHash2 = new Map<string, string>();
 genderToHash2.set('Masculine', 'м, с');

@@ -1917,7 +1917,7 @@
 
     comparative-difficult-form {
         width: 250px;
-        padding-left: 25px;
+        padding-left: 10px;
         padding-right: 25px;
         padding-top: 2px;
         padding-bottom: 1px;
@@ -1928,7 +1928,7 @@
 
     .col-difficult-form {
         width: 250px;
-        padding-left: 25px;
+        padding-left: 10px;
         padding-right: 25px;
         padding-top: 2px;
         padding-bottom: 1px;
@@ -1939,7 +1939,7 @@
 
     .col-difficult-form-no-border {
         width: 250px;
-        padding-left: 25px;
+        padding-left: 10px;
         padding-right: 25px;
         padding-top: 2px;
         padding-bottom: 5px;

@@ -1047,7 +1047,7 @@
     {#if showSubHeading}
         <div class="section-subheading">Полные формы</div>
     {/if}
-    <table class="paradigm-table">
+    <table class="paradigm-table wide-forms">
         <colgroup>
             <col class="col-adj-case" span="1"/>
             <col class="col-form" span="4"/>
@@ -1109,7 +1109,7 @@
 
 {#snippet renderShortForms(inflection, table)}
     <div class="section-subheading">Краткие формы</div>
-    <table class="paradigm-table">
+    <table class="paradigm-table wide-forms">
         <colgroup>
             <col class="col-form" span="4"/>
         </colgroup>
@@ -1530,7 +1530,7 @@
                         </table>
 
                         <div class="section-heading">Прошедшее время</div>
-                        <table class="paradigm-table">
+                        <table class="paradigm-table wide-forms">
                             <colgroup>
                                 <col class="col-form" span="4"/>
                             </colgroup>
@@ -1965,6 +1965,19 @@
 /*        padding: 1rem;   */
         cursor: pointer;
 /*        justify-content: space-between;   */
+    }
+
+    .paradigm-table.wide-forms {
+        table-layout: auto;         /* columns size to the longest form; text can no longer overlap */
+    }
+    .paradigm-table.wide-forms .col-adj-case {
+        width: 60px;                /* case labels are short, so give the space to the forms */
+    }
+    .paradigm-table.wide-forms .col-form,
+    .paradigm-table.wide-forms .col-difficult-form {
+        padding-left: 8px;
+        padding-right: 8px;
+        width: auto;                /* .col-difficult-form sets width: 250px, so reset it */
     }
 
     .participle-container .paradigm-table {
